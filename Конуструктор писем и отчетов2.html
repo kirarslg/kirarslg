@@ -312,7 +312,7 @@
     html body .checkline>label {
       display: inline-flex;
       align-items: center;
-      margin: 6 !important;
+      margin: 6px !important;
       line-height: 1.4;
     }
 
@@ -1337,12 +1337,12 @@
                 <input type="checkbox" id="headerTitleEnabled" />
                 <span>Добавить заголовок</span>
               </label>
-              <label id="headerTitle">Заголовок в шапке</label>
-              <input id="headerTitleAlignLabel" placeholder="Заголовок в шапке" style="display:none;" />
+              <label for="headerTitle">Заголовок в шапке</label>
+              <input id="headerTitle" placeholder="Заголовок в шапке" style="display:none;" />
 
               <div class="row">
                 <div>
-                  <label id="headerTitle">Выравнивание в шапке</label>
+                  <label id="headerTitleAlignLabel">Выравнивание в шапке</label>
                   <select id="headerTitleAlign" style="display:none;">
                     <option value="left">Слева</option>
                     <option value="center">По центру</option>
@@ -3147,6 +3147,8 @@ ${wrapClose}`
               const baseW = Number(data.buttonWidth || 526)
               const merged = {
                 ...data,
+                // Builder button must render regardless of global "buttonEnabled" toggle
+                buttonEnabled: true,
                 buttonText: block.text || data.buttonText || 'Кнопка',
                 buttonUrl: block.url || data.buttonUrl || '#',
                 // Clamp width so multi-column layouts never expand the email
@@ -3583,7 +3585,11 @@ ${wrapClose}`
             <td class="px-24" style="padding: ${bodyTopPadding} 24px 0 24px; font-family: SB Sans Text, Arial, sans-serif; color:${escapeHtml(data.textColor)}; font-size:14px; line-height:1.6;">
               ${greetingBlock}
               ${builderBody
-          ? builderBody
+          ? `${builderBody}${(cta || buttonBlock) ? `
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                ${cta}
+                ${buttonBlock}
+              </table>` : ''}`
           : `
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                 <tr>
