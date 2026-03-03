@@ -4768,7 +4768,7 @@ body,table,td,p,div,span,a{font-family:'SB Sans Text' !important;}
           const m = reportState.meta || {};
           parts.push(`
               <div class="rp-hero">
-                <div class="rp-brand">${reportState.ui.logoSvg || ""}</div>
+                <div class="rp-brand">${window.__reportLogoSvg || reportState.ui.logoSvg || ""}</div>
                 <h1>${esc(reportState.title || "Отчёт по релизу")}</h1>
                 <div class="meta">
                   <div class="rp-meta-grid">
@@ -5172,7 +5172,7 @@ if (sec.alert && reportState.alert) {
 // --- Logo upload (Report) FINAL ---
 (function(){
   function applyLogoToPreview(svgText){
-    const iframe = document.getElementById('preview');
+    const iframe = document.getElementById('reportPreview') || document.getElementById('preview');
     if(!iframe) return;
     const doc = iframe.contentDocument || iframe.contentWindow?.document;
     if(!doc) return;
@@ -5195,9 +5195,7 @@ if (sec.alert && reportState.alert) {
         // sanitize: keep only <svg ...>...</svg> to avoid XML/doctype issues in HTML parsing
         const m = raw.match(/<svg[\s\S]*?<\/svg>/i);
         const svgText = m ? m[0] : raw;
-        if (typeof reportState !== 'undefined' && reportState.ui) {
-          reportState.ui.logoSvg = svgText;
-        }
+        window.__reportLogoSvg = svgText;
         // immediate preview update (no waiting for rebuild)
         applyLogoToPreview(svgText);
 
@@ -5205,6 +5203,10 @@ if (sec.alert && reportState.alert) {
         try{
           if (typeof doBuild === 'function') doBuild();
           else if (typeof scheduleBuild === 'function') scheduleBuild();
+          else {
+            const b = document.getElementById('btnBuildReport');
+            if (b && typeof b.click === 'function') b.click();
+          }
         }catch(e){ console.error(e); }
       };
       reader.readAsText(f);
