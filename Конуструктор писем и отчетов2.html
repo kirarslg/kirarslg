@@ -6,6 +6,42 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Email Generator (Gmail/Outlook)</title>
   <style>
+    @font-face {
+      font-family: 'SB Sans Text';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src:
+        local('SB Sans Text'),
+        local('SBSansText-Regular'),
+        url('/fonts/SBSansText-Regular.woff2') format('woff2'),
+        url('https://cdn.sberdevices.ru/fonts/SBSansText-Regular.woff2') format('woff2');
+    }
+
+    @font-face {
+      font-family: 'SB Sans Text';
+      font-style: normal;
+      font-weight: 500;
+      font-display: swap;
+      src:
+        local('SB Sans Text Medium'),
+        local('SBSansText-Medium'),
+        url('/fonts/SBSansText-Medium.woff2') format('woff2'),
+        url('https://cdn.sberdevices.ru/fonts/SBSansText-Medium.woff2') format('woff2');
+    }
+
+    @font-face {
+      font-family: 'SB Sans Text';
+      font-style: normal;
+      font-weight: 700;
+      font-display: swap;
+      src:
+        local('SB Sans Text Bold'),
+        local('SBSansText-Bold'),
+        url('/fonts/SBSansText-Bold.woff2') format('woff2'),
+        url('https://cdn.sberdevices.ru/fonts/SBSansText-Bold.woff2') format('woff2');
+    }
+
     :root {
       color-scheme: light;
       --bg0: #f2f4f7;
@@ -25,10 +61,12 @@
       --radius: 14px;
     }
 
+    * {
+      font-family: 'SB Sans Text' !important;
+    }
+
     body {
-      font-family:
-        SB Sans Text, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-        sans-serif;
+      font-family: 'SB Sans Text';
       margin: 0;
       color: var(--text);
       background:
@@ -173,6 +211,7 @@
 
     button {
       appearance: none;
+      font-family: 'SB Sans Text' !important;
       border: 0;
       border-radius: 6px;
       padding: 10px 12px;
@@ -209,8 +248,7 @@
 
     .mono {
       font-family:
-        ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-        'Liberation Mono', 'Courier New', monospace;
+        'SB Sans Text';
       font-size: 12px;
     }
 
@@ -312,7 +350,7 @@
     html body .checkline>label {
       display: inline-flex;
       align-items: center;
-      margin: 6 !important;
+      margin: 6px !important;
       line-height: 1.4;
     }
 
@@ -679,7 +717,7 @@
       color: #9ca3af;
       font-size: 12px;
       font-weight: 500;
-      font-family: SB Sans Text;
+      font-family: 'SB Sans Text' !important;
       padding: 6px 0;
       cursor: pointer;
     }
@@ -689,7 +727,7 @@
       color: #ffffff;
       font-weight: 500;
       font-size: 12px;
-      font-family: SB Sans Text;
+      font-family: 'SB Sans Text' !important;
     }
 
     .builder-panel {
@@ -706,7 +744,7 @@
       display: flex;
       align-items: center;
       justify-content: flex-start;
-      font-family: SB Sans Text;
+      font-family: 'SB Sans Text' !important;
       gap: 8px;
       padding: 8px 9px;
       border-radius: 8px;
@@ -721,7 +759,7 @@
 
     .builder-block-btn:active {
       cursor: grabbing;
-      font-family: SB Sans Text;
+      font-family: 'SB Sans Text' !important;
     }
 
     .builder-block-btn span.icon {
@@ -930,6 +968,7 @@
     }
 
     .tabbtn {
+      font-family: 'SB Sans Text' !important;
       padding: 10px 14px;
       border-radius: 8px;
       background: #9ba6b13a;
@@ -1337,12 +1376,12 @@
                 <input type="checkbox" id="headerTitleEnabled" />
                 <span>Добавить заголовок</span>
               </label>
-              <label id="headerTitle">Заголовок в шапке</label>
-              <input id="headerTitleAlignLabel" placeholder="Заголовок в шапке" style="display:none;" />
+              <label for="headerTitle">Заголовок в шапке</label>
+              <input id="headerTitle" placeholder="Заголовок в шапке" style="display:none;" />
 
               <div class="row">
                 <div>
-                  <label id="headerTitle">Выравнивание в шапке</label>
+                  <label id="headerTitleAlignLabel">Выравнивание в шапке</label>
                   <select id="headerTitleAlign" style="display:none;">
                     <option value="left">Слева</option>
                     <option value="center">По центру</option>
@@ -1462,9 +1501,8 @@
 
         <section class="csec" data-open="true">
   <button class="csec__head" type="button" aria-expanded="true">
-    <span class="csec__title"><h3>Кнопка в тексте</h3></span>
+    <span class="csec__title"><h3>Настройка кнопок</h3></span>
     <span class="csec__right">
-    <input type="checkbox" id="buttonEnabled"></input>
 
       <svg class="csec__chev" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
         <path d="M7 10l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2"
@@ -3215,9 +3253,7 @@ ${wrapClose}`
     }
 
     function buildButtonBlock(data) {
-      // Explicit toggle; if disabled, do not render even if fields are filled.
-      if (data.buttonEnabled === false) return ''
-      // If enabled, require both text and URL.
+      // Require both text and URL for any builder button block.
       if (!(data.buttonText && data.buttonUrl)) return ''
       const r = Number(data.buttonRadius || 0)
       const fg = escapeHtml(data.buttonFg || '#ffffff')
@@ -3260,7 +3296,7 @@ ${wrapClose}`
           : `<v:fill color="${c1}"/>`
         }
           <w:anchorlock/>
-          <center style="color:${fg};font-family:SB Sans Text, Arial,sans-serif;font-size:14px;font-weight:600;">
+          <center style="color:${fg};font-family:'SB Sans Text';font-size:14px;font-weight:600;">
             ${escapeHtml(data.buttonText)}
           </center>
         </v:roundrect>
@@ -3273,7 +3309,7 @@ ${wrapClose}`
               <a
                 href="${escapeHtml(data.buttonUrl)}"
                 target="_blank" rel="noopener noreferrer"
-                style="${fluid ? 'display:block; width:100%; max-width:' + widthPx + 'px;' : 'display:inline-block; width:' + widthPx + 'px;'} padding:12px 0; font-family: SB Sans Text, Arial, sans-serif; font-size:14px; font-weight:600; color:${fg} !important; -webkit-text-fill-color:${fg} !important; text-decoration:none !important; text-align:center; border-radius:${r}px;"
+                style="${fluid ? 'display:block; width:100%; max-width:' + widthPx + 'px;' : 'display:inline-block; width:' + widthPx + 'px;'} padding:12px 0; font-family: 'SB Sans Text'; font-size:14px; font-weight:600; color:${fg} !important; -webkit-text-fill-color:${fg} !important; text-decoration:none !important; text-align:center; border-radius:${r}px;"
               >
                 ${escapeHtml(data.buttonText)}
               </a>
@@ -3315,8 +3351,6 @@ ${wrapClose}`
     </tr>`
         : ''
 
-      const buttonBlock = buildButtonBlock(data)
-
       const headerImgsArray = Array.isArray(data.headerImages)
         ? data.headerImages
         : []
@@ -3339,10 +3373,10 @@ ${wrapClose}`
       const overlayInner = (() => {
         const parts = []
         if (data.headerTitleEnabled && headerTitleText) {
-          parts.push(`<div style="font-size:22px; font-weight:700; line-height:1.25; margin:0; text-align:${titleAlign}; color:${escapeHtml(data.headerTitleColor || data.textColor)} !important; -webkit-text-fill-color:${escapeHtml(data.headerTitleColor || data.textColor)} !important; font-family: SB Sans Text, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;">${escapeHtml(headerTitleText)}</div>`)
+          parts.push(`<div style="font-size:22px; font-weight:700; line-height:1.25; margin:0; text-align:${titleAlign}; color:${escapeHtml(data.headerTitleColor || data.textColor)} !important; -webkit-text-fill-color:${escapeHtml(data.headerTitleColor || data.textColor)} !important; font-family: 'SB Sans Text';">${escapeHtml(headerTitleText)}</div>`)
         }
         if (data.headerDescEnabled && headerDescText) {
-          parts.push(`<div style="font-size:14px; line-height:1.5; margin:10px 0 0 0; text-align:${descAlign}; color:${escapeHtml(data.headerDescColor || data.textColor)} !important; -webkit-text-fill-color:${escapeHtml(data.headerDescColor || data.textColor)} !important; font-family: SB Sans Text, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;">${richTextToHtml(headerDescText, linkStyle)}</div>`)
+          parts.push(`<div style="font-size:14px; line-height:1.5; margin:10px 0 0 0; text-align:${descAlign}; color:${escapeHtml(data.headerDescColor || data.textColor)} !important; -webkit-text-fill-color:${escapeHtml(data.headerDescColor || data.textColor)} !important; font-family: 'SB Sans Text';">${richTextToHtml(headerDescText, linkStyle)}</div>`)
         }
         return parts.join('')
       })()
@@ -3377,10 +3411,10 @@ ${wrapClose}`
         if (!headerImgsArray.length) {
           // No image: fall back to regular padded rows above body
           const padTitle = data.headerTitleEnabled && headerTitleText
-            ? `<tr><td class="px-24" style="padding:18px 24px 0 24px; font-family: SB Sans Text, Arial, sans-serif; text-align:${titleAlign}; color:${escapeHtml(data.headerTitleColor || data.textColor)} !important; -webkit-text-fill-color:${escapeHtml(data.headerTitleColor || data.textColor)} !important;"><div style="font-size:20px; font-weight:700; line-height:1.25; margin:0;">${escapeHtml(headerTitleText)}</div></td></tr>`
+            ? `<tr><td class="px-24" style="padding:18px 24px 0 24px; font-family: 'SB Sans Text'; text-align:${titleAlign}; color:${escapeHtml(data.headerTitleColor || data.textColor)} !important; -webkit-text-fill-color:${escapeHtml(data.headerTitleColor || data.textColor)} !important;"><div style="font-size:20px; font-weight:700; line-height:1.25; margin:0;">${escapeHtml(headerTitleText)}</div></td></tr>`
             : ''
           const padDesc = data.headerDescEnabled && headerDescText
-            ? `<tr><td class="px-24" style="padding:10px 24px 0 24px; font-family: SB Sans Text, Arial, sans-serif; text-align:${descAlign}; color:${escapeHtml(data.headerDescColor || data.textColor)} !important; -webkit-text-fill-color:${escapeHtml(data.headerDescColor || data.textColor)} !important;"><div style="font-size:14px; line-height:1.5; margin:0;">${richTextToHtml(headerDescText, linkStyle)}</div></td></tr>`
+            ? `<tr><td class="px-24" style="padding:10px 24px 0 24px; font-family: 'SB Sans Text'; text-align:${descAlign}; color:${escapeHtml(data.headerDescColor || data.textColor)} !important; -webkit-text-fill-color:${escapeHtml(data.headerDescColor || data.textColor)} !important;"><div style="font-size:14px; line-height:1.5; margin:0;">${richTextToHtml(headerDescText, linkStyle)}</div></td></tr>`
             : ''
           return padTitle + padDesc
         }
@@ -3475,7 +3509,7 @@ ${wrapClose}`
         ? ''
         : `
           <tr>
-            <td class="px-24" style="padding: 22px 24px 0 24px; font-family: SB Sans Text, Arial, sans-serif; color:${escapeHtml(data.textColor)};">
+            <td class="px-24" style="padding: 22px 24px 0 24px; font-family: 'SB Sans Text'; color:${escapeHtml(data.textColor)};">
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                 <tr>
                   <td style="font-size:18px; font-weight:600; line-height:1.3; padding:0; margin:0; color:${escapeHtml(data.textColor)};">
@@ -3499,10 +3533,19 @@ ${wrapClose}`
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="format-detection" content="telephone=no,date=no,address=no,email=no,url=no">
   <title>${subject}</title>
   <meta name="color-scheme" content="light dark" />
   <meta name="supported-color-schemes" content="light dark" />
   <style>
+    html, body { margin:0 !important; padding:0 !important; width:100% !important; }
+    table, td { border-collapse: collapse !important; mso-table-lspace:0pt !important; mso-table-rspace:0pt !important; }
+    img { border:0; outline:none; text-decoration:none; -ms-interpolation-mode:bicubic; }
+    p { margin:0 0 12px 0; }
+    .ExternalClass, .ExternalClass * { line-height:100%; }
+    body, table, td, p, div, span, a { font-family: 'SB Sans Text' !important; }
+
     /* Color lock for Apple Mail / Mac Mail */
     body, table, td, p, div, span { color: ${safeTextColor} !important; -webkit-text-fill-color: ${safeTextColor} !important; }
     a { color: ${safeLinkColor} !important; -webkit-text-fill-color: ${safeLinkColor} !important; }
@@ -3517,7 +3560,7 @@ ${wrapClose}`
       -webkit-text-fill-color: ${safeLinkColor} !important;
       text-decoration: underline !important;
       font-size: inherit !important;
-      font-family: inherit !important;
+      font-family: 'SB Sans Text' !important;
       font-weight: inherit !important;
       line-height: inherit !important;
     }
@@ -3543,20 +3586,6 @@ ${wrapClose}`
   </xml>
   <![endif]-->
 
-<style>
-.report-pr textarea,
-.dark-input {
-  background:#1f1f1f;
-  color:#eaeaea;
-  border:1px solid rgba(255,255,255,0.08);
-  border-radius:12px;
-  padding:12px;
-}
-.report-pr textarea::placeholder{
-  color:rgba(255,255,255,0.35);
-}
-</style>
-
 </head>
 <body style="margin:0; padding:0; background-color:${escapeHtml(data.bgOuter)};">
   <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="display:none; font-size:1px; color:${escapeHtml(data.bgOuter)}; line-height:1px; max-height:0; max-width:0; opacity:0; overflow:hidden;">
@@ -3576,14 +3605,16 @@ ${wrapClose}`
         <table role="presentation" class="container" cellspacing="0" cellpadding="0" border="0" width="100%"
                style="max-width:${EMAIL_WIDTH}px; background-color:${escapeHtml(data.bgBody)}; border-radius:12px; overflow:hidden;">
           ${headerBlock}
-        ${'' /* removed */}
           ${subjectBlock}
 
           <tr>
-            <td class="px-24" style="padding: ${bodyTopPadding} 24px 0 24px; font-family: SB Sans Text, Arial, sans-serif; color:${escapeHtml(data.textColor)}; font-size:14px; line-height:1.6;">
+            <td class="px-24" style="padding: ${bodyTopPadding} 24px 0 24px; font-family: 'SB Sans Text'; color:${escapeHtml(data.textColor)}; font-size:14px; line-height:1.6;">
               ${greetingBlock}
               ${builderBody
-          ? builderBody
+          ? `${builderBody}${cta ? `
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                ${cta}
+              </table>` : ''}`
           : `
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                 <tr>
@@ -3609,7 +3640,6 @@ ${wrapClose}`
             data.textColor,
           )};">
                 ${cta}
-                ${buttonBlock}
               </table>`
         }
 
@@ -3639,7 +3669,7 @@ ${wrapClose}`
       </td>
     </tr>
   </table>
-</div></body>
+</body>
 </html>`
     }
 
@@ -3741,7 +3771,6 @@ ${wrapClose}`
 
         buttonText,
         buttonUrl,
-        buttonEnabled: !!el('buttonEnabled').checked,
         buttonAlign: el('buttonAlign').value || 'center',
         buttonBgMode,
         buttonGradDir,
@@ -4061,6 +4090,18 @@ ${wrapClose}`
         tabReport.style.display = isEmail ? 'none' : reportDisplay;
         btnEmail.classList.toggle('is-active', isEmail);
         btnReport.classList.toggle('is-active', !isEmail);
+
+        if (!isEmail) {
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              try {
+                if (typeof window.__refreshCollapsibleSections === 'function') {
+                  window.__refreshCollapsibleSections()
+                }
+              } catch (e) { }
+            })
+          })
+        }
       }
 
       btnEmail.addEventListener('click', () => setActive('email'));
@@ -4627,8 +4668,14 @@ function numOr(v, fallback) {
 
         const css = `
 :root{color-scheme:dark;}
+html,body{margin:0 !important;padding:0 !important;width:100% !important;}
+table,td{border-collapse:collapse !important;mso-table-lspace:0pt !important;mso-table-rspace:0pt !important;}
+img{border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;}
+.ExternalClass,.ExternalClass *{line-height:100%;}
+a[x-apple-data-detectors],u + #body a,#MessageViewBody a{color:inherit !important;text-decoration:inherit !important;}
+body,table,td,p,div,span,a{font-family:'SB Sans Text' !important;}
 .report-wrap{
-  font-family:SB Sans Text,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
+  font-family:'SB Sans Text';
   color:#e9eaee;
   background:${esc(reportState.ui.bodyBg)};
   box-sizing:border-box;
@@ -4723,7 +4770,7 @@ function numOr(v, fallback) {
 .rp-neutral{background:rgba(0,54,255,.16);color:#8fb2ff;border-color:rgba(0,54,255,.22);font-weight:600}
 .rp-prlist{
   white-space:pre-wrap;
-  font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace;
+  font-family:'SB Sans Text';
   font-size:12px;
   background:#272B31;
   color:#cfd3da;
@@ -4868,22 +4915,7 @@ if (sec.alert && reportState.alert) {
 
 
         const fragment = parts.join("\n").trim();
-        const full = `<!doctype html><html lang="ru"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>${esc(reportState.title || "Отчёт")}</title><style>${css}</style>
-<style>
-.report-pr textarea,
-.dark-input {
-  background:#1f1f1f;
-  color:#eaeaea;
-  border:1px solid rgba(255,255,255,0.08);
-  border-radius:12px;
-  padding:12px;
-}
-.report-pr textarea::placeholder{
-  color:rgba(255,255,255,0.35);
-}
-</style>
-
-</head><body style="margin:0;padding:16px;background:#101010;">${fragment}</body></html>`;
+        const full = `<!doctype html><html lang="ru"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta http-equiv="x-ua-compatible" content="ie=edge"><meta name="format-detection" content="telephone=no,date=no,address=no,email=no,url=no"><title>${esc(reportState.title || "Отчёт")}</title><style>${css}</style></head><body id="body" style="margin:0;padding:0;background:#101010;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;background:#101010;"><tr><td align="center" style="padding:16px;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:1120px;width:100%;"><tr><td>${fragment}</td></tr></table></td></tr></table></body></html>`;
         return { css, html: (mode === "fragment") ? fragment : full };
       }
 
@@ -5004,63 +5036,176 @@ if (sec.alert && reportState.alert) {
 
     try { initTabsAndReport(); } catch (e) { }
 
-    document.querySelectorAll(".csec").forEach(sec => {
-      const head = sec.querySelector(".csec__head");
-      const body = sec.querySelector(".csec__body");
+    function setupReportAccordionSections() {
+      const reportBody = document.querySelector('#tab-report .card .body')
+      if (!reportBody || reportBody.dataset.accordionReady === '1') return
 
-      const setMax = () => {
-        if (sec.dataset.open === "true") {
-          // сброс на auto-подобное поведение через scrollHeight
-          body.style.maxHeight = body.scrollHeight + "px";
+      const h3Rows = Array.from(reportBody.querySelectorAll('.row')).filter((r) => r.querySelector(':scope > h3'))
+      const findH3Row = (title) => h3Rows.find((r) => ((r.querySelector(':scope > h3')?.textContent || '').trim() === title))
+
+      const rowBody = findH3Row('Тело письма')
+      const rowHeader = document.getElementById('rpSecHeader')?.closest('.row') || null
+      const rowSummary = document.getElementById('rpSecSummary')?.closest('.row') || null
+      const rowAlert = document.getElementById('rpSecAlert')?.closest('.row') || null
+      const rowParams = document.getElementById('rpSecParams')?.closest('.row') || null
+      const rowRepos = document.getElementById('rpSecRepos')?.closest('.row') || null
+      const rowPr = document.getElementById('rpSecPrList')?.closest('.row') || null
+
+      const modeRow = document.getElementById('rpModeFull')?.closest('.row') || null
+      const modeLabel = modeRow?.previousElementSibling || null
+
+      const collectBetween = (start, endExclusive) => {
+        const out = []
+        let cur = start
+        while (cur && cur !== endExclusive) {
+          const next = cur.nextElementSibling
+          out.push(cur)
+          cur = next
         }
-      };
+        while (out.length && out[out.length - 1]?.tagName === 'HR') out.pop()
+        return out
+      }
 
-      const open = (animate = true) => {
-        sec.dataset.open = "true";
-        head.setAttribute("aria-expanded", "true");
+      const makeSection = (title, anchorNode, nodes, rightNode) => {
+        if (!anchorNode || !nodes || !nodes.length) return
 
-        if (!animate) body.style.transition = "none";
+        const sec = document.createElement('section')
+        sec.className = 'csec'
+        sec.dataset.open = 'true'
 
-        // сначала 0 -> потом реальная высота
-        body.style.maxHeight = "0px";
-        requestAnimationFrame(() => {
-          body.style.maxHeight = body.scrollHeight + "px";
-        });
+        const head = document.createElement('button')
+        head.className = 'csec__head'
+        head.type = 'button'
+        head.setAttribute('aria-expanded', 'true')
 
-        if (!animate) requestAnimationFrame(() => (body.style.transition = ""));
-      };
+        const titleWrap = document.createElement('span')
+        titleWrap.className = 'csec__title'
+        const h3 = document.createElement('h3')
+        h3.textContent = title
+        titleWrap.appendChild(h3)
 
-      const close = () => {
-        sec.dataset.open = "false";
-        head.setAttribute("aria-expanded", "false");
+        const right = document.createElement('span')
+        right.className = 'csec__right'
+        if (rightNode) right.appendChild(rightNode)
+        right.insertAdjacentHTML('beforeend', '<svg class="csec__chev" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>')
 
-        // текущая высота -> 0
-        body.style.maxHeight = body.scrollHeight + "px";
-        requestAnimationFrame(() => {
-          body.style.maxHeight = "0px";
-        });
-      };
+        head.appendChild(titleWrap)
+        head.appendChild(right)
 
-      // init
-      if (sec.dataset.open !== "false") open(false);
-      else close();
+        const body = document.createElement('div')
+        body.className = 'csec__body'
+        body.setAttribute('role', 'region')
 
-      head.addEventListener("click", () => {
-        (sec.dataset.open === "true") ? close() : open(true);
-      });
+        sec.appendChild(head)
+        sec.appendChild(body)
 
-      // 1) если внутри меняется контент (чекбоксы/условные блоки) — подстраиваем высоту
-      const mo = new MutationObserver(() => setMax());
-      mo.observe(body, { childList: true, subtree: true, attributes: true });
+        reportBody.insertBefore(sec, anchorNode)
+        nodes.forEach((n) => body.appendChild(n))
+      }
 
-      // 2) если контент меняется через CSS (например display по чекбоксу), мутация DOM может не случиться.
-      // Тогда ловим change/input внутри секции.
-      sec.addEventListener("change", () => requestAnimationFrame(setMax));
-      sec.addEventListener("input", () => requestAnimationFrame(setMax));
+      // 1) Действия и макет
+      const actionsStart = document.getElementById('btnBuildReport')?.closest('.row') || null
+      if (actionsStart && rowBody) {
+        makeSection('Действия и макет', actionsStart, collectBetween(actionsStart, rowBody), null)
+      }
 
-      // 3) ресайз окна
-      window.addEventListener("resize", () => requestAnimationFrame(setMax));
-    });
+      // 2) Тело письма
+      if (rowBody && rowHeader) {
+        const bodyNodes = collectBetween(rowBody.nextElementSibling, rowHeader)
+        makeSection('Тело письма', rowBody, bodyNodes, null)
+        rowBody.remove()
+      }
+
+      // 3) Разделы с переключателями справа
+      const wrapFromRow = (row, endExclusive) => {
+        if (!row) return
+        const title = (row.querySelector(':scope > h3')?.textContent || '').trim() || 'Раздел'
+        const rightNode = row.querySelector('.form-row')
+        const nodes = collectBetween(row.nextElementSibling, endExclusive)
+        makeSection(title, row, nodes, rightNode)
+        row.remove()
+      }
+
+      wrapFromRow(rowHeader, rowSummary)
+      wrapFromRow(rowSummary, rowAlert)
+      wrapFromRow(rowAlert, rowParams)
+      wrapFromRow(rowParams, rowRepos)
+      wrapFromRow(rowRepos, rowPr)
+
+      if (rowPr) {
+        const nodes = collectBetween(rowPr.nextElementSibling, modeLabel || null)
+        const rightNode = rowPr.querySelector('.form-row')
+        makeSection('Список PR', rowPr, nodes, rightNode)
+        rowPr.remove()
+      }
+
+      if (modeLabel) {
+        const nodes = collectBetween(modeLabel, null)
+        makeSection('Экспорт', modeLabel, nodes, null)
+      }
+
+      reportBody.dataset.accordionReady = '1'
+    }
+
+    function refreshCollapsibleSections(root) {
+      ;(root || document).querySelectorAll('.csec').forEach((sec) => {
+        const body = sec.querySelector('.csec__body')
+        if (!body) return
+        if (sec.dataset.open === 'true') {
+          body.style.maxHeight = body.scrollHeight + 'px'
+        }
+      })
+    }
+
+    function initCollapsibleSections(root) {
+      ;(root || document).querySelectorAll('.csec').forEach(sec => {
+        if (sec.dataset.boundAccordion === '1') return
+        sec.dataset.boundAccordion = '1'
+
+        const head = sec.querySelector('.csec__head')
+        const body = sec.querySelector('.csec__body')
+        if (!head || !body) return
+
+        const setMax = () => {
+          if (sec.dataset.open === 'true') body.style.maxHeight = body.scrollHeight + 'px'
+        }
+
+        const open = (animate = true) => {
+          sec.dataset.open = 'true'
+          head.setAttribute('aria-expanded', 'true')
+          if (!animate) body.style.transition = 'none'
+          body.style.maxHeight = '0px'
+          requestAnimationFrame(() => { body.style.maxHeight = body.scrollHeight + 'px' })
+          if (!animate) requestAnimationFrame(() => (body.style.transition = ''))
+        }
+
+        const close = () => {
+          sec.dataset.open = 'false'
+          head.setAttribute('aria-expanded', 'false')
+          body.style.maxHeight = body.scrollHeight + 'px'
+          requestAnimationFrame(() => { body.style.maxHeight = '0px' })
+        }
+
+        if (sec.dataset.open !== 'false') open(false)
+        else close()
+
+        head.addEventListener('click', () => {
+          ;(sec.dataset.open === 'true') ? close() : open(true)
+        })
+
+        const mo = new MutationObserver(() => setMax())
+        mo.observe(body, { childList: true, subtree: true, attributes: true })
+
+        sec.addEventListener('change', () => requestAnimationFrame(setMax))
+        sec.addEventListener('input', () => requestAnimationFrame(setMax))
+        window.addEventListener('resize', () => requestAnimationFrame(setMax))
+      })
+    }
+
+    setupReportAccordionSections()
+    initCollapsibleSections(document)
+    window.__refreshCollapsibleSections = () => refreshCollapsibleSections(document)
+    requestAnimationFrame(() => window.__refreshCollapsibleSections())
 
   
 
