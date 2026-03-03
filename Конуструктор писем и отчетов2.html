@@ -4653,6 +4653,9 @@ body,table,td,p,div,span,a{font-family:'SB Sans Text' !important;}
   box-sizing:border-box;
   border-radius:12px;
   padding:16px;
+  width:100%;
+  max-width:725px;
+  margin:0 auto;
   --statW:${Math.max(120, numOr(reportState.ui.statW, 280))}px;
   --statH:${Math.max(40, numOr(reportState.ui.statH, 68))}px;
 }
@@ -4887,7 +4890,7 @@ if (sec.alert && reportState.alert) {
 
 
         const fragment = parts.join("\n").trim();
-        const full = `<!doctype html><html lang="ru"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta http-equiv="x-ua-compatible" content="ie=edge"><meta name="format-detection" content="telephone=no,date=no,address=no,email=no,url=no"><title>${esc(reportState.title || "Отчёт")}</title><style>${css}</style></head><body id="body" style="margin:0;padding:0;background:#101010;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;background:#101010;"><tr><td align="center" style="padding:16px;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:1120px;width:100%;"><tr><td>${fragment}</td></tr></table></td></tr></table></body></html>`;
+        const full = `<!doctype html><html lang="ru"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta http-equiv="x-ua-compatible" content="ie=edge"><meta name="format-detection" content="telephone=no,date=no,address=no,email=no,url=no"><title>${esc(reportState.title || "Отчёт")}</title><style>${css}</style></head><body id="body" style="margin:0;padding:0;background:transparent;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;background:transparent;"><tr><td align="center" style="padding:0;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:725px;width:100%;"><tr><td>${fragment}</td></tr></table></td></tr></table></body></html>`;
         return { css, html: (mode === "fragment") ? fragment : full };
       }
 
