@@ -1109,6 +1109,14 @@
       outline: 2px solid rgba(34, 197, 94, .5);
       outline-offset: -2px;
     }
+
+    .csec--static .csec__head {
+      cursor: default;
+    }
+
+    .csec--static .csec__head:hover {
+      background: rgba(255, 255, 255, .25);
+    }
   </style>
 
 </head>
@@ -1605,15 +1613,17 @@
 
         <hr style="border: none; border-top: 1px solid #dce0eb00; margin-bottom: 4px; margin-top: 4px" />
 
-        <div class="row" style="align-items:center; padding: 2px 0;">
-          <h3 style="margin:0">Разделитель</h3>
-          <div class="form-row justify-end">
-            <label class="ui-check">
-              <input type="checkbox" id="withDivider" checked />
-              <span>Включено</span>
-            </label>
+        <section class="csec csec--static" data-open="true">
+          <div class="csec__head csec__head--static">
+            <span class="csec__title"><h3>Разделитель</h3></span>
+            <span class="csec__right">
+              <label class="ui-check">
+                <input type="checkbox" id="withDivider" checked />
+                <span>Включено</span>
+              </label>
+            </span>
           </div>
-        </div>
+        </section>
 
       <section class="csec" data-open="true">
   <button class="csec__head" type="button" aria-expanded="true">
