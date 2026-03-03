@@ -5024,63 +5024,164 @@ if (sec.alert && reportState.alert) {
 
     try { initTabsAndReport(); } catch (e) { }
 
-    document.querySelectorAll(".csec").forEach(sec => {
-      const head = sec.querySelector(".csec__head");
-      const body = sec.querySelector(".csec__body");
+    function setupReportAccordionSections() {
+      const reportBody = document.querySelector('#tab-report .card .body')
+      if (!reportBody || reportBody.dataset.accordionReady === '1') return
 
-      const setMax = () => {
-        if (sec.dataset.open === "true") {
-          // сброс на auto-подобное поведение через scrollHeight
-          body.style.maxHeight = body.scrollHeight + "px";
+      const h3Rows = Array.from(reportBody.querySelectorAll('.row')).filter((r) => r.querySelector(':scope > h3'))
+      const findH3Row = (title) => h3Rows.find((r) => ((r.querySelector(':scope > h3')?.textContent || '').trim() === title))
+
+      const rowBody = findH3Row('Тело письма')
+      const rowHeader = document.getElementById('rpSecHeader')?.closest('.row') || null
+      const rowSummary = document.getElementById('rpSecSummary')?.closest('.row') || null
+      const rowAlert = document.getElementById('rpSecAlert')?.closest('.row') || null
+      const rowParams = document.getElementById('rpSecParams')?.closest('.row') || null
+      const rowRepos = document.getElementById('rpSecRepos')?.closest('.row') || null
+      const rowPr = document.getElementById('rpSecPrList')?.closest('.row') || null
+
+      const modeRow = document.getElementById('rpModeFull')?.closest('.row') || null
+      const modeLabel = modeRow?.previousElementSibling || null
+
+      const collectBetween = (start, endExclusive) => {
+        const out = []
+        let cur = start
+        while (cur && cur !== endExclusive) {
+          const next = cur.nextElementSibling
+          out.push(cur)
+          cur = next
         }
-      };
+        while (out.length && out[out.length - 1]?.tagName === 'HR') out.pop()
+        return out
+      }
 
-      const open = (animate = true) => {
-        sec.dataset.open = "true";
-        head.setAttribute("aria-expanded", "true");
+      const makeSection = (title, anchorNode, nodes, rightNode) => {
+        if (!anchorNode || !nodes || !nodes.length) return
 
-        if (!animate) body.style.transition = "none";
+        const sec = document.createElement('section')
+        sec.className = 'csec'
+        sec.dataset.open = 'true'
 
-        // сначала 0 -> потом реальная высота
-        body.style.maxHeight = "0px";
-        requestAnimationFrame(() => {
-          body.style.maxHeight = body.scrollHeight + "px";
-        });
+        const head = document.createElement('button')
+        head.className = 'csec__head'
+        head.type = 'button'
+        head.setAttribute('aria-expanded', 'true')
 
-        if (!animate) requestAnimationFrame(() => (body.style.transition = ""));
-      };
+        const titleWrap = document.createElement('span')
+        titleWrap.className = 'csec__title'
+        const h3 = document.createElement('h3')
+        h3.textContent = title
+        titleWrap.appendChild(h3)
 
-      const close = () => {
-        sec.dataset.open = "false";
-        head.setAttribute("aria-expanded", "false");
+        const right = document.createElement('span')
+        right.className = 'csec__right'
+        if (rightNode) right.appendChild(rightNode)
+        right.insertAdjacentHTML('beforeend', '<svg class="csec__chev" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>')
 
-        // текущая высота -> 0
-        body.style.maxHeight = body.scrollHeight + "px";
-        requestAnimationFrame(() => {
-          body.style.maxHeight = "0px";
-        });
-      };
+        head.appendChild(titleWrap)
+        head.appendChild(right)
 
-      // init
-      if (sec.dataset.open !== "false") open(false);
-      else close();
+        const body = document.createElement('div')
+        body.className = 'csec__body'
+        body.setAttribute('role', 'region')
 
-      head.addEventListener("click", () => {
-        (sec.dataset.open === "true") ? close() : open(true);
-      });
+        sec.appendChild(head)
+        sec.appendChild(body)
 
-      // 1) если внутри меняется контент (чекбоксы/условные блоки) — подстраиваем высоту
-      const mo = new MutationObserver(() => setMax());
-      mo.observe(body, { childList: true, subtree: true, attributes: true });
+        reportBody.insertBefore(sec, anchorNode)
+        nodes.forEach((n) => body.appendChild(n))
+      }
 
-      // 2) если контент меняется через CSS (например display по чекбоксу), мутация DOM может не случиться.
-      // Тогда ловим change/input внутри секции.
-      sec.addEventListener("change", () => requestAnimationFrame(setMax));
-      sec.addEventListener("input", () => requestAnimationFrame(setMax));
+      // 1) Действия и макет
+      const actionsStart = document.getElementById('btnBuildReport')?.closest('.row') || null
+      if (actionsStart && rowBody) {
+        makeSection('Действия и макет', actionsStart, collectBetween(actionsStart, rowBody), null)
+      }
 
-      // 3) ресайз окна
-      window.addEventListener("resize", () => requestAnimationFrame(setMax));
-    });
+      // 2) Тело письма
+      if (rowBody && rowHeader) {
+        const bodyNodes = collectBetween(rowBody.nextElementSibling, rowHeader)
+        makeSection('Тело письма', rowBody, bodyNodes, null)
+        rowBody.remove()
+      }
+
+      // 3) Разделы с переключателями справа
+      const wrapFromRow = (row, endExclusive) => {
+        if (!row) return
+        const title = (row.querySelector(':scope > h3')?.textContent || '').trim() || 'Раздел'
+        const rightNode = row.querySelector('.form-row')
+        const nodes = collectBetween(row.nextElementSibling, endExclusive)
+        makeSection(title, row, nodes, rightNode)
+        row.remove()
+      }
+
+      wrapFromRow(rowHeader, rowSummary)
+      wrapFromRow(rowSummary, rowAlert)
+      wrapFromRow(rowAlert, rowParams)
+      wrapFromRow(rowParams, rowRepos)
+      wrapFromRow(rowRepos, rowPr)
+
+      if (rowPr) {
+        const nodes = collectBetween(rowPr.nextElementSibling, modeLabel || null)
+        const rightNode = rowPr.querySelector('.form-row')
+        makeSection('Список PR', rowPr, nodes, rightNode)
+        rowPr.remove()
+      }
+
+      if (modeLabel) {
+        const nodes = collectBetween(modeLabel, null)
+        makeSection('Экспорт', modeLabel, nodes, null)
+      }
+
+      reportBody.dataset.accordionReady = '1'
+    }
+
+    function initCollapsibleSections(root) {
+      ;(root || document).querySelectorAll('.csec').forEach(sec => {
+        if (sec.dataset.boundAccordion === '1') return
+        sec.dataset.boundAccordion = '1'
+
+        const head = sec.querySelector('.csec__head')
+        const body = sec.querySelector('.csec__body')
+        if (!head || !body) return
+
+        const setMax = () => {
+          if (sec.dataset.open === 'true') body.style.maxHeight = body.scrollHeight + 'px'
+        }
+
+        const open = (animate = true) => {
+          sec.dataset.open = 'true'
+          head.setAttribute('aria-expanded', 'true')
+          if (!animate) body.style.transition = 'none'
+          body.style.maxHeight = '0px'
+          requestAnimationFrame(() => { body.style.maxHeight = body.scrollHeight + 'px' })
+          if (!animate) requestAnimationFrame(() => (body.style.transition = ''))
+        }
+
+        const close = () => {
+          sec.dataset.open = 'false'
+          head.setAttribute('aria-expanded', 'false')
+          body.style.maxHeight = body.scrollHeight + 'px'
+          requestAnimationFrame(() => { body.style.maxHeight = '0px' })
+        }
+
+        if (sec.dataset.open !== 'false') open(false)
+        else close()
+
+        head.addEventListener('click', () => {
+          ;(sec.dataset.open === 'true') ? close() : open(true)
+        })
+
+        const mo = new MutationObserver(() => setMax())
+        mo.observe(body, { childList: true, subtree: true, attributes: true })
+
+        sec.addEventListener('change', () => requestAnimationFrame(setMax))
+        sec.addEventListener('input', () => requestAnimationFrame(setMax))
+        window.addEventListener('resize', () => requestAnimationFrame(setMax))
+      })
+    }
+
+    setupReportAccordionSections()
+    initCollapsibleSections(document)
 
   
 
