@@ -25,10 +25,12 @@
       --radius: 14px;
     }
 
+    * {
+      font-family: 'SB Sans Text' !important;
+    }
+
     body {
-      font-family:
-        SB Sans Text, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-        sans-serif;
+      font-family: 'SB Sans Text';
       margin: 0;
       color: var(--text);
       background:
@@ -209,8 +211,7 @@
 
     .mono {
       font-family:
-        ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-        'Liberation Mono', 'Courier New', monospace;
+        'SB Sans Text';
       font-size: 12px;
     }
 
@@ -3257,7 +3258,7 @@ ${wrapClose}`
           : `<v:fill color="${c1}"/>`
         }
           <w:anchorlock/>
-          <center style="color:${fg};font-family:SB Sans Text, Arial,sans-serif;font-size:14px;font-weight:600;">
+          <center style="color:${fg};font-family:'SB Sans Text';font-size:14px;font-weight:600;">
             ${escapeHtml(data.buttonText)}
           </center>
         </v:roundrect>
@@ -3270,7 +3271,7 @@ ${wrapClose}`
               <a
                 href="${escapeHtml(data.buttonUrl)}"
                 target="_blank" rel="noopener noreferrer"
-                style="${fluid ? 'display:block; width:100%; max-width:' + widthPx + 'px;' : 'display:inline-block; width:' + widthPx + 'px;'} padding:12px 0; font-family: SB Sans Text, Arial, sans-serif; font-size:14px; font-weight:600; color:${fg} !important; -webkit-text-fill-color:${fg} !important; text-decoration:none !important; text-align:center; border-radius:${r}px;"
+                style="${fluid ? 'display:block; width:100%; max-width:' + widthPx + 'px;' : 'display:inline-block; width:' + widthPx + 'px;'} padding:12px 0; font-family: 'SB Sans Text'; font-size:14px; font-weight:600; color:${fg} !important; -webkit-text-fill-color:${fg} !important; text-decoration:none !important; text-align:center; border-radius:${r}px;"
               >
                 ${escapeHtml(data.buttonText)}
               </a>
@@ -3334,10 +3335,10 @@ ${wrapClose}`
       const overlayInner = (() => {
         const parts = []
         if (data.headerTitleEnabled && headerTitleText) {
-          parts.push(`<div style="font-size:22px; font-weight:700; line-height:1.25; margin:0; text-align:${titleAlign}; color:${escapeHtml(data.headerTitleColor || data.textColor)} !important; -webkit-text-fill-color:${escapeHtml(data.headerTitleColor || data.textColor)} !important; font-family: SB Sans Text, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;">${escapeHtml(headerTitleText)}</div>`)
+          parts.push(`<div style="font-size:22px; font-weight:700; line-height:1.25; margin:0; text-align:${titleAlign}; color:${escapeHtml(data.headerTitleColor || data.textColor)} !important; -webkit-text-fill-color:${escapeHtml(data.headerTitleColor || data.textColor)} !important; font-family: 'SB Sans Text';">${escapeHtml(headerTitleText)}</div>`)
         }
         if (data.headerDescEnabled && headerDescText) {
-          parts.push(`<div style="font-size:14px; line-height:1.5; margin:10px 0 0 0; text-align:${descAlign}; color:${escapeHtml(data.headerDescColor || data.textColor)} !important; -webkit-text-fill-color:${escapeHtml(data.headerDescColor || data.textColor)} !important; font-family: SB Sans Text, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;">${richTextToHtml(headerDescText, linkStyle)}</div>`)
+          parts.push(`<div style="font-size:14px; line-height:1.5; margin:10px 0 0 0; text-align:${descAlign}; color:${escapeHtml(data.headerDescColor || data.textColor)} !important; -webkit-text-fill-color:${escapeHtml(data.headerDescColor || data.textColor)} !important; font-family: 'SB Sans Text';">${richTextToHtml(headerDescText, linkStyle)}</div>`)
         }
         return parts.join('')
       })()
@@ -3372,10 +3373,10 @@ ${wrapClose}`
         if (!headerImgsArray.length) {
           // No image: fall back to regular padded rows above body
           const padTitle = data.headerTitleEnabled && headerTitleText
-            ? `<tr><td class="px-24" style="padding:18px 24px 0 24px; font-family: SB Sans Text, Arial, sans-serif; text-align:${titleAlign}; color:${escapeHtml(data.headerTitleColor || data.textColor)} !important; -webkit-text-fill-color:${escapeHtml(data.headerTitleColor || data.textColor)} !important;"><div style="font-size:20px; font-weight:700; line-height:1.25; margin:0;">${escapeHtml(headerTitleText)}</div></td></tr>`
+            ? `<tr><td class="px-24" style="padding:18px 24px 0 24px; font-family: 'SB Sans Text'; text-align:${titleAlign}; color:${escapeHtml(data.headerTitleColor || data.textColor)} !important; -webkit-text-fill-color:${escapeHtml(data.headerTitleColor || data.textColor)} !important;"><div style="font-size:20px; font-weight:700; line-height:1.25; margin:0;">${escapeHtml(headerTitleText)}</div></td></tr>`
             : ''
           const padDesc = data.headerDescEnabled && headerDescText
-            ? `<tr><td class="px-24" style="padding:10px 24px 0 24px; font-family: SB Sans Text, Arial, sans-serif; text-align:${descAlign}; color:${escapeHtml(data.headerDescColor || data.textColor)} !important; -webkit-text-fill-color:${escapeHtml(data.headerDescColor || data.textColor)} !important;"><div style="font-size:14px; line-height:1.5; margin:0;">${richTextToHtml(headerDescText, linkStyle)}</div></td></tr>`
+            ? `<tr><td class="px-24" style="padding:10px 24px 0 24px; font-family: 'SB Sans Text'; text-align:${descAlign}; color:${escapeHtml(data.headerDescColor || data.textColor)} !important; -webkit-text-fill-color:${escapeHtml(data.headerDescColor || data.textColor)} !important;"><div style="font-size:14px; line-height:1.5; margin:0;">${richTextToHtml(headerDescText, linkStyle)}</div></td></tr>`
             : ''
           return padTitle + padDesc
         }
@@ -3470,7 +3471,7 @@ ${wrapClose}`
         ? ''
         : `
           <tr>
-            <td class="px-24" style="padding: 22px 24px 0 24px; font-family: SB Sans Text, Arial, sans-serif; color:${escapeHtml(data.textColor)};">
+            <td class="px-24" style="padding: 22px 24px 0 24px; font-family: 'SB Sans Text'; color:${escapeHtml(data.textColor)};">
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                 <tr>
                   <td style="font-size:18px; font-weight:600; line-height:1.3; padding:0; margin:0; color:${escapeHtml(data.textColor)};">
@@ -3505,6 +3506,7 @@ ${wrapClose}`
     img { border:0; outline:none; text-decoration:none; -ms-interpolation-mode:bicubic; }
     p { margin:0 0 12px 0; }
     .ExternalClass, .ExternalClass * { line-height:100%; }
+    body, table, td, p, div, span, a { font-family: 'SB Sans Text' !important; }
 
     /* Color lock for Apple Mail / Mac Mail */
     body, table, td, p, div, span { color: ${safeTextColor} !important; -webkit-text-fill-color: ${safeTextColor} !important; }
@@ -3520,7 +3522,7 @@ ${wrapClose}`
       -webkit-text-fill-color: ${safeLinkColor} !important;
       text-decoration: underline !important;
       font-size: inherit !important;
-      font-family: inherit !important;
+      font-family: 'SB Sans Text' !important;
       font-weight: inherit !important;
       line-height: inherit !important;
     }
@@ -3568,7 +3570,7 @@ ${wrapClose}`
           ${subjectBlock}
 
           <tr>
-            <td class="px-24" style="padding: ${bodyTopPadding} 24px 0 24px; font-family: SB Sans Text, Arial, sans-serif; color:${escapeHtml(data.textColor)}; font-size:14px; line-height:1.6;">
+            <td class="px-24" style="padding: ${bodyTopPadding} 24px 0 24px; font-family: 'SB Sans Text'; color:${escapeHtml(data.textColor)}; font-size:14px; line-height:1.6;">
               ${greetingBlock}
               ${builderBody
           ? `${builderBody}${cta ? `
@@ -4621,8 +4623,9 @@ table,td{border-collapse:collapse !important;mso-table-lspace:0pt !important;mso
 img{border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;}
 .ExternalClass,.ExternalClass *{line-height:100%;}
 a[x-apple-data-detectors],u + #body a,#MessageViewBody a{color:inherit !important;text-decoration:inherit !important;}
+body,table,td,p,div,span,a{font-family:'SB Sans Text' !important;}
 .report-wrap{
-  font-family:SB Sans Text,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
+  font-family:'SB Sans Text';
   color:#e9eaee;
   background:${esc(reportState.ui.bodyBg)};
   box-sizing:border-box;
@@ -4717,7 +4720,7 @@ a[x-apple-data-detectors],u + #body a,#MessageViewBody a{color:inherit !importan
 .rp-neutral{background:rgba(0,54,255,.16);color:#8fb2ff;border-color:rgba(0,54,255,.22);font-weight:600}
 .rp-prlist{
   white-space:pre-wrap;
-  font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace;
+  font-family:'SB Sans Text';
   font-size:12px;
   background:#272B31;
   color:#cfd3da;
