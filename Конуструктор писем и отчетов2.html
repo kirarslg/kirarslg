@@ -3585,7 +3585,11 @@ ${wrapClose}`
             <td class="px-24" style="padding: ${bodyTopPadding} 24px 0 24px; font-family: SB Sans Text, Arial, sans-serif; color:${escapeHtml(data.textColor)}; font-size:14px; line-height:1.6;">
               ${greetingBlock}
               ${builderBody
-          ? builderBody
+          ? `${builderBody}${(cta || buttonBlock) ? `
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                ${cta}
+                ${buttonBlock}
+              </table>` : ''}`
           : `
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                 <tr>
