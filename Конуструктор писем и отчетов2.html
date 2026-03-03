@@ -1605,12 +1605,23 @@
 
         <hr style="border: none; border-top: 1px solid #dce0eb00; margin-bottom: 4px; margin-top: 4px" />
 
+        <div class="row" style="align-items:center; padding: 2px 0;">
+          <h3 style="margin:0">Разделитель</h3>
+          <div class="form-row justify-end">
+            <label class="ui-check">
+              <input type="checkbox" id="withDivider" checked />
+              <span>Включено</span>
+            </label>
+          </div>
+        </div>
+
       <section class="csec" data-open="true">
   <button class="csec__head" type="button" aria-expanded="true">
     <span class="csec__title"><h3>Подпись</h3></span>
     <span class="csec__right">
-    <input type="checkbox" id="withDivider"></input>
-
+      <label class="ui-check" style="margin:0 6px 0 0">
+        <input type="checkbox" id="withSignature" checked />
+      </label>
       <svg class="csec__chev" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
         <path d="M7 10l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2"
               stroke-linecap="round" stroke-linejoin="round"/>
@@ -3492,6 +3503,24 @@ ${wrapClose}`
     `
         : ''
 
+      const signatureSection = (!data.withDivider && !data.withSignature)
+        ? ''
+        : `
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr><td height="22" style="height:22px; line-height:22px; font-size:22px;">&nbsp;</td></tr>
+              </table>
+              ${dividerBeforeSignature}
+              ${data.withSignature ? `<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr><td height="16" style="height:16px; line-height:16px; font-size:16px;">&nbsp;</td></tr>
+              </table>
+
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="font-size:13px; line-height:1.5; color:${escapeHtml(data.mutedColor)};">
+                ${signatureHtml}
+              </table>` : ''}
+
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"><tr><td height="22" style="height:22px; line-height:22px; font-size:22px;">&nbsp;</td></tr></table>
+    `
+
       const subjectBlock = data.hideSubject
         ? ''
         : `
@@ -3630,19 +3659,7 @@ ${wrapClose}`
               </table>`
         }
 
-                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
-                <tr><td height="22" style="height:22px; line-height:22px; font-size:22px;">&nbsp;</td></tr>
-              </table>
-              ${dividerBeforeSignature}
-              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
-                <tr><td height="16" style="height:16px; line-height:16px; font-size:16px;">&nbsp;</td></tr>
-              </table>
-
-              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="font-size:13px; line-height:1.5; color:${escapeHtml(data.mutedColor)};">
-                ${signatureHtml}
-              </table>
-
-              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"><tr><td height="22" style="height:22px; line-height:22px; font-size:22px;">&nbsp;</td></tr></table>
+              ${signatureSection}
             </td>
           </tr>
         </table>
@@ -3773,6 +3790,7 @@ ${wrapClose}`
         senderCompany: el('senderCompany').value.trim(),
         senderPhone: el('senderPhone').value.trim(),
         withDivider: !!el('withDivider').checked,
+        withSignature: !!el('withSignature').checked,
         preheader: '',
       }
     }
@@ -4004,6 +4022,8 @@ ${wrapClose}`
       'headerTitleColorText',
       'headerDescColor',
       'headerDescColorText',
+      'withDivider',
+      'withSignature',
     ]
     inputs.forEach((id) => {
       el(id).addEventListener('input', () => {
@@ -4025,6 +4045,8 @@ ${wrapClose}`
     el('bgBody').value = '#ffffff'
     el('textColor').value = '#111111'
     el('mutedColor').value = '#444444'
+    el('withDivider').checked = true
+    el('withSignature').checked = true
 
     el('headerTitleColor').value = el('textColor').value
     el('headerTitleColorText').value = el('textColor').value
