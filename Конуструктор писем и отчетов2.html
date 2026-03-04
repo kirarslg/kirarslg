@@ -5291,10 +5291,16 @@ if (sec.alert && reportState.alert) {
         const open = (animate = true) => {
           sec.dataset.open = 'true'
           head.setAttribute('aria-expanded', 'true')
-          if (!animate) body.style.transition = 'none'
+          if (!animate) {
+            const prevTransition = body.style.transition
+            body.style.transition = 'none'
+            body.style.maxHeight = body.scrollHeight + 'px'
+            requestAnimationFrame(() => { body.style.transition = prevTransition })
+            return
+          }
           body.style.maxHeight = '0px'
           requestAnimationFrame(() => { body.style.maxHeight = body.scrollHeight + 'px' })
-          if (!animate) requestAnimationFrame(() => (body.style.transition = ''))
+
         }
 
         const close = () => {
