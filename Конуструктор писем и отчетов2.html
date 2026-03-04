@@ -1814,7 +1814,6 @@
           </div>
           <div>
             <label>Фон шапки (картинка)</label>
-
             <div class="file-control">
               <input id="rpHeroBgUpload" type="file" accept="image/*" class="file-input-hidden" />
               <button type="button" class="secondary file-btn" id="rpHeroBgUploadBtn" aria-controls="rpHeroBgUpload">
@@ -1822,13 +1821,11 @@
               </button>
               <span class="file-name" id="rpHeroBgUploadName">Файл не выбран</span>
             </div>
-
           </div>
         </div>
 
         <div class="row" style="grid-template-columns:1fr; gap:8px;">
           <div style="display:flex;justify-content:flex-start;">
-
             <button type="button" class="secondary" id="rpHeroBgReset">Сбросить картинку шапки</button>
           </div>
         </div>
@@ -3677,7 +3674,6 @@ ${wrapClose}`
           ? `${builderBody}${cta ? `
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                 ${cta}
-
               </table>` : ''}`
           : `
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
@@ -4730,6 +4726,12 @@ function numOr(v, fallback) {
 
         const sec = readSec();
         const mode = getMode();
+        const previewWidthPx = 725;
+        const reportWrapWidth = isPreview ? `${previewWidthPx}px` : "100%";
+        const reportWrapMaxWidth = isPreview ? `${previewWidthPx}px` : "100%";
+        const reportWrapMinWidth = isPreview ? `${previewWidthPx}px` : "0";
+        const repoTableMinWidth = isPreview ? "980px" : "100%";
+        const repoTableLayout = isPreview ? "auto" : "fixed";
 
         const css = `
 :root{color-scheme:dark;}
@@ -4746,8 +4748,9 @@ body,table,td,p,div,span,a{font-family:'SB Sans Text' !important;}
   box-sizing:border-box;
   border-radius:0;
   padding:0;
-  width:100%;
-  max-width:725px;
+  width:${reportWrapWidth};
+  max-width:${reportWrapMaxWidth};
+  min-width:${reportWrapMinWidth};
   margin:0 auto;
   --statW:${Math.max(120, numOr(reportState.ui.statW, 280))}px;
   --statH:${Math.max(40, numOr(reportState.ui.statH, 68))}px;
@@ -4779,7 +4782,7 @@ body,table,td,p,div,span,a{font-family:'SB Sans Text' !important;}
 
   
 .rp-card h2{margin:0;padding:14px 16px;font-size:16px;font-weight:600;}
-.rp-card .body{padding:14px 16px 16px;}
+.rp-card .body{padding:14px 16px 16px;overflow-x:auto;}
 .rp-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(var(--statW,160px),1fr));gap:10px;}
 
 .rp-stat{border:1px solid ${esc(reportState.ui.bodyBorder)};border-radius:10px;padding:10px 10px;background:#272727;text-align:center;min-height:var(--statH);display:flex;flex-direction:column;justify-content:center;margin:0;}
@@ -4821,7 +4824,8 @@ body,table,td,p,div,span,a{font-family:'SB Sans Text' !important;}
 .rp-card-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:16px;}
 .rp-card-head h2{margin:0;font-size:16px;font-weight:600;padding:0;}
 .rp-right{color:#cfd3da;font-size:13px;opacity:.9;}
-.rp-table{width:100%;border-collapse:collapse;font-size:12px;}
+.rp-table-wrap{width:100%;overflow-x:auto;}
+.rp-table{width:100%;min-width:${repoTableMinWidth};table-layout:${repoTableLayout};border-collapse:collapse;font-size:12px;}
 .rp-table th{
   background:${esc(reportState.ui.tableHeadBg)};
   color:${esc(reportState.ui.tableHeadText)};
@@ -4831,8 +4835,9 @@ body,table,td,p,div,span,a{font-family:'SB Sans Text' !important;}
   font-size:11px;
   text-transform:uppercase;
   letter-spacing:.02em;
+  word-break:break-word;
 }
-.rp-table td{padding:12px 8px;border-top:1px solid ${esc(reportState.ui.bodyBorder)};vertical-align:top;}
+.rp-table td{padding:12px 8px;border-top:1px solid ${esc(reportState.ui.bodyBorder)};vertical-align:top;word-break:break-word;}
 .rp-badge{display:inline-block;padding:5px 10px;border-radius:999px;font-weight:600;font-size:12px;background:#3D1C1C;font-color:#C45648;border:0px solid ${esc(reportState.ui.bodyBorder)};}
 .rp-ok{background:rgba(61,196,102,.18);color:#3DC466;border-color:rgba(61,196,102,.28);font-weight:600}
 .rp-neutral{background:rgba(0,54,255,.16);color:#8fb2ff;border-color:rgba(0,54,255,.22);font-weight:600}
@@ -4938,6 +4943,7 @@ if (sec.alert && reportState.alert) {
         if (sec.repos) {
           parts.push(`<div class="rp-card"><div class="rp-card-head"><h2>Детали по репозиториям</h2><div class="rp-right">Обработано репозиториев: ${esc((reportState.reposInfo?.processed ?? 0))} из ${esc((reportState.reposInfo?.total ?? 0))}</div></div><div class="body">`);
           parts.push(`
+              <div class="rp-table-wrap">
               <table class="rp-table">
                 <thead>
                   <tr>
@@ -4961,7 +4967,7 @@ if (sec.alert && reportState.alert) {
                 </tr>
               `);
           });
-          parts.push(`</tbody></table></div></div>`);
+          parts.push(`</tbody></table></div></div></div>`);
         }
 
         if (sec.prList) {
@@ -4984,7 +4990,7 @@ if (sec.alert && reportState.alert) {
 
         const fragment = parts.join("\n").trim();
         const exportBodyBg = esc((ui.bodyBg?.value || reportState.ui?.bodyBg || "#ffffff").trim());
-        const full = `<!doctype html><html lang="ru"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta http-equiv="x-ua-compatible" content="ie=edge"><meta name="format-detection" content="telephone=no,date=no,address=no,email=no,url=no"><title>${esc(reportState.title || "Отчёт")}</title><style>${css}</style></head><body id="body" style="margin:0;padding:0;background:transparent;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;background:transparent;"><tr><td align="center" style="padding:0;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width:725px;width:100%;"><tr><td style="padding:16px;background:${exportBodyBg};border-radius:12px;">${fragment}</td></tr></table></td></tr></table></body></html>`;
+        const full = `<!doctype html><html lang="ru"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta http-equiv="x-ua-compatible" content="ie=edge"><meta name="format-detection" content="telephone=no,date=no,address=no,email=no,url=no"><title>${esc(reportState.title || "Отчёт")}</title><style>${css}</style></head><body id="body" style="margin:0;padding:0;background:transparent;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;background:transparent;"><tr><td align="center" style="padding:0;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;max-width:${isPreview ? "725px" : "100%"};"><tr><td style="padding:16px;background:${exportBodyBg};border-radius:12px;">${fragment}</td></tr></table></td></tr></table></body></html>`;
         return { css, html: (mode === "fragment") ? fragment : full };
       }
 
