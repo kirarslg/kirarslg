@@ -227,6 +227,15 @@
       color: #111;
     }
 
+    #rpHeroBgReset {
+      background: #d64545;
+      color: #ffffff;
+    }
+
+    #rpHeroBgReset:hover {
+      background: #bf3636;
+    }
+
     button.ghost {
       background: transparent;
       color: #111;
@@ -1791,7 +1800,6 @@
             </div>
           </div>
         </div>
-
 
         <div class="row">
           <div>
@@ -4228,7 +4236,6 @@ ${wrapClose}`
         tplOpacity: document.getElementById('rpTplOpacity'),
         logoUpload: document.getElementById('logoUpload'),
         heroBgUpload: document.getElementById('rpHeroBgUpload'),
-
         heroBgUploadBtn: document.getElementById('rpHeroBgUploadBtn'),
         heroBgUploadName: document.getElementById('rpHeroBgUploadName'),
         heroBgReset: document.getElementById('rpHeroBgReset'),
@@ -5145,7 +5152,6 @@ if (sec.alert && reportState.alert) {
 
       bindSimpleFilePicker(ui.logoUpload, ui.logoUploadBtn, ui.logoUploadName, 'Файл не выбран')
       bindSimpleFilePicker(ui.heroBgUpload, ui.heroBgUploadBtn, ui.heroBgUploadName, 'Файл не выбран')
-
 
       // first render
       doBuild();
