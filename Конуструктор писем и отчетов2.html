@@ -1794,13 +1794,27 @@
 
         <div>
           <label>Логотип (SVG)</label>
-          <input type="file" id="logoUpload" accept=".svg" />
+          <div class="file-control">
+            <input id="logoUpload" type="file" accept=".svg" class="file-input-hidden" />
+            <button type="button" class="secondary file-btn" id="logoUploadBtn" aria-controls="logoUpload">
+              <span class="file-btn-text" contenteditable="false" spellcheck="false">Выберите файл</span>
+            </button>
+            <span class="file-name" id="logoUploadName">Файл не выбран</span>
+          </div>
         </div>
 
         <div class="row">
           <div>
             <label>Фон шапки (картинка)</label>
-            <input type="file" id="rpHeroBgUpload" accept="image/*" />
+
+            <div class="file-control">
+              <input id="rpHeroBgUpload" type="file" accept="image/*" class="file-input-hidden" />
+              <button type="button" class="secondary file-btn" id="rpHeroBgUploadBtn" aria-controls="rpHeroBgUpload">
+                <span class="file-btn-text" contenteditable="false" spellcheck="false">Выберите файл</span>
+              </button>
+              <span class="file-name" id="rpHeroBgUploadName">Файл не выбран</span>
+            </div>
+
           </div>
           <div style="display:flex;align-items:flex-end;">
             <button type="button" class="secondary" id="rpHeroBgReset">Сбросить картинку шапки</button>
@@ -4210,7 +4224,13 @@ ${wrapClose}`
         tplOpacity: document.getElementById('rpTplOpacity'),
         logoUpload: document.getElementById('logoUpload'),
         heroBgUpload: document.getElementById('rpHeroBgUpload'),
+
+        heroBgUploadBtn: document.getElementById('rpHeroBgUploadBtn'),
+        heroBgUploadName: document.getElementById('rpHeroBgUploadName'),
         heroBgReset: document.getElementById('rpHeroBgReset'),
+        logoUploadBtn: document.getElementById('logoUploadBtn'),
+        logoUploadName: document.getElementById('logoUploadName'),
+
       };
 
 
@@ -5106,9 +5126,25 @@ if (sec.alert && reportState.alert) {
       if (ui.heroBgReset) {
         ui.heroBgReset.addEventListener('click', () => {
           reportState.ui.heroBgImage = ''
+
+          if (ui.heroBgUploadName) ui.heroBgUploadName.textContent = 'Файл не выбран'
+
           doBuild()
         })
       }
+
+      const bindSimpleFilePicker = (inputEl, btnEl, nameEl, emptyText = 'Файл не выбран') => {
+        if (!inputEl || !btnEl || !nameEl) return
+        btnEl.addEventListener('click', () => inputEl.click())
+        inputEl.addEventListener('change', () => {
+          const f = inputEl.files && inputEl.files[0]
+          nameEl.textContent = f ? (f.name || '1 файл') : emptyText
+        })
+      }
+
+      bindSimpleFilePicker(ui.logoUpload, ui.logoUploadBtn, ui.logoUploadName, 'Файл не выбран')
+      bindSimpleFilePicker(ui.heroBgUpload, ui.heroBgUploadBtn, ui.heroBgUploadName, 'Файл не выбран')
+
 
       // first render
       doBuild();
