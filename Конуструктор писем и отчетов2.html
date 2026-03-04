@@ -1792,6 +1792,7 @@
           </div>
         </div>
 
+
         <div class="row">
           <div>
             <label>Логотип (SVG)</label>
@@ -1805,6 +1806,7 @@
           </div>
           <div>
             <label>Фон шапки (картинка)</label>
+
             <div class="file-control">
               <input id="rpHeroBgUpload" type="file" accept="image/*" class="file-input-hidden" />
               <button type="button" class="secondary file-btn" id="rpHeroBgUploadBtn" aria-controls="rpHeroBgUpload">
@@ -1812,11 +1814,13 @@
               </button>
               <span class="file-name" id="rpHeroBgUploadName">Файл не выбран</span>
             </div>
+
           </div>
         </div>
 
         <div class="row" style="grid-template-columns:1fr; gap:8px;">
           <div style="display:flex;justify-content:flex-start;">
+
             <button type="button" class="secondary" id="rpHeroBgReset">Сбросить картинку шапки</button>
           </div>
         </div>
@@ -3216,6 +3220,8 @@ ${wrapClose}`
               const baseW = Number(data.buttonWidth || 526)
               const merged = {
                 ...data,
+                // Builder button must render regardless of global "buttonEnabled" toggle
+                buttonEnabled: true,
                 buttonText: block.text || data.buttonText || 'Кнопка',
                 buttonUrl: block.url || data.buttonUrl || '#',
                 // Clamp width so multi-column layouts never expand the email
@@ -3663,6 +3669,7 @@ ${wrapClose}`
           ? `${builderBody}${cta ? `
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                 ${cta}
+
               </table>` : ''}`
           : `
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
@@ -4221,6 +4228,7 @@ ${wrapClose}`
         tplOpacity: document.getElementById('rpTplOpacity'),
         logoUpload: document.getElementById('logoUpload'),
         heroBgUpload: document.getElementById('rpHeroBgUpload'),
+
         heroBgUploadBtn: document.getElementById('rpHeroBgUploadBtn'),
         heroBgUploadName: document.getElementById('rpHeroBgUploadName'),
         heroBgReset: document.getElementById('rpHeroBgReset'),
@@ -5137,6 +5145,7 @@ if (sec.alert && reportState.alert) {
 
       bindSimpleFilePicker(ui.logoUpload, ui.logoUploadBtn, ui.logoUploadName, 'Файл не выбран')
       bindSimpleFilePicker(ui.heroBgUpload, ui.heroBgUploadBtn, ui.heroBgUploadName, 'Файл не выбран')
+
 
       // first render
       doBuild();
