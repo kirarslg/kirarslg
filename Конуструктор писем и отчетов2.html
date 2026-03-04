@@ -1792,18 +1792,18 @@
           </div>
         </div>
 
-        <div>
-          <label>Логотип (SVG)</label>
-          <div class="file-control">
-            <input id="logoUpload" type="file" accept=".svg" class="file-input-hidden" />
-            <button type="button" class="secondary file-btn" id="logoUploadBtn" aria-controls="logoUpload">
-              <span class="file-btn-text" contenteditable="false" spellcheck="false">Выберите файл</span>
-            </button>
-            <span class="file-name" id="logoUploadName">Файл не выбран</span>
-          </div>
-        </div>
 
         <div class="row">
+          <div>
+            <label>Логотип (SVG)</label>
+            <div class="file-control">
+              <input id="logoUpload" type="file" accept=".svg" class="file-input-hidden" />
+              <button type="button" class="secondary file-btn" id="logoUploadBtn" aria-controls="logoUpload">
+                <span class="file-btn-text" contenteditable="false" spellcheck="false">Выберите файл</span>
+              </button>
+              <span class="file-name" id="logoUploadName">Файл не выбран</span>
+            </div>
+          </div>
           <div>
             <label>Фон шапки (картинка)</label>
 
@@ -1816,7 +1816,11 @@
             </div>
 
           </div>
-          <div style="display:flex;align-items:flex-end;">
+        </div>
+
+        <div class="row" style="grid-template-columns:1fr; gap:8px;">
+          <div style="display:flex;justify-content:flex-start;">
+
             <button type="button" class="secondary" id="rpHeroBgReset">Сбросить картинку шапки</button>
           </div>
         </div>
@@ -4230,7 +4234,6 @@ ${wrapClose}`
         heroBgReset: document.getElementById('rpHeroBgReset'),
         logoUploadBtn: document.getElementById('logoUploadBtn'),
         logoUploadName: document.getElementById('logoUploadName'),
-
       };
 
 
@@ -5126,9 +5129,7 @@ if (sec.alert && reportState.alert) {
       if (ui.heroBgReset) {
         ui.heroBgReset.addEventListener('click', () => {
           reportState.ui.heroBgImage = ''
-
           if (ui.heroBgUploadName) ui.heroBgUploadName.textContent = 'Файл не выбран'
-
           doBuild()
         })
       }
