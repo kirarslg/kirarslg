@@ -4144,18 +4144,16 @@ ${wrapClose}`
         tabReport.style.display = isEmail ? 'none' : reportDisplay;
         btnEmail.classList.toggle('is-active', isEmail);
         btnReport.classList.toggle('is-active', !isEmail);
-
-        if (!isEmail) {
+        const activeRoot = isEmail ? tabEmail : tabReport
+        requestAnimationFrame(() => {
           requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-              try {
-                if (typeof window.__refreshCollapsibleSections === 'function') {
-                  window.__refreshCollapsibleSections()
-                }
-              } catch (e) { }
-            })
+            try {
+              if (typeof window.__refreshCollapsibleSections === 'function') {
+                window.__refreshCollapsibleSections(activeRoot)
+              }
+            } catch (e) { }
           })
-        }
+        })
       }
 
       btnEmail.addEventListener('click', () => setActive('email'));
@@ -5269,9 +5267,8 @@ if (sec.alert && reportState.alert) {
       ;(root || document).querySelectorAll('.csec').forEach((sec) => {
         const body = sec.querySelector('.csec__body')
         if (!body) return
-        if (sec.dataset.open === 'true') {
-          body.style.maxHeight = body.scrollHeight + 'px'
-        }
+        if (sec.dataset.open === 'true') body.style.maxHeight = body.scrollHeight + 'px'
+        else body.style.maxHeight = '0px'
       })
     }
 
@@ -5300,7 +5297,6 @@ if (sec.alert && reportState.alert) {
           }
           body.style.maxHeight = '0px'
           requestAnimationFrame(() => { body.style.maxHeight = body.scrollHeight + 'px' })
-
         }
 
         const close = () => {
@@ -5318,21 +5314,20 @@ if (sec.alert && reportState.alert) {
         })
 
         const mo = new MutationObserver(() => setMax())
-        mo.observe(body, { childList: true, subtree: true, attributes: true })
+        mo.observe(body, { childList: true, subtree: true })
 
         sec.addEventListener('change', () => requestAnimationFrame(setMax))
         sec.addEventListener('input', () => requestAnimationFrame(setMax))
-        window.addEventListener('resize', () => requestAnimationFrame(setMax))
       })
     }
 
     setupReportAccordionSections()
     initCollapsibleSections(document)
-    window.__refreshCollapsibleSections = () => refreshCollapsibleSections(document)
+    window.__refreshCollapsibleSections = (root) => refreshCollapsibleSections(root || document)
+    window.addEventListener('resize', () => {
+      try { window.__refreshCollapsibleSections() } catch (e) { }
+    })
     requestAnimationFrame(() => window.__refreshCollapsibleSections())
-
-  
-
 
 
 </script>
