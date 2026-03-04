@@ -4727,9 +4727,10 @@ function numOr(v, fallback) {
         const sec = readSec();
         const mode = opts.forceMode || getMode();
         const previewWidthPx = 725;
-        const reportWrapWidth = isPreview ? `${previewWidthPx}px` : "100%";
-        const reportWrapMaxWidth = isPreview ? `${previewWidthPx}px` : "100%";
-        const reportWrapMinWidth = isPreview ? `${previewWidthPx}px` : "0";
+        const previewInnerWidthPx = 693;
+        const reportWrapWidth = isPreview ? `${previewInnerWidthPx}px` : "100%";
+        const reportWrapMaxWidth = isPreview ? `${previewInnerWidthPx}px` : "100%";
+        const reportWrapMinWidth = isPreview ? `${previewInnerWidthPx}px` : "0";
         const repoTableMinWidth = "100%";
         const repoTableLayout = "fixed";
 
