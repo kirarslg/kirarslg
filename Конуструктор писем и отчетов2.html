@@ -4725,7 +4725,8 @@ function numOr(v, fallback) {
         reportState.ui.statH = numOr(ui.statH?.value, reportState.ui.statH);
 
         const sec = readSec();
-        const mode = getMode();
+        const mode = opts.forceMode || getMode();
+
         const previewWidthPx = 725;
         const reportWrapWidth = isPreview ? `${previewWidthPx}px` : "100%";
         const reportWrapMaxWidth = isPreview ? `${previewWidthPx}px` : "100%";
@@ -5002,7 +5003,7 @@ if (sec.alert && reportState.alert) {
 
       function doBuild() {
         const outExport = buildReportHtml({ preview: false });
-        const outPreview = buildReportHtml({ preview: true });
+        const outPreview = buildReportHtml({ preview: true, forceMode: "full" });
         if (cssOut) cssOut.value = outExport.css;
         if (htmlOut) htmlOut.value = outExport.html;
         if (prev) {
