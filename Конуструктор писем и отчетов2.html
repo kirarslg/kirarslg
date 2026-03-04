@@ -1390,7 +1390,7 @@
                 <input type="checkbox" id="headerTitleEnabled" />
                 <span>Добавить заголовок</span>
               </label>
-              <label for="headerTitle">Заголовок в шапке</label>
+              <label for="headerTitle" id="headerTitleLabel" style="display:none;">Заголовок в шапке</label>
               <input id="headerTitle" placeholder="Заголовок в шапке" style="display:none;" />
 
               <div class="row">
@@ -2970,6 +2970,7 @@ ${wrapClose}`
       const d = el('headerDesc')
       const tA = el('headerTitleAlign')
       const dA = el('headerDescAlign')
+      const tL = el('headerTitleLabel')
       const tAL = el('headerTitleAlignLabel')
       const dAL = el('headerDescAlignLabel')
       const mode = el('headerBlockAlignMode')
@@ -2978,6 +2979,7 @@ ${wrapClose}`
         const titleOn = !!tEn?.checked
         const descOn = !!dEn?.checked
         if (t) t.style.display = titleOn ? '' : 'none'
+        if (tL) tL.style.display = titleOn ? '' : 'none'
         if (tA) tA.style.display = titleOn ? '' : 'none'
         if (tAL) tAL.style.display = titleOn ? '' : 'none'
 
