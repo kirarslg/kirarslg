@@ -5289,7 +5289,6 @@ if (sec.alert && reportState.alert) {
           body.style.maxHeight = (parentSec.dataset.open === 'true') ? (body.scrollHeight + 'px') : '0px'
         }
         parentBody = parentSec.parentElement ? parentSec.parentElement.closest('.csec__body') : null
-      }
     }
 
     function initCollapsibleSections(root) {
@@ -5307,6 +5306,7 @@ if (sec.alert && reportState.alert) {
             if (sec.dataset.open === 'true') body.style.maxHeight = body.scrollHeight + 'px'
             refreshParentSections(sec)
           })
+
         }
 
         const open = (animate = true) => {
@@ -5345,6 +5345,18 @@ if (sec.alert && reportState.alert) {
 
         head.addEventListener('click', () => {
           ;(sec.dataset.open === 'true') ? close() : open(true)
+          syncHeights()
+          setTimeout(syncHeights, 380)
+        })
+
+        body.addEventListener('transitionend', (e) => {
+          if (e.propertyName !== 'max-height') return
+          syncHeights()
+        })
+
+        body.addEventListener('transitionend', (e) => {
+          if (e.propertyName !== 'max-height') return
+          syncHeights(true)
         })
 
         body.addEventListener('transitionend', (e) => {
@@ -5363,6 +5375,7 @@ if (sec.alert && reportState.alert) {
 
           sec.addEventListener('change', () => syncHeights())
           sec.addEventListener('input', () => syncHeights())
+
         }
 
       })
