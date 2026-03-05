@@ -5279,6 +5279,19 @@ if (sec.alert && reportState.alert) {
       })
     }
 
+    function refreshParentSections(sec) {
+      let parentBody = sec.parentElement ? sec.parentElement.closest('.csec__body') : null
+      while (parentBody) {
+        const parentSec = parentBody.closest('.csec')
+        if (!parentSec) break
+        const body = parentSec.querySelector(':scope > .csec__body')
+        if (body) {
+          body.style.maxHeight = (parentSec.dataset.open === 'true') ? (body.scrollHeight + 'px') : '0px'
+        }
+        parentBody = parentSec.parentElement ? parentSec.parentElement.closest('.csec__body') : null
+      }
+    }
+
     function initCollapsibleSections(root) {
       ;(root || document).querySelectorAll('.csec').forEach(sec => {
         if (sec.dataset.boundAccordion === '1') return
@@ -5289,8 +5302,11 @@ if (sec.alert && reportState.alert) {
         if (!head || !body) return
 
         const isReportSec = !!sec.closest('#tab-report')
-        const setMax = () => {
-          if (sec.dataset.open === 'true') body.style.maxHeight = body.scrollHeight + 'px'
+        const syncHeights = () => {
+          requestAnimationFrame(() => {
+            if (sec.dataset.open === 'true') body.style.maxHeight = body.scrollHeight + 'px'
+            refreshParentSections(sec)
+          })
         }
 
         const open = (animate = true) => {
@@ -5331,12 +5347,22 @@ if (sec.alert && reportState.alert) {
           ;(sec.dataset.open === 'true') ? close() : open(true)
         })
 
+        body.addEventListener('transitionend', (e) => {
+          if (e.propertyName !== 'max-height') return
+          syncHeights()
+        })
+
         if (!isReportSec) {
-          const mo = new MutationObserver(() => setMax())
+          const mo = new MutationObserver(() => syncHeights())
           mo.observe(body, { childList: true, subtree: true })
 
-          sec.addEventListener('change', () => requestAnimationFrame(setMax))
-          sec.addEventListener('input', () => requestAnimationFrame(setMax))
+          if (typeof ResizeObserver !== 'undefined') {
+            const ro = new ResizeObserver(() => syncHeights())
+            ro.observe(body)
+          }
+
+          sec.addEventListener('change', () => syncHeights())
+          sec.addEventListener('input', () => syncHeights())
         }
 
       })
