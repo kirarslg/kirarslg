@@ -5289,6 +5289,8 @@ if (sec.alert && reportState.alert) {
           body.style.maxHeight = (parentSec.dataset.open === 'true') ? (body.scrollHeight + 'px') : '0px'
         }
         parentBody = parentSec.parentElement ? parentSec.parentElement.closest('.csec__body') : null
+      }
+
     }
 
     function initCollapsibleSections(root) {
@@ -5306,7 +5308,6 @@ if (sec.alert && reportState.alert) {
             if (sec.dataset.open === 'true') body.style.maxHeight = body.scrollHeight + 'px'
             refreshParentSections(sec)
           })
-
         }
 
         const open = (animate = true) => {
@@ -5364,15 +5365,14 @@ if (sec.alert && reportState.alert) {
           syncHeights()
         })
 
+        body.addEventListener('transitionend', (e) => {
+          if (e.propertyName !== 'max-height') return
+          syncHeights()
+        })
+
         if (!isReportSec) {
           const mo = new MutationObserver(() => syncHeights())
           mo.observe(body, { childList: true, subtree: true })
-
-          if (typeof ResizeObserver !== 'undefined') {
-            const ro = new ResizeObserver(() => syncHeights())
-            ro.observe(body)
-          }
-
           sec.addEventListener('change', () => syncHeights())
           sec.addEventListener('input', () => syncHeights())
 
