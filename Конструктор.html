@@ -3676,12 +3676,6 @@ ${wrapClose}`
           <tr>
             <td class="px-24" style="padding: ${bodyTopPadding} 24px 0 24px; font-family: 'SB Sans Text'; color:${escapeHtml(data.textColor)}; font-size:14px; line-height:1.6;">
               ${greetingBlock}
-              ${builderBody
-          ? `${builderBody}${cta ? `
-              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
-                ${cta}
-              </table>` : ''}`
-          : `
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                 <tr>
                   <td style="padding:0 0 14px 0; color:${escapeHtml(
@@ -3706,8 +3700,9 @@ ${wrapClose}`
             data.textColor,
           )};">
                 ${cta}
-              </table>`
-        }
+              </table>
+
+              ${builderBody || ''}
 
               ${signatureSection}
             </td>
@@ -5279,6 +5274,19 @@ if (sec.alert && reportState.alert) {
       })
     }
 
+    function refreshParentSections(sec) {
+      let parentBody = sec.parentElement ? sec.parentElement.closest('.csec__body') : null
+      while (parentBody) {
+        const parentSec = parentBody.closest('.csec')
+        if (!parentSec) break
+        const body = parentSec.querySelector(':scope > .csec__body')
+        if (body) {
+          body.style.maxHeight = (parentSec.dataset.open === 'true') ? (body.scrollHeight + 'px') : '0px'
+        }
+        parentBody = parentSec.parentElement ? parentSec.parentElement.closest('.csec__body') : null
+      }
+    }
+
     function initCollapsibleSections(root) {
       ;(root || document).querySelectorAll('.csec').forEach(sec => {
         if (sec.dataset.boundAccordion === '1') return
@@ -5289,8 +5297,11 @@ if (sec.alert && reportState.alert) {
         if (!head || !body) return
 
         const isReportSec = !!sec.closest('#tab-report')
-        const setMax = () => {
-          if (sec.dataset.open === 'true') body.style.maxHeight = body.scrollHeight + 'px'
+        const syncHeights = () => {
+          requestAnimationFrame(() => {
+            if (sec.dataset.open === 'true') body.style.maxHeight = body.scrollHeight + 'px'
+            refreshParentSections(sec)
+          })
         }
 
         const open = (animate = true) => {
@@ -5331,12 +5342,17 @@ if (sec.alert && reportState.alert) {
           ;(sec.dataset.open === 'true') ? close() : open(true)
         })
 
+        body.addEventListener('transitionend', (e) => {
+          if (e.propertyName !== 'max-height') return
+          syncHeights()
+        })
+
         if (!isReportSec) {
-          const mo = new MutationObserver(() => setMax())
+          const mo = new MutationObserver(() => syncHeights())
           mo.observe(body, { childList: true, subtree: true })
 
-          sec.addEventListener('change', () => requestAnimationFrame(setMax))
-          sec.addEventListener('input', () => requestAnimationFrame(setMax))
+          sec.addEventListener('change', () => syncHeights())
+          sec.addEventListener('input', () => syncHeights())
         }
 
       })
