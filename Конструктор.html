@@ -5279,12 +5279,23 @@ if (sec.alert && reportState.alert) {
       })
     }
 
-    function refreshSectionAndParents(sec) {
+    function refreshSectionAndParents(sec, disableTransition = false) {
       let cur = sec
       while (cur && cur.classList && cur.classList.contains('csec')) {
         const body = cur.querySelector(':scope > .csec__body')
         if (body) {
-          body.style.maxHeight = (cur.dataset.open === 'true') ? (body.scrollHeight + 'px') : '0px'
+          const apply = () => {
+            body.style.maxHeight = (cur.dataset.open === 'true') ? (body.scrollHeight + 'px') : '0px'
+          }
+
+          if (!disableTransition) apply()
+          else {
+            const prevTransition = body.style.transition
+            body.style.transition = 'none'
+            apply()
+            requestAnimationFrame(() => { body.style.transition = prevTransition })
+          }
+
         }
 
         const parentBody = cur.parentElement ? cur.parentElement.closest('.csec__body') : null
@@ -5302,8 +5313,8 @@ if (sec.alert && reportState.alert) {
         if (!head || !body) return
 
         const isReportSec = !!sec.closest('#tab-report')
-        const setMax = () => {
-          if (sec.dataset.open === 'true') body.style.maxHeight = body.scrollHeight + 'px'
+        const syncHeights = (disableTransition = false) => {
+          requestAnimationFrame(() => refreshSectionAndParents(sec, disableTransition))
         }
 
         const syncHeights = () => {
@@ -5355,12 +5366,17 @@ if (sec.alert && reportState.alert) {
           syncHeights()
         })
 
+        body.addEventListener('transitionend', (e) => {
+          if (e.propertyName !== 'max-height') return
+          syncHeights(true)
+        })
+
         if (!isReportSec) {
-          const mo = new MutationObserver(() => setMax())
+          const mo = new MutationObserver(() => syncHeights(true))
           mo.observe(body, { childList: true, subtree: true })
 
-          sec.addEventListener('change', () => requestAnimationFrame(setMax))
-          sec.addEventListener('input', () => requestAnimationFrame(setMax))
+          sec.addEventListener('change', () => syncHeights(true))
+          sec.addEventListener('input', () => syncHeights(true))
         }
 
       })
