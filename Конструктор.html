@@ -1703,6 +1703,10 @@
                 <button type="button" class="builder-tab" data-tab="layouts">Структура</button>
               </div>
               <div class="builder-panel is-active" data-panel="elements">
+                <button type="button" class="builder-block-btn" draggable="true" data-block-type="greeting">
+                  <span class="icon">👋</span>
+                  <span>Приветствие</span>
+                </button>
                 <button type="button" class="builder-block-btn" draggable="true" data-block-type="heading">
                   <span class="icon">H</span>
                   <span>Заголовок</span>
@@ -2378,11 +2382,15 @@
       return col
     }
 
-    function addBlocksToColumn(columnId, blocks) {
+    function addBlocksToColumn(columnId, blocks, insertIndex) {
       if (!blocks || !blocks.length) return
       let col = columnId ? findBuilderColumn(columnId) : null
       if (!col) col = getActiveOrFallbackColumn()
-      col.blocks = col.blocks.concat(blocks)
+      if (typeof insertIndex === 'number' && insertIndex >= 0) {
+        col.blocks.splice(insertIndex, 0, ...blocks)
+      } else {
+        col.blocks = col.blocks.concat(blocks)
+      }
       builderActiveColumnId = col.id
       renderBuilder()
       render()
@@ -2390,6 +2398,13 @@
 
     function createBlock(type, extra) {
       switch (type) {
+        case 'greeting':
+          return {
+            id: nextBuilderId('gr'),
+            type: 'greeting',
+            text: el('greeting')?.value || 'Здравствуйте!',
+            linkedField: 'greeting',
+          }
         case 'heading':
           return {
             id: nextBuilderId('h'),
@@ -2400,8 +2415,8 @@
           return {
             id: nextBuilderId('p'),
             type: 'text',
-            text:
-              'Абзац текста. Дважды кликните, чтобы отредактировать содержимое.',
+            text: el('intro')?.value || 'Основной текст письма',
+            linkedField: 'intro',
           }
         case 'button':
           return {
@@ -2433,6 +2448,22 @@
       }
     }
 
+
+
+    function addBlockByType(type, columnId) {
+      const block = createBlock(type)
+      if (!block) return
+
+      let insertIndex = null
+      if (type === 'heading') {
+        const col = columnId ? findBuilderColumn(columnId) : getActiveOrFallbackColumn()
+        const blocks = (col && col.blocks) ? col.blocks : []
+        const introIdx = blocks.findIndex((b) => b && b.linkedField === 'intro')
+        if (introIdx >= 0) insertIndex = introIdx
+      }
+
+      addBlocksToColumn(columnId, [block], insertIndex)
+    }
     async function handleBodyFiles(fileList, columnId) {
       const files = fileList ? Array.from(fileList) : []
       if (!files.length) return
@@ -2473,6 +2504,17 @@
       return null
     }
 
+    function hasBuilderBlock(predicate) {
+      for (const row of builderRows) {
+        for (const col of row.columns || []) {
+          for (const block of col.blocks || []) {
+            if (predicate(block)) return true
+          }
+        }
+      }
+      return false
+    }
+
     function renderBuilder() {
       const canvas = el('builderCanvas')
       if (!canvas) return
@@ -2494,16 +2536,22 @@
               const wrapOpen = `<div class="eb-block" draggable="true" data-block-wrap="true" data-block-id="${bid}" data-column-id="${col.id}"><button type="button" class="eb-remove" data-remove-block="${bid}" aria-label="Удалить блок">×</button>`
               const wrapClose = `</div>`
 
-              if (block.type === 'heading') {
+              if (block.type === 'greeting') {
+                const text = el('greeting')?.value || block.text || 'Здравствуйте!'
+                html += `${wrapOpen}
+  <div class="eb-text" data-block-id="${bid}">${escapeHtml(text).replaceAll('\n', '<br>')}</div>
+${wrapClose}`
+              } else if (block.type === 'heading') {
                 html += `${wrapOpen}
   <div class="eb-heading" data-block-id="${bid}" data-editable="true">${escapeHtml(
                   block.text || 'Текст заголовка',
                 ).replaceAll('\n', '<br>')}</div>
 ${wrapClose}`
               } else if (block.type === 'text') {
+                const text = block.linkedField === 'intro' ? (el('intro')?.value || '') : (block.text || '')
                 html += `${wrapOpen}
-  <div class="eb-text" data-block-id="${bid}" data-editable="true">${escapeHtml(
-                  block.text || '',
+  <div class="eb-text" data-block-id="${bid}"${block.linkedField ? '' : ' data-editable="true"'}>${escapeHtml(
+                  text,
                 ).replaceAll('\n', '<br>')}</div>
 ${wrapClose}`
               } else if (block.type === 'image') {
@@ -2748,8 +2796,7 @@ ${wrapClose}`
 
           const type = dt.getData('builder-block-type')
           if (type) {
-            const block = createBlock(type)
-            if (block) addBlocksToColumn(columnId, [block])
+            addBlockByType(type, columnId)
           }
         })
       }
@@ -2806,8 +2853,7 @@ ${wrapClose}`
             if (imageInput) imageInput.click()
             return
           }
-          const block = createBlock(type)
-          if (block) addBlocksToColumn(null, [block])
+          addBlockByType(type, null)
         })
       })
 
@@ -3200,6 +3246,15 @@ ${wrapClose}`
       const blocksToHtml = (blocks, ctx) =>
         (blocks || [])
           .map((block) => {
+            if (block.type === 'greeting') {
+              const greetingText = (data.greeting || block.text || '').trim()
+              if (!greetingText || data.hideGreeting) return ''
+              return `<tr>
+      <td style="padding:0 0 14px 0; color:${textColor}; font-size:14px; line-height:1.6;">
+        ${escapeHtml(greetingText)}
+      </td>
+    </tr>`
+            }
             if (block.type === 'heading') {
               return `<tr>
       <td style="padding: 18px 0 12px 0; font-size:18px; font-weight:600; color:${textColor};">
@@ -3208,9 +3263,10 @@ ${wrapClose}`
     </tr>`
             }
             if (block.type === 'text') {
+              const blockText = block.linkedField === 'intro' ? (data.intro || '') : (block.text || '')
               return `<tr>
       <td style="padding: 0 0 12px 0; font-size:14px; line-height:1.6; color:${textColor};">
-        ${richTextToHtml(block.text || '', linkStyle)}
+        ${richTextToHtml(blockText, linkStyle)}
       </td>
     </tr>`
             }
@@ -3586,7 +3642,10 @@ ${wrapClose}`
             </td>
           </tr>`
 
-      const greetingBlock = data.hideGreeting
+      const hasLinkedGreetingBlock = hasBuilderBlock((b) => b.type === 'greeting')
+      const hasLinkedIntroBlock = hasBuilderBlock((b) => b.type === 'text' && b.linkedField === 'intro')
+
+      const greetingBlock = (data.hideGreeting || hasLinkedGreetingBlock)
         ? ''
         : `<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"><tr><td style="padding:0 0 14px 0; color:${escapeHtml(data.textColor)};">${escapeHtml(data.greeting || '')}</td></tr></table>`
 
@@ -3677,12 +3736,13 @@ ${wrapClose}`
             <td class="px-24" style="padding: ${bodyTopPadding} 24px 0 24px; font-family: 'SB Sans Text'; color:${escapeHtml(data.textColor)}; font-size:14px; line-height:1.6;">
               ${greetingBlock}
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+
                 <tr>
                   <td style="padding:0 0 14px 0; color:${escapeHtml(
             data.textColor,
           )};">${introHtml}</td>
                 </tr>
-              </table>
+              </table>`}
 
               ${bullets
             ? `
@@ -3840,8 +3900,37 @@ ${wrapClose}`
       }
     }
 
+    function syncLinkedBuilderBlocks() {
+      const intro = (el('intro')?.value || '').trim()
+      const greeting = (el('greeting')?.value || '').trim()
+      let changed = false
+
+      for (const row of builderRows) {
+        for (const col of row.columns || []) {
+          for (const block of col.blocks || []) {
+            if (block.type === 'greeting' && block.linkedField === 'greeting') {
+              if ((block.text || '') !== greeting) {
+                block.text = greeting
+                changed = true
+              }
+            }
+            if (block.type === 'text' && block.linkedField === 'intro') {
+              if ((block.text || '') !== intro) {
+                block.text = intro
+                changed = true
+              }
+            }
+          }
+        }
+      }
+
+      return changed
+    }
+
     function render() {
       try { window.__syncHeaderTextControls && window.__syncHeaderTextControls() } catch (e) {}
+      const linkedChanged = syncLinkedBuilderBlocks()
+      if (linkedChanged) renderBuilder()
       const data = collectData()
       const html = buildEmailHTML(data)
 
