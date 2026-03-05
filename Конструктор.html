@@ -5295,6 +5295,7 @@ if (sec.alert && reportState.alert) {
             apply()
             requestAnimationFrame(() => { body.style.transition = prevTransition })
           }
+
         }
 
         const parentBody = cur.parentElement ? cur.parentElement.closest('.csec__body') : null
@@ -5314,6 +5315,10 @@ if (sec.alert && reportState.alert) {
         const isReportSec = !!sec.closest('#tab-report')
         const syncHeights = (disableTransition = false) => {
           requestAnimationFrame(() => refreshSectionAndParents(sec, disableTransition))
+        }
+
+        const syncHeights = () => {
+          requestAnimationFrame(() => refreshSectionAndParents(sec))
         }
 
         const open = (animate = true) => {
@@ -5352,6 +5357,13 @@ if (sec.alert && reportState.alert) {
 
         head.addEventListener('click', () => {
           ;(sec.dataset.open === 'true') ? close() : open(true)
+          syncHeights()
+          setTimeout(syncHeights, 380)
+        })
+
+        body.addEventListener('transitionend', (e) => {
+          if (e.propertyName !== 'max-height') return
+          syncHeights()
         })
 
         body.addEventListener('transitionend', (e) => {
