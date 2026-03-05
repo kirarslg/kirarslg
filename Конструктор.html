@@ -5428,6 +5428,28 @@ if (sec.alert && reportState.alert) {
 
         head.addEventListener('click', () => {
           ;(sec.dataset.open === 'true') ? close() : open(true)
+          syncHeights()
+          setTimeout(syncHeights, 380)
+        })
+
+        body.addEventListener('transitionend', (e) => {
+          if (e.propertyName !== 'max-height') return
+          syncHeights()
+        })
+
+        body.addEventListener('transitionend', (e) => {
+          if (e.propertyName !== 'max-height') return
+          syncHeights(true)
+        })
+
+        body.addEventListener('transitionend', (e) => {
+          if (e.propertyName !== 'max-height') return
+          syncHeights()
+        })
+
+        body.addEventListener('transitionend', (e) => {
+          if (e.propertyName !== 'max-height') return
+          syncHeights()
         })
 
         body.addEventListener('transitionend', (e) => {
@@ -5438,9 +5460,11 @@ if (sec.alert && reportState.alert) {
         if (!isReportSec) {
           const mo = new MutationObserver(() => syncHeights())
           mo.observe(body, { childList: true, subtree: true })
-
           sec.addEventListener('change', () => syncHeights())
           sec.addEventListener('input', () => syncHeights())
+          sec.addEventListener('change', () => syncHeights())
+          sec.addEventListener('input', () => syncHeights())
+
         }
 
       })
