@@ -1677,12 +1677,11 @@
                 <button type="button" class="builder-tab" data-tab="layouts">Структура</button>
               </div>
               <div class="builder-panel is-active" data-panel="elements">
-=
+
                 <button type="button" class="builder-block-btn" draggable="true" data-block-type="header">
                   <span class="icon">🖼</span>
                   <span>Шапка письма</span>
                 </button>
-
                 <button type="button" class="builder-block-btn" draggable="true" data-block-type="greeting">
                   <span class="icon">👋</span>
                   <span>Приветствие</span>
@@ -2390,7 +2389,6 @@
 
     function createBlock(type, extra) {
       switch (type) {
-
         case 'header':
           return {
             id: nextBuilderId('hdr'),
@@ -2569,7 +2567,6 @@ ${wrapClose}`
               } else if (block.type === 'heading') {
                 const c = clampHexColor(el('builderHeadingColorText')?.value || el('builderHeadingColor')?.value || '#111111', '#111111')
                 const sz = Math.max(12, Math.min(56, parseInt((el('builderHeadingSize')?.value || '22').trim(), 10) || 22))
-
                 html += `${wrapOpen}
   <div class="eb-heading" data-block-id="${bid}" data-editable="true" style="color:${escapeHtml(c)}; font-size:${sz}px;">${escapeHtml(
                   block.text || 'Текст заголовка',
@@ -3309,7 +3306,6 @@ ${wrapClose}`
             if (block.type === 'header') {
               return ''
             }
-
             if (block.type === 'greeting') {
               const greetingText = (data.greeting || block.text || '').trim()
               if (!greetingText || data.hideGreeting) return ''
@@ -3449,7 +3445,7 @@ ${wrapClose}`
       // Outlook-safe button: VML for (some) Outlook + table fallback for others.
       return `
     <tr>
-      <td align="${escapeHtml(btnAlign)}" bgcolor="${escapeHtml(padBg)}" style="background:${escapeHtml(padBg)}; padding: 18px 0 0 0;">
+      <td align="${escapeHtml(btnAlign)}" bgcolor="${escapeHtml(padBg)}" style="background:${escapeHtml(padBg)}; padding: 18px 0 14px 0;">
 
         <!--[if mso]>
         <v:roundrect
@@ -5516,6 +5512,11 @@ if (sec.alert && reportState.alert) {
         body.addEventListener('transitionend', (e) => {
           if (e.propertyName !== 'max-height') return
           syncHeights(true)
+        })
+
+        body.addEventListener('transitionend', (e) => {
+          if (e.propertyName !== 'max-height') return
+          syncHeights()
         })
 
         body.addEventListener('transitionend', (e) => {
