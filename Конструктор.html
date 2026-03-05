@@ -1677,10 +1677,12 @@
                 <button type="button" class="builder-tab" data-tab="layouts">Структура</button>
               </div>
               <div class="builder-panel is-active" data-panel="elements">
+=
                 <button type="button" class="builder-block-btn" draggable="true" data-block-type="header">
                   <span class="icon">🖼</span>
                   <span>Шапка письма</span>
                 </button>
+
                 <button type="button" class="builder-block-btn" draggable="true" data-block-type="greeting">
                   <span class="icon">👋</span>
                   <span>Приветствие</span>
@@ -2388,6 +2390,7 @@
 
     function createBlock(type, extra) {
       switch (type) {
+
         case 'header':
           return {
             id: nextBuilderId('hdr'),
@@ -2473,7 +2476,6 @@
 
       addBlocksToColumn(columnId, [block], insertIndex)
     }
-
     async function handleBodyFiles(fileList, columnId) {
       const files = fileList ? Array.from(fileList) : []
       if (!files.length) return
@@ -2567,6 +2569,7 @@ ${wrapClose}`
               } else if (block.type === 'heading') {
                 const c = clampHexColor(el('builderHeadingColorText')?.value || el('builderHeadingColor')?.value || '#111111', '#111111')
                 const sz = Math.max(12, Math.min(56, parseInt((el('builderHeadingSize')?.value || '22').trim(), 10) || 22))
+
                 html += `${wrapOpen}
   <div class="eb-heading" data-block-id="${bid}" data-editable="true" style="color:${escapeHtml(c)}; font-size:${sz}px;">${escapeHtml(
                   block.text || 'Текст заголовка',
@@ -3306,11 +3309,13 @@ ${wrapClose}`
             if (block.type === 'header') {
               return ''
             }
+
             if (block.type === 'greeting') {
               const greetingText = (data.greeting || block.text || '').trim()
               if (!greetingText || data.hideGreeting) return ''
               return `<tr>
       <td style="padding:0 0 14px 0; color:${greetingColor}; font-size:${greetingSize}px; line-height:1.6;">
+
         ${escapeHtml(greetingText)}
       </td>
     </tr>`
@@ -5499,6 +5504,33 @@ if (sec.alert && reportState.alert) {
 
         head.addEventListener('click', () => {
           ;(sec.dataset.open === 'true') ? close() : open(true)
+          syncHeights()
+          setTimeout(syncHeights, 380)
+        })
+
+        body.addEventListener('transitionend', (e) => {
+          if (e.propertyName !== 'max-height') return
+          syncHeights()
+        })
+
+        body.addEventListener('transitionend', (e) => {
+          if (e.propertyName !== 'max-height') return
+          syncHeights(true)
+        })
+
+        body.addEventListener('transitionend', (e) => {
+          if (e.propertyName !== 'max-height') return
+          syncHeights()
+        })
+
+        body.addEventListener('transitionend', (e) => {
+          if (e.propertyName !== 'max-height') return
+          syncHeights()
+        })
+
+        body.addEventListener('transitionend', (e) => {
+          if (e.propertyName !== 'max-height') return
+          syncHeights()
         })
 
         body.addEventListener('transitionend', (e) => {
@@ -5509,9 +5541,14 @@ if (sec.alert && reportState.alert) {
         if (!isReportSec) {
           const mo = new MutationObserver(() => syncHeights())
           mo.observe(body, { childList: true, subtree: true })
+          sec.addEventListener('change', () => syncHeights())
+          sec.addEventListener('input', () => syncHeights())
+          sec.addEventListener('change', () => syncHeights())
+          sec.addEventListener('input', () => syncHeights())
 
           sec.addEventListener('change', () => syncHeights())
           sec.addEventListener('input', () => syncHeights())
+
         }
 
       })
