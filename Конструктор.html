@@ -5279,6 +5279,19 @@ if (sec.alert && reportState.alert) {
       })
     }
 
+    function refreshSectionAndParents(sec) {
+      let cur = sec
+      while (cur && cur.classList && cur.classList.contains('csec')) {
+        const body = cur.querySelector(':scope > .csec__body')
+        if (body) {
+          body.style.maxHeight = (cur.dataset.open === 'true') ? (body.scrollHeight + 'px') : '0px'
+        }
+
+        const parentBody = cur.parentElement ? cur.parentElement.closest('.csec__body') : null
+        cur = parentBody ? parentBody.closest('.csec') : null
+      }
+    }
+
     function initCollapsibleSections(root) {
       ;(root || document).querySelectorAll('.csec').forEach(sec => {
         if (sec.dataset.boundAccordion === '1') return
@@ -5291,6 +5304,10 @@ if (sec.alert && reportState.alert) {
         const isReportSec = !!sec.closest('#tab-report')
         const setMax = () => {
           if (sec.dataset.open === 'true') body.style.maxHeight = body.scrollHeight + 'px'
+        }
+
+        const syncHeights = () => {
+          requestAnimationFrame(() => refreshSectionAndParents(sec))
         }
 
         const open = (animate = true) => {
@@ -5329,6 +5346,13 @@ if (sec.alert && reportState.alert) {
 
         head.addEventListener('click', () => {
           ;(sec.dataset.open === 'true') ? close() : open(true)
+          syncHeights()
+          setTimeout(syncHeights, 380)
+        })
+
+        body.addEventListener('transitionend', (e) => {
+          if (e.propertyName !== 'max-height') return
+          syncHeights()
         })
 
         if (!isReportSec) {
