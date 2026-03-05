@@ -5260,6 +5260,7 @@ if (sec.alert && reportState.alert) {
         rowPr.remove()
       }
 
+
       reportBody.dataset.accordionReady = '1'
     }
 
@@ -5281,6 +5282,7 @@ if (sec.alert && reportState.alert) {
         const body = sec.querySelector('.csec__body')
         if (!head || !body) return
 
+        const isReportSec = !!sec.closest('#tab-report')
         const setMax = () => {
           if (sec.dataset.open === 'true') body.style.maxHeight = body.scrollHeight + 'px'
         }
@@ -5288,7 +5290,9 @@ if (sec.alert && reportState.alert) {
         const open = (animate = true) => {
           sec.dataset.open = 'true'
           head.setAttribute('aria-expanded', 'true')
-          if (!animate) {
+          if (!animate || isReportSec) {
+
+
             const prevTransition = body.style.transition
             body.style.transition = 'none'
             body.style.maxHeight = body.scrollHeight + 'px'
@@ -5302,6 +5306,14 @@ if (sec.alert && reportState.alert) {
         const close = () => {
           sec.dataset.open = 'false'
           head.setAttribute('aria-expanded', 'false')
+          if (isReportSec) {
+            const prevTransition = body.style.transition
+            body.style.transition = 'none'
+            body.style.maxHeight = '0px'
+            requestAnimationFrame(() => { body.style.transition = prevTransition })
+            return
+          }
+
           body.style.maxHeight = body.scrollHeight + 'px'
           requestAnimationFrame(() => { body.style.maxHeight = '0px' })
         }
@@ -5313,11 +5325,14 @@ if (sec.alert && reportState.alert) {
           ;(sec.dataset.open === 'true') ? close() : open(true)
         })
 
-        const mo = new MutationObserver(() => setMax())
-        mo.observe(body, { childList: true, subtree: true })
+        if (!isReportSec) {
+          const mo = new MutationObserver(() => setMax())
+          mo.observe(body, { childList: true, subtree: true })
 
-        sec.addEventListener('change', () => requestAnimationFrame(setMax))
-        sec.addEventListener('input', () => requestAnimationFrame(setMax))
+          sec.addEventListener('change', () => requestAnimationFrame(setMax))
+          sec.addEventListener('input', () => requestAnimationFrame(setMax))
+        }
+
       })
     }
 
