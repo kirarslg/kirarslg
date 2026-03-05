@@ -1215,7 +1215,7 @@
         <section class="csec" data-open="true">
           <button class="csec__head" type="button" aria-expanded="true">
             <span class="csec__title">
-              <h3>Заголовок письма</h3>
+              <h3>Заголовок и приветствие</h3>
             </span>
 
             <span class="csec__right">
@@ -1227,41 +1227,37 @@
           </button>
 
           <div class="csec__body" role="region">
-            <!-- content -->
-            <div>
-              <label_min>Тема письма</label_min>
-              <input id="subject" placeholder="Например: Фоллоу-ап по встрече" />
-              <div class="checkline">
-                <input id="hideSubject" type="checkbox" />
-                <label for="hideSubject" style="margin: 0; font-size: 12px; color: #444">Не выводить тему в
-                  письме</label>
+            <div class="row">
+              <div>
+                <label>Размер заголовка (px)</label>
+                <input id="builderHeadingSize" placeholder="22" value="22" />
               </div>
-
-              <div class="row">
-                <div>
-                  <label>Имя получателя</label>
-                  <input id="recipientName" placeholder="Иван Иванов" />
-                </div>
-
-                <div>
-                  <label>Тон</label>
-                  <select id="tone">
-                    <option value="neutral" selected>Нейтральный</option>
-                    <option value="formal">Официальный</option>
-                    <option value="friendly">Дружелюбный</option>
-                    <option value="direct">Коротко/по делу</option>
-                  </select>
+              <div>
+                <label>Цвет заголовка</label>
+                <div class="colorline">
+                  <input id="builderHeadingColorText" placeholder="#111111" value="#111111" />
+                  <input type="color" id="builderHeadingColor" value="#111111" style="width:30px; padding:0; height:38px;" />
                 </div>
               </div>
-
-              <label>Приветствие (если пусто — по тону)</label>
-              <input id="greeting" placeholder="Здравствуйте, Иван Иванов!" />
-
-              <div class="checkline">
-                <input id="hideGreeting" type="checkbox" />
-                <label for="hideGreeting" style="margin: 0; font-size: 12px; color: #444">Не выводить приветствие в
-                  письме</label>
+              <div>
+                <label>Размер приветствия (px)</label>
+                <input id="builderGreetingSize" placeholder="14" value="14" />
               </div>
+              <div>
+                <label>Цвет приветствия</label>
+                <div class="colorline">
+                  <input id="builderGreetingColorText" placeholder="#111111" value="#111111" />
+                  <input type="color" id="builderGreetingColor" value="#111111" style="width:30px; padding:0; height:38px;" />
+                </div>
+              </div>
+            </div>
+            <div style="display:none;">
+              <input id="subject" value="" />
+              <input id="hideSubject" type="checkbox" />
+              <input id="recipientName" value="коллега" />
+              <select id="tone"><option value="neutral" selected>Нейтральный</option><option value="formal">Официальный</option><option value="friendly">Дружелюбный</option><option value="direct">Коротко/по делу</option></select>
+              <input id="greeting" value="" />
+              <input id="hideGreeting" type="checkbox" />
             </div>
           </div>
         </section>
@@ -1382,27 +1378,8 @@
                 <input id="headerAlt" placeholder="Заголовок" />
               </div>
             </div>
-          </div>
-        </section>
 
-        <hr style="border: none; border-top: 1px solid #dce0eb00; margin-bottom: 4px; margin-top: 4px" />
-
-        <section class="csec" data-open="true">
-          <button class="csec__head" type="button" aria-expanded="true">
-            <span class="csec__title">
-              <h3>Текст в шапке</h3>
-            </span>
-
-            <span class="csec__right">
-              <svg class="csec__chev" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M7 10l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                  stroke-linejoin="round" />
-              </svg>
-            </span>
-          </button>
-
-          <div class="csec__body" role="region">
-            <!-- content -->
+            <hr style="border: none; border-top: 1px solid #dce0eb00; margin: 14px 0 8px" />
             <div style="flex: 1;">
               <label class="check">
                 <input type="checkbox" id="headerTitleEnabled" />
@@ -1475,11 +1452,8 @@
                 </div>
               </div>
             </div>
-
           </div>
         </section>
-
-
 
         <hr style="border: none; border-top: 1px solid #dce0eb00; margin-bottom: 4px; margin-top: 4px" />
 
@@ -1703,6 +1677,14 @@
                 <button type="button" class="builder-tab" data-tab="layouts">Структура</button>
               </div>
               <div class="builder-panel is-active" data-panel="elements">
+                <button type="button" class="builder-block-btn" draggable="true" data-block-type="header">
+                  <span class="icon">🖼</span>
+                  <span>Шапка письма</span>
+                </button>
+                <button type="button" class="builder-block-btn" draggable="true" data-block-type="greeting">
+                  <span class="icon">👋</span>
+                  <span>Приветствие</span>
+                </button>
                 <button type="button" class="builder-block-btn" draggable="true" data-block-type="heading">
                   <span class="icon">H</span>
                   <span>Заголовок</span>
@@ -2149,6 +2131,7 @@
     let builderIdCounter = 1
     let builderImageEditTarget = null
     let builderActiveColumnId = null
+    let headerReplaceMode = false
 
     function pruneEmptyBuilderRows() {
       if (!builderRows || builderRows.length <= 1) return
@@ -2220,10 +2203,21 @@
       })
 
       // Update chosen filenames and load images
-      fileInput.addEventListener('change', () => {
-        if (fileInput.files && fileInput.files.length) {
-          handleHeaderFiles(fileInput.files)
+      fileInput.addEventListener('change', async () => {
+        const files = fileInput.files ? Array.from(fileInput.files) : []
+        if (files.length) {
+          if (headerReplaceMode) {
+            headerImages = []
+            const first = files[0]
+            if (first) {
+              await handleHeaderFiles([first])
+            }
+            headerReplaceMode = false
+            return
+          }
+          await handleHeaderFiles(files)
         } else {
+          if (headerReplaceMode) headerReplaceMode = false
           headerImages = []
           updateHeaderImagesInfo()
           render()
@@ -2378,11 +2372,15 @@
       return col
     }
 
-    function addBlocksToColumn(columnId, blocks) {
+    function addBlocksToColumn(columnId, blocks, insertIndex) {
       if (!blocks || !blocks.length) return
       let col = columnId ? findBuilderColumn(columnId) : null
       if (!col) col = getActiveOrFallbackColumn()
-      col.blocks = col.blocks.concat(blocks)
+      if (typeof insertIndex === 'number' && insertIndex >= 0) {
+        col.blocks.splice(insertIndex, 0, ...blocks)
+      } else {
+        col.blocks = col.blocks.concat(blocks)
+      }
       builderActiveColumnId = col.id
       renderBuilder()
       render()
@@ -2390,6 +2388,18 @@
 
     function createBlock(type, extra) {
       switch (type) {
+        case 'header':
+          return {
+            id: nextBuilderId('hdr'),
+            type: 'header',
+          }
+        case 'greeting':
+          return {
+            id: nextBuilderId('gr'),
+            type: 'greeting',
+            text: el('greeting')?.value || 'Здравствуйте!',
+            linkedField: 'greeting',
+          }
         case 'heading':
           return {
             id: nextBuilderId('h'),
@@ -2400,8 +2410,8 @@
           return {
             id: nextBuilderId('p'),
             type: 'text',
-            text:
-              'Абзац текста. Дважды кликните, чтобы отредактировать содержимое.',
+            text: el('intro')?.value || 'Основной текст письма',
+            linkedField: 'intro',
           }
         case 'button':
           return {
@@ -2431,6 +2441,37 @@
         default:
           return null
       }
+    }
+
+
+
+    function addBlockByType(type, columnId) {
+      if (type === 'header') {
+        if (hasBuilderBlock((b) => b.type === 'header')) {
+          renderBuilder()
+          return
+        }
+        ensureDefaultBuilderRow()
+        const firstCol = builderRows[0] && builderRows[0].columns ? builderRows[0].columns[0] : null
+        if (!firstCol) return
+        const block = createBlock(type)
+        if (!block) return
+        addBlocksToColumn(firstCol.id, [block], 0)
+        return
+      }
+
+      const block = createBlock(type)
+      if (!block) return
+
+      let insertIndex = null
+      if (type === 'heading') {
+        const col = columnId ? findBuilderColumn(columnId) : getActiveOrFallbackColumn()
+        const blocks = (col && col.blocks) ? col.blocks : []
+        const introIdx = blocks.findIndex((b) => b && b.linkedField === 'intro')
+        if (introIdx >= 0) insertIndex = introIdx
+      }
+
+      addBlocksToColumn(columnId, [block], insertIndex)
     }
 
     async function handleBodyFiles(fileList, columnId) {
@@ -2473,6 +2514,17 @@
       return null
     }
 
+    function hasBuilderBlock(predicate) {
+      for (const row of builderRows) {
+        for (const col of row.columns || []) {
+          for (const block of col.blocks || []) {
+            if (predicate(block)) return true
+          }
+        }
+      }
+      return false
+    }
+
     function renderBuilder() {
       const canvas = el('builderCanvas')
       if (!canvas) return
@@ -2494,16 +2546,37 @@
               const wrapOpen = `<div class="eb-block" draggable="true" data-block-wrap="true" data-block-id="${bid}" data-column-id="${col.id}"><button type="button" class="eb-remove" data-remove-block="${bid}" aria-label="Удалить блок">×</button>`
               const wrapClose = `</div>`
 
-              if (block.type === 'heading') {
+              if (block.type === 'header') {
+                const src = (headerImages && headerImages[0] && headerImages[0].src) ? headerImages[0].src : safeUrl(el('headerImageUrl')?.value || '')
                 html += `${wrapOpen}
-  <div class="eb-heading" data-block-id="${bid}" data-editable="true">${escapeHtml(
+  <div class="eb-image" data-block-id="${bid}" style="padding:8px; border:1px dashed #9fb3cf; background:#f5f8ff;">
+    ${src ? `<img src="${escapeHtml(src)}" alt="Шапка" style="max-height:120px; object-fit:cover;">` : '<span>Шапка письма: выберите изображение с компьютера</span>'}
+    <div style="display:flex; gap:8px; margin-top:8px;">
+      <button type="button" class="secondary" data-header-upload="1">${src ? 'Заменить' : 'Добавить'}</button>
+      <button type="button" class="secondary" data-header-remove="1" ${src ? '' : 'disabled'}>Удалить</button>
+    </div>
+  </div>
+${wrapClose}`
+              } else if (block.type === 'greeting') {
+                const text = el('greeting')?.value || block.text || 'Здравствуйте!'
+                const c = clampHexColor(el('builderGreetingColorText')?.value || el('builderGreetingColor')?.value || '#111111', '#111111')
+                const sz = Math.max(10, Math.min(40, parseInt((el('builderGreetingSize')?.value || '14').trim(), 10) || 14))
+                html += `${wrapOpen}
+  <div class="eb-text" data-block-id="${bid}" style="color:${escapeHtml(c)}; font-size:${sz}px;">${escapeHtml(text).replaceAll('\n', '<br>')}</div>
+${wrapClose}`
+              } else if (block.type === 'heading') {
+                const c = clampHexColor(el('builderHeadingColorText')?.value || el('builderHeadingColor')?.value || '#111111', '#111111')
+                const sz = Math.max(12, Math.min(56, parseInt((el('builderHeadingSize')?.value || '22').trim(), 10) || 22))
+                html += `${wrapOpen}
+  <div class="eb-heading" data-block-id="${bid}" data-editable="true" style="color:${escapeHtml(c)}; font-size:${sz}px;">${escapeHtml(
                   block.text || 'Текст заголовка',
                 ).replaceAll('\n', '<br>')}</div>
 ${wrapClose}`
               } else if (block.type === 'text') {
+                const text = block.linkedField === 'intro' ? (el('intro')?.value || '') : (block.text || '')
                 html += `${wrapOpen}
-  <div class="eb-text" data-block-id="${bid}" data-editable="true">${escapeHtml(
-                  block.text || '',
+  <div class="eb-text" data-block-id="${bid}"${block.linkedField ? '' : ' data-editable="true"'}>${escapeHtml(
+                  text,
                 ).replaceAll('\n', '<br>')}</div>
 ${wrapClose}`
               } else if (block.type === 'image') {
@@ -2611,6 +2684,32 @@ ${wrapClose}`
 
           renderBuilder()
           render()
+        })
+
+        // Header block actions
+        canvas.addEventListener('click', (e) => {
+          const up = e.target && e.target.closest && e.target.closest('[data-header-upload]')
+          if (up) {
+            e.preventDefault()
+            e.stopPropagation()
+            const fileInput = el('headerImageFile')
+            if (fileInput) {
+              headerReplaceMode = true
+              fileInput.click()
+            }
+            return
+          }
+          const rm = e.target && e.target.closest && e.target.closest('[data-header-remove]')
+          if (rm) {
+            e.preventDefault()
+            e.stopPropagation()
+            headerImages = []
+            const urlInput = el('headerImageUrl')
+            if (urlInput) urlInput.value = ''
+            updateHeaderImagesInfo()
+            renderBuilder()
+            render()
+          }
         })
 
         // Set active column (for "Elements" clicks) on any click inside a column
@@ -2748,8 +2847,7 @@ ${wrapClose}`
 
           const type = dt.getData('builder-block-type')
           if (type) {
-            const block = createBlock(type)
-            if (block) addBlocksToColumn(columnId, [block])
+            addBlockByType(type, columnId)
           }
         })
       }
@@ -2806,8 +2904,7 @@ ${wrapClose}`
             if (imageInput) imageInput.click()
             return
           }
-          const block = createBlock(type)
-          if (block) addBlocksToColumn(null, [block])
+          addBlockByType(type, null)
         })
       })
 
@@ -3054,6 +3151,8 @@ ${wrapClose}`
       const pairs = [
         ['headerTitleColor', 'headerTitleColorText'],
         ['headerDescColor', 'headerDescColorText'],
+        ['builderHeadingColor', 'builderHeadingColorText'],
+        ['builderGreetingColor', 'builderGreetingColorText'],
       ]
 
       let rafId = 0
@@ -3191,6 +3290,10 @@ ${wrapClose}`
       const linkColor = escapeHtml(data.linkColor || '#0b57d0')
       const underline = data.linkUnderline === 'none' ? 'none' : 'underline'
       const linkStyle = `color:${linkColor}; text-decoration:${underline};`
+      const headingSize = Math.max(12, Math.min(56, Number(data.builderHeadingSize) || 22))
+      const headingColor = escapeHtml(data.builderHeadingColor || data.textColor || '#111111')
+      const greetingSize = Math.max(10, Math.min(40, Number(data.builderGreetingSize) || 14))
+      const greetingColor = escapeHtml(data.builderGreetingColor || data.textColor || '#111111')
 
       const BODY_PAD = 24
       const INNER_GUTTER = 8
@@ -3200,17 +3303,30 @@ ${wrapClose}`
       const blocksToHtml = (blocks, ctx) =>
         (blocks || [])
           .map((block) => {
+            if (block.type === 'header') {
+              return ''
+            }
+            if (block.type === 'greeting') {
+              const greetingText = (data.greeting || block.text || '').trim()
+              if (!greetingText || data.hideGreeting) return ''
+              return `<tr>
+      <td style="padding:0 0 14px 0; color:${greetingColor}; font-size:${greetingSize}px; line-height:1.6;">
+        ${escapeHtml(greetingText)}
+      </td>
+    </tr>`
+            }
             if (block.type === 'heading') {
               return `<tr>
-      <td style="padding: 18px 0 12px 0; font-size:18px; font-weight:600; color:${textColor};">
+      <td style="padding: 18px 0 12px 0; font-size:${headingSize}px; font-weight:600; color:${headingColor}; line-height:1.3;">
         ${escapeHtml(block.text || 'Заголовок')}
       </td>
     </tr>`
             }
             if (block.type === 'text') {
+              const blockText = block.linkedField === 'intro' ? (data.intro || '') : (block.text || '')
               return `<tr>
       <td style="padding: 0 0 12px 0; font-size:14px; line-height:1.6; color:${textColor};">
-        ${richTextToHtml(block.text || '', linkStyle)}
+        ${richTextToHtml(blockText, linkStyle)}
       </td>
     </tr>`
             }
@@ -3586,7 +3702,10 @@ ${wrapClose}`
             </td>
           </tr>`
 
-      const greetingBlock = data.hideGreeting
+      const hasLinkedGreetingBlock = hasBuilderBlock((b) => b.type === 'greeting')
+      const hasLinkedIntroBlock = hasBuilderBlock((b) => b.type === 'text' && b.linkedField === 'intro')
+
+      const greetingBlock = (data.hideGreeting || hasLinkedGreetingBlock)
         ? ''
         : `<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"><tr><td style="padding:0 0 14px 0; color:${escapeHtml(data.textColor)};">${escapeHtml(data.greeting || '')}</td></tr></table>`
 
@@ -3676,19 +3795,13 @@ ${wrapClose}`
           <tr>
             <td class="px-24" style="padding: ${bodyTopPadding} 24px 0 24px; font-family: 'SB Sans Text'; color:${escapeHtml(data.textColor)}; font-size:14px; line-height:1.6;">
               ${greetingBlock}
-              ${builderBody
-          ? `${builderBody}${cta ? `
-              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
-                ${cta}
-              </table>` : ''}`
-          : `
-              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+              ${hasLinkedIntroBlock ? '' : `<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                 <tr>
                   <td style="padding:0 0 14px 0; color:${escapeHtml(
             data.textColor,
           )};">${introHtml}</td>
                 </tr>
-              </table>
+              </table>`}
 
               ${bullets
             ? `
@@ -3706,8 +3819,9 @@ ${wrapClose}`
             data.textColor,
           )};">
                 ${cta}
-              </table>`
-        }
+              </table>
+
+              ${builderBody || ''}
 
               ${signatureSection}
             </td>
@@ -3812,9 +3926,12 @@ ${wrapClose}`
         headerBlockAlignMode: el('headerBlockAlignMode')?.value || 'separate',
 
         headerTitleColor: clampHexColor((el('headerTitleColorText')?.value || el('headerTitleColor')?.value || '').trim(), clampHexColor(el('textColor').value, '#111111')),
-        headerDescColor: clampHexColor((el('headerDescColorText')?.value || el('headerDescColor')?.value || '').trim(), clampHexColor(el('textColor').value, '#111111')),
+                headerDescColor: clampHexColor((el('headerDescColorText')?.value || el('headerDescColor')?.value || '').trim(), clampHexColor(el('textColor').value, '#111111')),
 
-
+        builderHeadingSize: Math.max(12, Math.min(56, parseInt((el('builderHeadingSize')?.value || '22').trim(), 10) || 22)),
+        builderHeadingColor: clampHexColor((el('builderHeadingColorText')?.value || el('builderHeadingColor')?.value || '').trim(), '#111111'),
+        builderGreetingSize: Math.max(10, Math.min(40, parseInt((el('builderGreetingSize')?.value || '14').trim(), 10) || 14)),
+        builderGreetingColor: clampHexColor((el('builderGreetingColorText')?.value || el('builderGreetingColor')?.value || '').trim(), '#111111'),
 
         intro: el('intro').value.trim(),
         linkColor,
@@ -3845,8 +3962,37 @@ ${wrapClose}`
       }
     }
 
+    function syncLinkedBuilderBlocks() {
+      const intro = (el('intro')?.value || '').trim()
+      const greeting = (el('greeting')?.value || '').trim()
+      let changed = false
+
+      for (const row of builderRows) {
+        for (const col of row.columns || []) {
+          for (const block of col.blocks || []) {
+            if (block.type === 'greeting' && block.linkedField === 'greeting') {
+              if ((block.text || '') !== greeting) {
+                block.text = greeting
+                changed = true
+              }
+            }
+            if (block.type === 'text' && block.linkedField === 'intro') {
+              if ((block.text || '') !== intro) {
+                block.text = intro
+                changed = true
+              }
+            }
+          }
+        }
+      }
+
+      return changed
+    }
+
     function render() {
       try { window.__syncHeaderTextControls && window.__syncHeaderTextControls() } catch (e) {}
+      const linkedChanged = syncLinkedBuilderBlocks()
+      if (linkedChanged) renderBuilder()
       const data = collectData()
       const html = buildEmailHTML(data)
 
@@ -4075,13 +4221,21 @@ ${wrapClose}`
       'headerDescColorText',
       'withDivider',
       'withSignature',
+      'builderHeadingSize',
+      'builderHeadingColor',
+      'builderHeadingColorText',
+      'builderGreetingSize',
+      'builderGreetingColor',
+      'builderGreetingColorText',
     ]
     inputs.forEach((id) => {
-      el(id).addEventListener('input', () => {
+      const node = el(id)
+      if (!node) return
+      node.addEventListener('input', () => {
         clearTimeout(t)
         t = setTimeout(render, 250)
       })
-      el(id).addEventListener('change', () => {
+      node.addEventListener('change', () => {
         clearTimeout(t)
         t = setTimeout(render, 0)
       })
@@ -5279,6 +5433,19 @@ if (sec.alert && reportState.alert) {
       })
     }
 
+    function refreshParentSections(sec) {
+      let parentBody = sec.parentElement ? sec.parentElement.closest('.csec__body') : null
+      while (parentBody) {
+        const parentSec = parentBody.closest('.csec')
+        if (!parentSec) break
+        const body = parentSec.querySelector(':scope > .csec__body')
+        if (body) {
+          body.style.maxHeight = (parentSec.dataset.open === 'true') ? (body.scrollHeight + 'px') : '0px'
+        }
+        parentBody = parentSec.parentElement ? parentSec.parentElement.closest('.csec__body') : null
+      }
+    }
+
     function initCollapsibleSections(root) {
       ;(root || document).querySelectorAll('.csec').forEach(sec => {
         if (sec.dataset.boundAccordion === '1') return
@@ -5289,8 +5456,11 @@ if (sec.alert && reportState.alert) {
         if (!head || !body) return
 
         const isReportSec = !!sec.closest('#tab-report')
-        const setMax = () => {
-          if (sec.dataset.open === 'true') body.style.maxHeight = body.scrollHeight + 'px'
+        const syncHeights = () => {
+          requestAnimationFrame(() => {
+            if (sec.dataset.open === 'true') body.style.maxHeight = body.scrollHeight + 'px'
+            refreshParentSections(sec)
+          })
         }
 
         const open = (animate = true) => {
@@ -5331,12 +5501,17 @@ if (sec.alert && reportState.alert) {
           ;(sec.dataset.open === 'true') ? close() : open(true)
         })
 
+        body.addEventListener('transitionend', (e) => {
+          if (e.propertyName !== 'max-height') return
+          syncHeights()
+        })
+
         if (!isReportSec) {
-          const mo = new MutationObserver(() => setMax())
+          const mo = new MutationObserver(() => syncHeights())
           mo.observe(body, { childList: true, subtree: true })
 
-          sec.addEventListener('change', () => requestAnimationFrame(setMax))
-          sec.addEventListener('input', () => requestAnimationFrame(setMax))
+          sec.addEventListener('change', () => syncHeights())
+          sec.addEventListener('input', () => syncHeights())
         }
 
       })
