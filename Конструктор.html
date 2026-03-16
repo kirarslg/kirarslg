@@ -4850,6 +4850,7 @@ function numOr(v, fallback) {
       function buildReportHtml(opts) {
         opts = opts || {};
         const isPreview = !!opts.preview;
+        const emailSafe = !isPreview;
 
         // sync top inputs
         reportState.title = ui.title?.value || reportState.title;
@@ -4944,12 +4945,12 @@ body,table,td,p,div,span,a{font-family:'SB Sans Text' !important;}
   
 .rp-card h2{margin:0;padding:14px 16px;font-size:16px;font-weight:600;}
 .rp-card .body{padding:14px 16px 16px;overflow-x:auto;}
-.rp-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(var(--statW,160px),1fr));gap:10px;}
+.rp-stats{display:${emailSafe ? 'table' : 'grid'};width:100%;${emailSafe ? '' : 'grid-template-columns:repeat(auto-fit,minmax(var(--statW,160px),1fr));'}gap:10px;}
 
 .rp-stat{border:1px solid ${esc(reportState.ui.bodyBorder)};border-radius:10px;padding:10px 10px;background:#272727;text-align:center;min-height:var(--statH);display:flex;flex-direction:column;justify-content:center;margin:0;}
 .rp-stat .n{font-size:24px;font-weight:600;color:${esc(reportState.ui.statAccent)};margin-bottom:6px;}
 .rp-stat .l{font-size:12px;color:#cfd3da;opacity:.9;}
-.rp-actions{display:flex;gap:8px;margin-top:4px;flex-wrap:wrap;}
+.rp-actions{display:${emailSafe ? "block" : "flex"};gap:8px;margin-top:4px;flex-wrap:wrap;}
 .rp-btn{
   display:inline-block;
   padding:8px 12px;
@@ -4982,7 +4983,7 @@ body,table,td,p,div,span,a{font-family:'SB Sans Text' !important;}
 .rp-kv4 td{padding:12px 8px;border-top:1px solid ${esc(reportState.ui.bodyBorder)};vertical-align:top;}
 .rp-kv4 td.k{color:#8f949c;text-transform:uppercase;letter-spacing:.02em;font-size:11px;width:22%;font-weight:700;opacity:.6}
 .rp-kv4 td.v{color:#e7e9ee;font-size:13px;width:28%;}
-.rp-card-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:16px;}
+.rp-card-head{display:${emailSafe ? "table" : "flex"};width:100%;align-items:baseline;justify-content:space-between;gap:12px;margin:16px;}
 .rp-card-head h2{margin:0;font-size:16px;font-weight:600;padding:0;}
 .rp-right{color:#cfd3da;font-size:13px;opacity:.9;}
 .rp-table-wrap{width:100%;overflow-x:auto;}
@@ -5029,7 +5030,27 @@ body,table,td,p,div,span,a{font-family:'SB Sans Text' !important;}
 
         if (sec.header) {
           const m = reportState.meta || {};
-          parts.push(`
+          if (emailSafe) {
+            parts.push(`
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="rp-hero">
+                <tr><td style="padding:0 0 8px 0;"><div class="rp-brand">${window.__reportLogoSvg || reportState.ui.logoSvg || ""}</div></td></tr>
+                <tr><td><h1 style="margin:10px 0 10px;font-size:26px;line-height:1.1;font-weight:600;letter-spacing:.2px;">${esc(reportState.title || "Отчёт по релизу")}</h1></td></tr>
+                <tr>
+                  <td>
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:6px;">
+                      <tr>
+                        <td valign="top" style="padding:0 20px 10px 0;"><div class="rp-meta-item"><div class="k">Тип:</div><div class="v">${esc(m.type || "-")}</div></div></td>
+                        <td valign="top" style="padding:0 20px 10px 0;"><div class="rp-meta-item"><div class="k">Задача:</div><div class="v">${esc(m.task || "-")}</div></div></td>
+                        <td valign="top" style="padding:0 0 10px 0;"><div class="rp-meta-item"><div class="k">Время:</div><div class="v">${esc(m.start || "-")} – ${esc(m.end || "-")}${(m.duration ? " (" + esc(m.duration) + ")" : "")}</div></div></td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr><td style="padding-top:4px;"><span class="rp-status" style="position:static;display:inline-block;">Статус: <b>${esc(m.status || "-")}</b></span></td></tr>
+              </table>
+            `);
+          } else {
+            parts.push(`
               <div class="rp-hero">
                 <div class="rp-brand">${window.__reportLogoSvg || reportState.ui.logoSvg || ""}</div>
                 <h1>${esc(reportState.title || "Отчёт по релизу")}</h1>
@@ -5043,22 +5064,55 @@ body,table,td,p,div,span,a{font-family:'SB Sans Text' !important;}
                 <div class="rp-status">Статус: <b>${esc(m.status || "-")}</b></div>
               </div>
             `);
+          }
         }
 
         if (sec.summary) {
           parts.push(`<div class="rp-card"><h2>Сводная статистика</h2><div class="body">`);
           // Stats layout (preview): responsive grid, cards go into one row when there is enough width
 const cards = (reportState.summaryCards || []);
-parts.push(`<div class="rp-stats">`);
-for (const c of cards) {
-  parts.push(
-    `<div class="rp-stat" style="min-height:${Math.max(40, numOr(reportState.ui.statH, 68))}px;">` +
-    `<div class="n">${esc(c.value)}</div><div class="l">${esc(c.label)}</div>` +
-    `</div>`
-  );
+if (emailSafe) {
+  parts.push(`<table class="rp-stats" role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"><tr>`);
+  for (const c of cards) {
+    parts.push(
+      `<td class="rp-stat" valign="top" style="min-height:${Math.max(40, numOr(reportState.ui.statH, 68))}px;">` +
+      `<div class="n">${esc(c.value)}</div><div class="l">${esc(c.label)}</div>` +
+      `</td>`
+    );
+  }
+  parts.push(`</tr></table>`);
+} else {
+  parts.push(`<div class="rp-stats">`);
+  for (const c of cards) {
+    parts.push(
+      `<div class="rp-stat" style="min-height:${Math.max(40, numOr(reportState.ui.statH, 68))}px;">` +
+      `<div class="n">${esc(c.value)}</div><div class="l">${esc(c.label)}</div>` +
+      `</div>`
+    );
+  }
+  parts.push(`</div>`);
 }
-parts.push(`</div>`);
 if (sec.alert && reportState.alert) {
+            if (emailSafe) {
+              parts.push(`
+                <div class="rp-alert" style="margin-top:30px;">
+                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                      <td valign="top" style="padding:0 10px 8px 0;">
+                        <div class="t">${esc(reportState.alert.title || "Обнаружены ошибки!")}</div>
+                        <div class="d">${esc(reportState.alert.text || "")}</div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td valign="top" style="padding-top:8px;">
+                        <span class="rp-chip" style="display:inline-block;margin:0 8px 8px 0;background:${esc(reportState.ui.chipOkBg || '#1f6f3a')};color:${esc(reportState.ui.chipOkText || '#c9ffd9')};">Процент успешных обработок: ${esc(reportState.alert.okPercent)}%</span>
+                        <span class="rp-chip" style="display:inline-block;margin:0 8px 8px 0;background:${esc(reportState.ui.chipWarnBg || '#6f5a12')};color:${esc(reportState.ui.chipWarnText || '#fff2b3')};">Процент успешных мержей: ${esc(reportState.alert.mergePercent)}%</span>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+              `);
+            } else {
             parts.push(`
                 <div class="rp-alert" style="margin-top:30px;">
                   <div style="display:flex;gap:12px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;">
@@ -5073,6 +5127,7 @@ if (sec.alert && reportState.alert) {
                   </div>
                 </div>
               `);
+            }
           }
           parts.push(`</div></div>`);
         }
@@ -5092,17 +5147,28 @@ if (sec.alert && reportState.alert) {
           }
           parts.push(`</table>`);
           if (reportState.actions && reportState.actions.show) {
-            parts.push(`<div class="rp-actions" style="margin-top:16px;">` +
-              `<a class="rp-btn" href="${esc(reportState.actions.btn1Href || '#')}">${esc(reportState.actions.btn1Text || 'Открыть полный отчёт (HTML)')}</a>` +
-              `<a class="rp-btn" href="${esc(reportState.actions.btn2Href || '#')}">${esc(reportState.actions.btn2Text || 'Перейти к сборке')}</a>` +
-              `</div>`);
+            if (emailSafe) {
+              parts.push(`<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:16px;"><tr>` +
+                `<td valign="top" style="padding:0 8px 8px 0;"><a class="rp-btn" href="${esc(reportState.actions.btn1Href || '#')}">${esc(reportState.actions.btn1Text || 'Открыть полный отчёт (HTML)')}</a></td>` +
+                `<td valign="top" style="padding:0 0 8px 0;"><a class="rp-btn" href="${esc(reportState.actions.btn2Href || '#')}">${esc(reportState.actions.btn2Text || 'Перейти к сборке')}</a></td>` +
+                `</tr></table>`);
+            } else {
+              parts.push(`<div class="rp-actions" style="margin-top:16px;">` +
+                `<a class="rp-btn" href="${esc(reportState.actions.btn1Href || '#')}">${esc(reportState.actions.btn1Text || 'Открыть полный отчёт (HTML)')}</a>` +
+                `<a class="rp-btn" href="${esc(reportState.actions.btn2Href || '#')}">${esc(reportState.actions.btn2Text || 'Перейти к сборке')}</a>` +
+                `</div>`);
+            }
           }
           parts.push(`</div></div>`);
         }
 
 
         if (sec.repos) {
-          parts.push(`<div class="rp-card"><div class="rp-card-head"><h2>Детали по репозиториям</h2><div class="rp-right">Обработано репозиториев: ${esc((reportState.reposInfo?.processed ?? 0))} из ${esc((reportState.reposInfo?.total ?? 0))}</div></div><div class="body">`);
+          if (emailSafe) {
+            parts.push(`<div class="rp-card"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="rp-card-head"><tr><td valign="top"><h2>Детали по репозиториям</h2></td><td valign="top" align="right" class="rp-right">Обработано репозиториев: ${esc((reportState.reposInfo?.processed ?? 0))} из ${esc((reportState.reposInfo?.total ?? 0))}</td></tr></table><div class="body">`);
+          } else {
+            parts.push(`<div class="rp-card"><div class="rp-card-head"><h2>Детали по репозиториям</h2><div class="rp-right">Обработано репозиториев: ${esc((reportState.reposInfo?.processed ?? 0))} из ${esc((reportState.reposInfo?.total ?? 0))}</div></div><div class="body">`);
+          }
           parts.push(`
               <div class="rp-table-wrap">
               <table class="rp-table">
