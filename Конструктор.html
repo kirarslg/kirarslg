@@ -5029,6 +5029,10 @@ function numOr(v, fallback) {
         const reportWrapMinWidth = isPreview ? `${previewInnerWidthPx}px` : "0";
         const repoTableMinWidth = "100%";
         const repoTableLayout = "fixed";
+        const heroBgCss = String(isPreview ? reportState.ui.heroBg : (reportState.ui.cardBg || '#232323'))
+          .replace(/<\/style/gi, '')
+          .replace(/[\r\n]+/g, ' ')
+          .trim();
         const reportLogoHtml = reportState.ui.logoImage
           ? `<img src="${esc(reportState.ui.logoImage)}" alt="Логотип" style="display:block;height:14px;width:auto;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;">`
           : (window.__reportLogoSvg || reportState.ui.logoSvg || "");
@@ -5057,7 +5061,7 @@ body,table,td,p,div,span,a{font-family:'SB Sans Text' !important;}
 }
 .rp-hero{
   position:relative;
-  background:${isPreview ? esc(reportState.ui.heroBg) : esc(reportState.ui.cardBg || '#232323')};
+  background:${heroBgCss};
   border-radius:10px;
   padding:16px 18px 14px;
   margin:0 0 14px;
