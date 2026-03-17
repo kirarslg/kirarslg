@@ -4983,8 +4983,8 @@ function numOr(v, fallback) {
         reportState.meta.status = ui.metaStatus?.value || reportState.meta.status;
 
         const heroBgFallback = `url(${HERO_BG_SVG_DATA_URI}) center/cover no-repeat`;
-        const uploadedHeroBg = reportState.ui.heroBgImage ? `url(${reportState.ui.heroBgImage}) center/cover no-repeat` : "";
-        reportState.ui.heroBg = uploadedHeroBg || ui.heroBg?.value || reportState.ui.heroBg || heroBgFallback;
+        const reportHeroImageSrc = reportState.ui.heroBgImage || "";
+        reportState.ui.heroBg = ui.heroBg?.value || reportState.ui.heroBg || heroBgFallback;
         if (!reportState.ui.heroBg) reportState.ui.heroBg = heroBgFallback;
         reportState.ui.heroBorder = ui.heroBorder?.value || reportState.ui.heroBorder;
         reportState.ui.statW = numOr(ui.statW?.value, reportState.ui.statW);
@@ -5149,6 +5149,7 @@ body,table,td,p,div,span,a{font-family:'SB Sans Text' !important;}
   white-space:pre-wrap;
   font-family:'SB Sans Text';
   font-size:12px;
+
   background:#272B31;
   color:${esc(reportState.ui.textSecondary || '#cfd3da')};
   border:0px solid ${esc(reportState.ui.bodyBorder)};
@@ -5370,7 +5371,7 @@ if (sec.alert && reportState.alert) {
       }
 
       function doBuild() {
-        const outExport = buildReportHtml({ preview: false });
+        const outExport = buildReportHtml({ preview: false, emailSafe: true });
         const outPreview = buildReportHtml({ preview: true, forceMode: "full" });
         if (cssOut) cssOut.value = outExport.css;
         if (htmlOut) htmlOut.value = outExport.html;
