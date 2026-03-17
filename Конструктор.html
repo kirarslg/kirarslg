@@ -4983,8 +4983,8 @@ function numOr(v, fallback) {
         reportState.meta.status = ui.metaStatus?.value || reportState.meta.status;
 
         const heroBgFallback = `url(${HERO_BG_SVG_DATA_URI}) center/cover no-repeat`;
-        const uploadedHeroBg = reportState.ui.heroBgImage ? `url(${reportState.ui.heroBgImage}) center/cover no-repeat` : "";
-        reportState.ui.heroBg = uploadedHeroBg || ui.heroBg?.value || reportState.ui.heroBg || heroBgFallback;
+        const reportHeroImageSrc = reportState.ui.heroBgImage || "";
+        reportState.ui.heroBg = ui.heroBg?.value || reportState.ui.heroBg || heroBgFallback;
         if (!reportState.ui.heroBg) reportState.ui.heroBg = heroBgFallback;
         reportState.ui.heroBorder = ui.heroBorder?.value || reportState.ui.heroBorder;
         reportState.ui.statW = numOr(ui.statW?.value, reportState.ui.statW);
@@ -5029,6 +5029,9 @@ function numOr(v, fallback) {
         const reportWrapMinWidth = isPreview ? `${previewInnerWidthPx}px` : "0";
         const repoTableMinWidth = "100%";
         const repoTableLayout = "fixed";
+        const reportHeroImageHtml = reportHeroImageSrc
+          ? `<tr><td style="padding:0 0 12px 0;"><img src="${esc(reportHeroImageSrc)}" alt="" style="display:block;width:100%;max-width:100%;height:auto;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;border-radius:10px;"></td></tr>`
+          : "";
         const reportLogoHtml = reportState.ui.logoImage
           ? `<img src="${esc(reportState.ui.logoImage)}" alt="Логотип" style="display:block;height:14px;width:auto;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;">`
           : (window.__reportLogoSvg || reportState.ui.logoSvg || "");
@@ -5171,6 +5174,7 @@ body,table,td,p,div,span,a{font-family:'SB Sans Text' !important;}
           if (emailSafe) {
             parts.push(`
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="rp-hero">
+                ${reportHeroImageHtml}
                 <tr><td style="padding:0 0 8px 0;"><div class="rp-brand">${reportLogoHtml}</div></td></tr>
                 <tr><td><h1 style="margin:10px 0 10px;font-size:26px;line-height:1.1;font-weight:600;letter-spacing:.2px;">${esc(reportState.title || "Отчёт по релизу")}</h1></td></tr>
                 <tr>
@@ -5190,6 +5194,7 @@ body,table,td,p,div,span,a{font-family:'SB Sans Text' !important;}
           } else {
             parts.push(`
               <div class="rp-hero">
+                ${reportHeroImageSrc ? `<img src="${esc(reportHeroImageSrc)}" alt="" style="display:block;width:100%;max-width:100%;height:auto;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;border-radius:10px;margin:0 0 12px 0;">` : ""}
                 <div class="rp-brand">${reportLogoHtml}</div>
                 <h1>${esc(reportState.title || "Отчёт по релизу")}</h1>
                 <div class="meta">
