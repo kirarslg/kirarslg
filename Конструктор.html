@@ -547,7 +547,7 @@
 
     /* важно для sticky внутри CSS Grid */
 
-    .card.rightpane {
+    #emailResultCard {
       position: sticky;
       top: 8px;
       align-self: start;
@@ -561,21 +561,26 @@
     }
 
     /* topbar остаётся на месте, скроллится только контент */
-    .card.rightpane .body {
+    #emailResultCard .body {
       flex: 1 1 auto;
       min-height: 0;
       /* важно для overflow внутри flex/grid */
       overflow-y: auto;
       overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
 
     /* чтобы grid-элементы внутри .body могли сжиматься и скроллиться */
-    .card.rightpane .outgrid {
+    #emailResultCard .outgrid {
+      display: flex;
+      flex-direction: column;
       min-height: 0;
     }
 
     /* iframe не должен ломать расчёт высоты контейнера */
-    .card.rightpane iframe {
+    #emailResultCard iframe {
       display: block;
     }
 
@@ -1718,7 +1723,7 @@
     </div>
 
     <!-- Left: shared preview/output -->
-    <div class="card rightpane email-pane email-pane-preview">
+    <div class="card rightpane email-pane email-pane-preview" id="emailResultCard">
       <div class="topbar">
         <div>
           <div style="font-weight: 600; font-size: 18px">Результат</div>
@@ -1751,7 +1756,7 @@
             </div>
           </div>
         </div>
-        <div id="emailIframePreviewSection">
+        <div id="emailViewInputsPreview">
           <h3>Превью результата</h3>
           <iframe id="preview" title="Preview"></iframe>
           <div class="btns" id="emailExportBar">
@@ -4477,7 +4482,7 @@ ${wrapClose}`
       const inputsCard = document.getElementById('emailInputsCard')
       const builderCard = document.getElementById('emailBuilderCard')
       const builderPreview = document.getElementById('emailBuilderPreview')
-      const iframePreview = document.getElementById('emailIframePreviewSection')
+      const iframePreview = document.getElementById('emailViewInputsPreview')
       if (!tabEmail || !btnInputs || !btnBuilder || !inputsCard || !builderCard || !builderPreview || !iframePreview) return
 
       const setMode = (mode) => {
