@@ -114,14 +114,43 @@
       display: none !important;
     }
 
-    .email-mode-switch {
+    .email-view-toggle {
       display: inline-flex;
-      gap: 6px;
+      align-items: center;
+      gap: 4px;
+      padding: 4px;
+      border-radius: 10px;
+      background: rgba(155, 166, 177, 0.22);
+      border: 1px solid rgba(155, 166, 177, 0.28);
     }
 
-    .email-mode-btn.is-active {
-      background: #3ea16b;
+    .email-view-btn {
+      width: 34px;
+      height: 34px;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.7);
+      color: #4b5563;
+      transition: background-color .15s ease, color .15s ease, box-shadow .15s ease;
+    }
+
+    .email-view-btn:hover {
+      background: rgba(255, 255, 255, .95);
+    }
+
+    .email-view-btn.is-active {
+      background: #28bd6b;
       color: #fff;
+      box-shadow: 0 8px 18px rgba(40, 189, 107, .28);
+    }
+
+    .email-view-btn svg {
+      width: 16px;
+      height: 16px;
+      display: block;
     }
 
     /* Header line with logo + icon */
@@ -1694,11 +1723,21 @@
         <div>
           <div style="font-weight: 600; font-size: 18px">Результат</div>
         </div>
-        <div class="email-mode-switch" role="tablist" aria-label="Режим письма">
-          <button type="button" class="secondary email-mode-btn is-active" id="btnEmailModeInputs"
-            data-mode="inputs">Поля</button>
-          <button type="button" class="secondary email-mode-btn" id="btnEmailModeBuilder"
-            data-mode="builder">Конструктор</button>
+        <div class="email-view-toggle" role="group" aria-label="Режим отображения письма">
+          <button type="button" class="secondary email-view-btn is-active" id="emailModeInputs"
+            data-mode="inputs" aria-label="Режим полей" title="Режим полей" aria-pressed="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path fill="currentColor"
+                d="M4 7a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm16-2h-9v2h9V5ZM10 11a2 2 0 1 0-4 0 2 2 0 0 0 4 0Zm10-1h-9v2h9v-2ZM4 18a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm16-2h-9v2h9v-2Z" />
+            </svg>
+          </button>
+          <button type="button" class="secondary email-view-btn" id="emailModeBuilder"
+            data-mode="builder" aria-label="Режим конструктора" title="Режим конструктора" aria-pressed="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path fill="currentColor"
+                d="M4 4h7v7H4V4Zm9 0h7v4h-7V4ZM13 10h7v10h-7V10ZM4 13h7v7H4v-7Z" />
+            </svg>
+          </button>
         </div>
         <div class="pill" id="bytes">0 bytes</div>
       </div>
@@ -4433,8 +4472,8 @@ ${wrapClose}`
 
     function setupEmailViewMode() {
       const tabEmail = document.getElementById('tab-email')
-      const btnInputs = document.getElementById('btnEmailModeInputs')
-      const btnBuilder = document.getElementById('btnEmailModeBuilder')
+      const btnInputs = document.getElementById('emailModeInputs') || document.getElementById('btnEmailModeInputs')
+      const btnBuilder = document.getElementById('emailModeBuilder') || document.getElementById('btnEmailModeBuilder')
       const inputsCard = document.getElementById('emailInputsCard')
       const builderCard = document.getElementById('emailBuilderCard')
       const builderPreview = document.getElementById('emailBuilderPreview')
@@ -4447,8 +4486,8 @@ ${wrapClose}`
         tabEmail.classList.toggle('email-mode-inputs', !isBuilder)
         btnInputs.classList.toggle('is-active', !isBuilder)
         btnBuilder.classList.toggle('is-active', isBuilder)
-        btnInputs.setAttribute('aria-selected', (!isBuilder).toString())
-        btnBuilder.setAttribute('aria-selected', isBuilder.toString())
+        btnInputs.setAttribute('aria-pressed', (!isBuilder).toString())
+        btnBuilder.setAttribute('aria-pressed', isBuilder.toString())
 
         inputsCard.style.display = isBuilder ? 'none' : ''
         builderCard.style.display = isBuilder ? '' : 'none'
