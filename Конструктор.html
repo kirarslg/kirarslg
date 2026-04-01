@@ -184,14 +184,14 @@
       margin: 16px 0 4px;
     }
 
-    label_min {
+    .label-min {
       display: block;
       font-size: 12px;
       color: #333;
       margin: 0px 0 4px;
     }
 
-    label_medium {
+    .label-medium {
       display: block;
       font-size: 12px;
       color: #333;
@@ -1321,14 +1321,14 @@
 
             <div class="row">
               <div>
-                <label_min style="margin-top: 6">Фон письма (вокруг тела)</label_min>
+                <label for="bgOuter" class="label-min" style="margin-top: 6">Фон письма (вокруг тела)</label>
                 <div class="colorline">
                   <input id="bgOuter" placeholder="#f6f7f9" /><input type="color" class="colorPicker"
                     data-bind="bgOuter" aria-label="Выбрать цвет" />
                 </div>
               </div>
               <div>
-                <label_min style="margin-top: 6">Фон тела (600px блок)</label_min>
+                <label for="bgBody" class="label-min" style="margin-top: 6">Фон тела (600px блок)</label>
                 <div class="colorline">
                   <input id="bgBody" placeholder="#ffffff" /><input type="color" class="colorPicker" data-bind="bgBody"
                     aria-label="Выбрать цвет" />
@@ -1380,7 +1380,7 @@
 
           <div class="csec__body" role="region">
             <!-- content -->
-            <label_min>Шапка письма: одна или несколько картинок (600×200, PNG/JPG/GIF)</label_min>
+            <div class="label-min">Шапка письма: одна или несколько картинок (600×200, PNG/JPG/GIF)</div>
 
             <div class="file-control">
               <input id="headerImageFile" type="file" accept="image/*" multiple class="file-input-hidden" />
@@ -1506,7 +1506,7 @@
   </button>
 
   <div class="csec__body" role="region">
-    <label_min>Основной текст (поддержка ссылок)</label_min>
+    <label for="intro" class="label-min">Основной текст (поддержка ссылок)</label>
         <textarea id="intro" placeholder="Текст. Ссылка в формате:
 [текст|https://example.com]
 или просто https://example.com"></textarea>
@@ -1555,7 +1555,7 @@
   <div class="csec__body" role="region">
           <div class="row">
           <div>
-            <label_min>Выравнивание кнопки</label_min>
+            <label for="buttonAlign" class="label-min">Выравнивание кнопки</label>
             <select id="buttonAlign">
               <option value="left">Слева</option>
               <option value="center" selected>По центру</option>
@@ -1563,7 +1563,7 @@
             </select>
           </div>
           <div>
-            <label_min>Ширина кнопки </label_min>
+            <label for="buttonWidth" class="label-min">Ширина кнопки </label>
             <input id="buttonWidth" placeholder="например 200" />
           </div>
         </div>
@@ -1669,8 +1669,8 @@
 
   <div class="csec__body" role="region">
     <div class="row">
-          <div><label_min>Имя</label_min><input id="senderName" placeholder="Иван Иванов" /></div>
-          <div><label_min>Должность</label_min><input id="senderTitle" placeholder="UI/UX дизайнер" /></div>
+          <div><label for="senderName" class="label-min">Имя</label><input id="senderName" placeholder="Иван Иванов" /></div>
+          <div><label for="senderTitle" class="label-min">Должность</label><input id="senderTitle" placeholder="UI/UX дизайнер" /></div>
         </div>
 
         <label>Контакты (необязательно)</label>
