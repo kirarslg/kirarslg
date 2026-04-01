@@ -90,6 +90,40 @@
       /* important for sticky */
     }
 
+    #tab-email.email-layout {
+      grid-template-columns: minmax(0, 1fr) 420px;
+      gap: 16px;
+    }
+
+    #tab-email .email-pane-preview {
+      grid-column: 1;
+      min-width: 0;
+    }
+
+    #tab-email .email-pane-inputs,
+    #tab-email .email-pane-builder {
+      grid-column: 2;
+      min-width: 0;
+    }
+
+    #tab-email.email-mode-inputs .email-pane-builder {
+      display: none !important;
+    }
+
+    #tab-email.email-mode-builder .email-pane-inputs {
+      display: none !important;
+    }
+
+    .email-mode-switch {
+      display: inline-flex;
+      gap: 6px;
+    }
+
+    .email-mode-btn.is-active {
+      background: #3ea16b;
+      color: #fff;
+    }
+
     /* Header line with logo + icon */
     .header-line {
       grid-column: 1 / -1;
@@ -1206,9 +1240,9 @@
       <button type="button" class="tabbtn" id="tabBtnReport" data-tab="report">Отчёт по релизу</button>
     </div>
   </div>
-  <div id="tab-email" class="wrap">
+  <div id="tab-email" class="wrap email-layout email-mode-inputs">
     <!-- Left: form -->
-    <div class="card">
+    <div id="emailInputsCard" class="card email-pane email-pane-inputs">
       <h2>Форма</h2>
       <div class="body">
 
@@ -1653,99 +1687,34 @@
       </div>
     </div>
 
-    <!-- Right: output + preview -->
-    <div class="card rightpane">
+    <!-- Left: shared preview/output -->
+    <div class="card rightpane email-pane email-pane-preview">
       <div class="topbar">
         <div>
           <div style="font-weight: 600; font-size: 18px">Результат</div>
+        </div>
+        <div class="email-mode-switch" role="tablist" aria-label="Режим письма">
+          <button type="button" class="secondary email-mode-btn is-active" id="btnEmailModeInputs"
+            data-mode="inputs">Поля</button>
+          <button type="button" class="secondary email-mode-btn" id="btnEmailModeBuilder"
+            data-mode="builder">Конструктор</button>
         </div>
         <div class="pill" id="bytes">0 bytes</div>
       </div>
 
       <div class="body outgrid">
-        <div>
-          <h3>Визуальный конструктор письма</h3>
-          <div class="builder-shell">
-            <div class="builder-canvas-wrap">
-              <div id="builderCanvas" class="builder-canvas" aria-label="Превью письма">
-                <!-- Ряды и блоки будут добавляться скриптом -->
-              </div>
+        <div id="emailBuilderPreview" style="display:none;">
+          <h3>Canvas конструктора</h3>
+          <div class="builder-canvas-wrap" style="margin-top:8px;">
+            <div id="builderCanvas" class="builder-canvas" aria-label="Превью письма">
+              <!-- Ряды и блоки будут добавляться скриптом -->
             </div>
-            <aside class="builder-sidebar">
-              <div class="builder-tabs">
-                <button type="button" class="builder-tab is-active" data-tab="elements">Элементы</button>
-                <button type="button" class="builder-tab" data-tab="layouts">Структура</button>
-              </div>
-              <div class="builder-panel is-active" data-panel="elements">
-
-                <button type="button" class="builder-block-btn" draggable="true" data-block-type="header">
-                  <span class="icon">🖼</span>
-                  <span>Шапка письма</span>
-                </button>
-                <button type="button" class="builder-block-btn" draggable="true" data-block-type="greeting">
-                  <span class="icon">👋</span>
-                  <span>Приветствие</span>
-                </button>
-                <button type="button" class="builder-block-btn" draggable="true" data-block-type="heading">
-                  <span class="icon">H</span>
-                  <span>Заголовок</span>
-                </button>
-                <button type="button" class="builder-block-btn" draggable="true" data-block-type="text">
-                  <span class="icon">T</span>
-                  <span>Текст</span>
-                </button>
-                <button type="button" class="builder-block-btn" draggable="true" data-block-type="image"
-                  id="builderImageBtn">
-                  <span class="icon">🖼</span>
-                  <span>Картинка</span>
-                </button>
-                <button type="button" class="builder-block-btn" draggable="true" data-block-type="button">
-                  <span class="icon">⇢</span>
-                  <span>Кнопка</span>
-                </button>
-                <button type="button" class="builder-block-btn" draggable="true" data-block-type="divider">
-                  <span class="icon">—</span>
-                  <span>Разделитель</span>
-                </button>
-                <button type="button" class="builder-block-btn" draggable="true" data-block-type="spacer">
-                  <span class="icon">↕</span>
-                  <span>Отступ</span>
-                </button>
-              </div>
-              <div class="builder-panel" data-panel="layouts">
-                <div class="builder-layout-grid">
-                  <button type="button" class="builder-layout-btn" data-layout="1">
-                    <div class="builder-layout-btn-inner">
-                      <div class="builder-layout-col"></div>
-                    </div>
-                  </button>
-                  <button type="button" class="builder-layout-btn" data-layout="2">
-                    <div class="builder-layout-btn-inner">
-                      <div class="builder-layout-col"></div>
-                      <div class="builder-layout-col"></div>
-                    </div>
-                  </button>
-                  <button type="button" class="builder-layout-btn" data-layout="3">
-                    <div class="builder-layout-btn-inner">
-                      <div class="builder-layout-col"></div>
-                      <div class="builder-layout-col"></div>
-                      <div class="builder-layout-col"></div>
-                    </div>
-                  </button>
-                </div>
-              </div>
-            </aside>
-          </div>
-          <input id="builderImageInput" type="file" accept="image/*" multiple class="file-input-hidden" />
-          <div class="smallnote">
-            Перетащите блоки слева на «лист» письма или кидайте картинки прямо из проводника.
           </div>
         </div>
-
-        <div>
+        <div id="emailIframePreviewSection">
           <h3>Превью результата</h3>
-          <div class="btns">
-            <iframe id="preview" title="Preview"></iframe>
+          <iframe id="preview" title="Preview"></iframe>
+          <div class="btns" id="emailExportBar">
             <button class="secondary" id="btnCopy">Копировать HTML</button>
             <button class="secondary" id="btnDownload">Скачать .html</button>
             <button class="secondary" id="btnDownloadEml">
@@ -1754,9 +1723,84 @@
           </div>
         </div>
 
-        <div>
+        <div id="emailOutputSection">
           <h3>HTML письма</h3>
           <textarea id="output" class="mono" spellcheck="false" style="min-height: 240px; margin-top: 8px;"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: builder controls -->
+    <div id="emailBuilderCard" class="card email-pane email-pane-builder" style="display:none;">
+      <h2>Визуальный конструктор письма</h2>
+      <div class="body">
+          <aside class="builder-sidebar" style="width:100%;">
+            <div class="builder-tabs">
+              <button type="button" class="builder-tab is-active" data-tab="elements">Элементы</button>
+              <button type="button" class="builder-tab" data-tab="layouts">Структура</button>
+            </div>
+            <div class="builder-panel is-active" data-panel="elements">
+
+              <button type="button" class="builder-block-btn" draggable="true" data-block-type="header">
+                <span class="icon">🖼</span>
+                <span>Шапка письма</span>
+              </button>
+              <button type="button" class="builder-block-btn" draggable="true" data-block-type="greeting">
+                <span class="icon">👋</span>
+                <span>Приветствие</span>
+              </button>
+              <button type="button" class="builder-block-btn" draggable="true" data-block-type="heading">
+                <span class="icon">H</span>
+                <span>Заголовок</span>
+              </button>
+              <button type="button" class="builder-block-btn" draggable="true" data-block-type="text">
+                <span class="icon">T</span>
+                <span>Текст</span>
+              </button>
+              <button type="button" class="builder-block-btn" draggable="true" data-block-type="image"
+                id="builderImageBtn">
+                <span class="icon">🖼</span>
+                <span>Картинка</span>
+              </button>
+              <button type="button" class="builder-block-btn" draggable="true" data-block-type="button">
+                <span class="icon">⇢</span>
+                <span>Кнопка</span>
+              </button>
+              <button type="button" class="builder-block-btn" draggable="true" data-block-type="divider">
+                <span class="icon">—</span>
+                <span>Разделитель</span>
+              </button>
+              <button type="button" class="builder-block-btn" draggable="true" data-block-type="spacer">
+                <span class="icon">↕</span>
+                <span>Отступ</span>
+              </button>
+            </div>
+            <div class="builder-panel" data-panel="layouts">
+              <div class="builder-layout-grid">
+                <button type="button" class="builder-layout-btn" data-layout="1">
+                  <div class="builder-layout-btn-inner">
+                    <div class="builder-layout-col"></div>
+                  </div>
+                </button>
+                <button type="button" class="builder-layout-btn" data-layout="2">
+                  <div class="builder-layout-btn-inner">
+                    <div class="builder-layout-col"></div>
+                    <div class="builder-layout-col"></div>
+                  </div>
+                </button>
+                <button type="button" class="builder-layout-btn" data-layout="3">
+                  <div class="builder-layout-btn-inner">
+                    <div class="builder-layout-col"></div>
+                    <div class="builder-layout-col"></div>
+                    <div class="builder-layout-col"></div>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </aside>
+        <input id="builderImageInput" type="file" accept="image/*" multiple class="file-input-hidden" />
+        <div class="smallnote">
+          Перетащите блоки слева на «лист» письма или кидайте картинки прямо из проводника.
         </div>
       </div>
     </div>
@@ -4385,6 +4429,38 @@ ${wrapClose}`
     setupBuilderEditing()
 
     render()
+
+    function setupEmailViewMode() {
+      const tabEmail = document.getElementById('tab-email')
+      const btnInputs = document.getElementById('btnEmailModeInputs')
+      const btnBuilder = document.getElementById('btnEmailModeBuilder')
+      const inputsCard = document.getElementById('emailInputsCard')
+      const builderCard = document.getElementById('emailBuilderCard')
+      const builderPreview = document.getElementById('emailBuilderPreview')
+      const iframePreview = document.getElementById('emailIframePreviewSection')
+      if (!tabEmail || !btnInputs || !btnBuilder || !inputsCard || !builderCard || !builderPreview || !iframePreview) return
+
+      const setMode = (mode) => {
+        const isBuilder = mode === 'builder'
+        tabEmail.classList.toggle('email-mode-builder', isBuilder)
+        tabEmail.classList.toggle('email-mode-inputs', !isBuilder)
+        btnInputs.classList.toggle('is-active', !isBuilder)
+        btnBuilder.classList.toggle('is-active', isBuilder)
+        btnInputs.setAttribute('aria-selected', (!isBuilder).toString())
+        btnBuilder.setAttribute('aria-selected', isBuilder.toString())
+
+        inputsCard.style.display = isBuilder ? 'none' : ''
+        builderCard.style.display = isBuilder ? '' : 'none'
+        builderPreview.style.display = isBuilder ? '' : 'none'
+        iframePreview.style.display = isBuilder ? 'none' : ''
+      }
+
+      btnInputs.addEventListener('click', () => setMode('inputs'))
+      btnBuilder.addEventListener('click', () => setMode('builder'))
+      setMode('inputs')
+    }
+
+    setupEmailViewMode()
 
 
     // -----------------------------
