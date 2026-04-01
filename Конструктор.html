@@ -522,8 +522,9 @@
       position: sticky;
       top: 8px;
       align-self: start;
-
-      height: 1024px;
+      max-height: calc(100vh - 16px);
+      max-height: calc(100dvh - 16px);
+      min-height: 560px;
       display: flex;
       flex-direction: column;
       overflow: hidden;
