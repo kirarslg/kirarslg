@@ -1138,11 +1138,23 @@
       color: #fff;
     }
 
-    .report-grid {
-      display: grid;
-      grid-template-columns: 420px 1fr;
+    #tab-report.report-layout {
+      grid-template-columns: 420px minmax(0, 1fr);
       gap: 16px;
-      align-items: start;
+    }
+
+    #tab-report .report-pane-inputs {
+      grid-column: 1;
+      grid-row: 1;
+      min-width: 0;
+      align-self: start;
+    }
+
+    #tab-report .report-pane-preview {
+      grid-column: 2;
+      grid-row: 1;
+      min-width: 0;
+      align-self: start;
     }
   </style>
 
@@ -1930,8 +1942,8 @@
 
   </div><!-- /#tab-email.wrap -->
 
-  <div id="tab-report" class="wrap" style="display:none">
-    <div class="card">
+  <div id="tab-report" class="wrap report-layout" style="display:none">
+    <div class="card report-pane-inputs">
       <h2>Отчёт по релизу</h2>
       <div class="body">
 
@@ -2360,7 +2372,7 @@
       </div>
     </div>
 
-    <div class="card rightpane">
+    <div class="card rightpane report-pane-preview">
       <h2>Результат</h2>
       <div class="body">
         <div>
@@ -5287,8 +5299,8 @@ function numOr(v, fallback) {
 
         const sec = readSec();
         const mode = opts.forceMode || getMode();
-        const previewWidthPx = 725;
-        const previewInnerWidthPx = 693;
+        const previewWidthPx = 632;
+        const previewInnerWidthPx = 600;
         const reportWrapWidth = isPreview ? `${previewInnerWidthPx}px` : "100%";
         const reportWrapMaxWidth = isPreview ? `${previewInnerWidthPx}px` : "100%";
         const reportWrapMinWidth = isPreview ? `${previewInnerWidthPx}px` : "0";
@@ -5626,7 +5638,7 @@ if (sec.alert && reportState.alert) {
 
         const fragment = parts.join("\n").trim();
         const exportBodyBg = esc((ui.bodyBg?.value || reportState.ui?.bodyBg || "#ffffff").trim());
-        const full = `<!doctype html><html lang="ru"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta http-equiv="x-ua-compatible" content="ie=edge"><meta name="format-detection" content="telephone=no,date=no,address=no,email=no,url=no"><meta name="color-scheme" content="dark light"><meta name="supported-color-schemes" content="dark light"><title>${esc(reportState.title || "Отчёт")}</title><style>${css}</style></head><body id="body" bgcolor="${exportBodyBg}" style="margin:0;padding:0;background:${exportBodyBg};"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="${exportBodyBg}" style="width:100%;background:${exportBodyBg};"><tr><td align="center" style="padding:0;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;max-width:${isPreview ? "725px" : "100%"};"><tr><td bgcolor="${exportBodyBg}" style="padding:16px;background:${exportBodyBg};border-radius:12px;">${fragment}</td></tr></table></td></tr></table></body></html>`;
+        const full = `<!doctype html><html lang="ru"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta http-equiv="x-ua-compatible" content="ie=edge"><meta name="format-detection" content="telephone=no,date=no,address=no,email=no,url=no"><meta name="color-scheme" content="dark light"><meta name="supported-color-schemes" content="dark light"><title>${esc(reportState.title || "Отчёт")}</title><style>${css}</style></head><body id="body" bgcolor="${exportBodyBg}" style="margin:0;padding:0;background:${exportBodyBg};"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="${exportBodyBg}" style="width:100%;background:${exportBodyBg};"><tr><td align="center" style="padding:0;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;max-width:${isPreview ? "632px" : "100%"};"><tr><td bgcolor="${exportBodyBg}" style="padding:16px;background:${exportBodyBg};border-radius:12px;">${fragment}</td></tr></table></td></tr></table></body></html>`;
         return { css, html: (mode === "fragment") ? fragment : full };
       }
 
@@ -5848,7 +5860,10 @@ if (sec.alert && reportState.alert) {
           out.push(cur)
           cur = next
         }
-        while (out.length && out[out.length - 1]?.tagName === 'HR') out.pop()
+        while (out.length && out[out.length - 1]?.tagName === 'HR') {
+          const trailingHr = out.pop()
+          if (trailingHr && trailingHr.parentNode) trailingHr.parentNode.removeChild(trailingHr)
+        }
         return out
       }
 
@@ -5857,12 +5872,12 @@ if (sec.alert && reportState.alert) {
 
         const sec = document.createElement('section')
         sec.className = 'csec'
-        sec.dataset.open = 'true'
+        sec.dataset.open = 'false'
 
         const head = document.createElement('button')
         head.className = 'csec__head'
         head.type = 'button'
-        head.setAttribute('aria-expanded', 'true')
+        head.setAttribute('aria-expanded', 'false')
 
         const titleWrap = document.createElement('span')
         titleWrap.className = 'csec__title'
@@ -5919,6 +5934,9 @@ if (sec.alert && reportState.alert) {
         rowPr.remove()
       }
 
+      Array.from(reportBody.children).forEach((node) => {
+        if (node.tagName === 'HR') node.remove()
+      })
 
       reportBody.dataset.accordionReady = '1'
     }
