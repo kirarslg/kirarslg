@@ -3280,8 +3280,10 @@ ${wrapClose}`
       if (!canvas) return
 
       const getEditableTarget = (target) => {
-        if (!target || !target.closest) return null
-        const node = target.closest('[data-block-id][data-editable="true"]')
+        if (!target) return null
+        const base = (target.nodeType === Node.TEXT_NODE) ? target.parentElement : target
+        if (!base || !base.closest) return null
+        const node = base.closest('[data-block-id][data-editable="true"]')
         return node && canvas.contains(node) ? node : null
       }
 
