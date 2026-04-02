@@ -2854,7 +2854,7 @@ ${wrapClose}`
                 const c = clampHexColor(el('builderGreetingColorText')?.value || el('builderGreetingColor')?.value || '#111111', '#111111')
                 const sz = Math.max(10, Math.min(40, parseInt((el('builderGreetingSize')?.value || '14').trim(), 10) || 14))
                 html += `${wrapOpen}
-  <div class="eb-text" data-block-id="${bid}" style="color:${escapeHtml(c)}; font-size:${sz}px;">${escapeHtml(text).replaceAll('\n', '<br>')}</div>
+  <div class="eb-text" data-block-id="${bid}" data-editable="true" style="color:${escapeHtml(c)}; font-size:${sz}px;">${escapeHtml(text).replaceAll('\n', '<br>')}</div>
 ${wrapClose}`
               } else if (block.type === 'heading') {
                 const c = clampHexColor(el('builderHeadingColorText')?.value || el('builderHeadingColor')?.value || '#111111', '#111111')
@@ -2865,9 +2865,9 @@ ${wrapClose}`
                 ).replaceAll('\n', '<br>')}</div>
 ${wrapClose}`
               } else if (block.type === 'text') {
-                const text = block.linkedField === 'intro' ? (el('intro')?.value || '') : (block.text || '')
+                const text = (block.text || '') || (block.linkedField === 'intro' ? (el('intro')?.value || '') : '')
                 html += `${wrapOpen}
-  <div class="eb-text" data-block-id="${bid}"${block.linkedField ? '' : ' data-editable="true"'}>${escapeHtml(
+  <div class="eb-text" data-block-id="${bid}" data-editable="true">${escapeHtml(
                   text,
                 ).replaceAll('\n', '<br>')}</div>
 ${wrapClose}`
@@ -3310,6 +3310,7 @@ ${wrapClose}`
               for (const block of col.blocks || []) {
                 if (block.id === id) {
                   block.text = text.trim()
+                  if (block.linkedField) delete block.linkedField
                   break
                 }
               }
