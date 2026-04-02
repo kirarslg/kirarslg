@@ -3279,22 +3279,36 @@ ${wrapClose}`
       const canvas = el('builderCanvas')
       if (!canvas) return
 
-      canvas.addEventListener('dblclick', (e) => {
-        const target = e.target
-        if (
-          target &&
-          target.hasAttribute('data-block-id') &&
-          target.getAttribute('data-editable') === 'true'
-        ) {
-          target.setAttribute('contenteditable', 'true')
-          const range = document.createRange()
-          range.selectNodeContents(target)
-          range.collapse(false)
-          const sel = window.getSelection()
+      const getEditableTarget = (target) => {
+        if (!target || !target.closest) return null
+        const node = target.closest('[data-block-id][data-editable="true"]')
+        return node && canvas.contains(node) ? node : null
+      }
+
+      const startEditing = (target) => {
+        if (!target || target.getAttribute('contenteditable') === 'true') return
+        target.setAttribute('contenteditable', 'true')
+        const range = document.createRange()
+        range.selectNodeContents(target)
+        range.collapse(false)
+        const sel = window.getSelection()
+        if (sel) {
           sel.removeAllRanges()
           sel.addRange(range)
-          target.focus()
         }
+        target.focus()
+      }
+
+      canvas.addEventListener('click', (e) => {
+        const target = getEditableTarget(e.target)
+        if (!target) return
+        startEditing(target)
+      })
+
+      canvas.addEventListener('dblclick', (e) => {
+        const target = getEditableTarget(e.target)
+        if (!target) return
+        startEditing(target)
       })
 
       canvas.addEventListener('blur', (e) => {
