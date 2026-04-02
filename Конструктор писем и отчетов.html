@@ -6064,47 +6064,11 @@ if (sec.alert && reportState.alert) {
           syncHeights()
         })
 
-        body.addEventListener('transitionend', (e) => {
-          if (e.propertyName !== 'max-height') return
-          syncHeights(true)
-        })
-
-        body.addEventListener('transitionend', (e) => {
-          if (e.propertyName !== 'max-height') return
-          syncHeights()
-        })
-
-        body.addEventListener('transitionend', (e) => {
-          if (e.propertyName !== 'max-height') return
-          syncHeights()
-        })
-
-        body.addEventListener('transitionend', (e) => {
-          if (e.propertyName !== 'max-height') return
-          syncHeights()
-        })
-
-        body.addEventListener('transitionend', (e) => {
-          if (e.propertyName !== 'max-height') return
-          syncHeights()
-        })
-
-        body.addEventListener('transitionend', (e) => {
-          if (e.propertyName !== 'max-height') return
-          syncHeights()
-        })
-
         if (!isReportSec) {
           const mo = new MutationObserver(() => syncHeights())
           mo.observe(body, { childList: true, subtree: true })
           sec.addEventListener('change', () => syncHeights())
           sec.addEventListener('input', () => syncHeights())
-          sec.addEventListener('change', () => syncHeights())
-          sec.addEventListener('input', () => syncHeights())
-
-          sec.addEventListener('change', () => syncHeights())
-          sec.addEventListener('input', () => syncHeights())
-
         }
 
       })
