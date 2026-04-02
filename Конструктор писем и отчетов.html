@@ -3348,27 +3348,37 @@ ${wrapClose}`
 
     // Convert text with:
     // 1) [label|https://...] -> <a>
-    // 2) raw URLs -> <a>
+    // 2) [label](https://...) -> <a>
+    // 3) raw URLs -> <a>
     // and preserve newlines as <br>
     function richTextToHtml(input, linkStyle) {
       const text = input ?? ''
       const lines = text.split(/\r?\n/)
 
       const urlRegex = /(https?:\/\/[^\s<>"']+)/g
-      const tagRegex = /\[([^\]|]+)\|(\s*https?:\/\/[^\]\s]+)\]/g
+      const pipeTagRegex = /\[([^\]|]+)\|(\s*https?:\/\/[^\]\s]+)\]/g
+      const mdTagRegex = /\[([^\]]+)\]\((\s*https?:\/\/[^)\s]+)\)/g
 
       const outLines = lines.map((line) => {
         let escaped = escapeHtml(line)
+        const tokens = []
 
-        escaped = escaped.replace(tagRegex, (m, label, url) => {
-          const safeLabel = escapeHtml(label.trim())
-          const safeUrl = escapeHtml(url.trim())
-          return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" style="${linkStyle}">${safeLabel}</a>`
-        })
+        const makeToken = (label, url) => {
+          const safeLabel = escapeHtml((label || '').trim())
+          const safeUrl = escapeHtml((url || '').trim())
+          if (!safeLabel || !safeUrl) return ''
+          const token = `__RT_LINK_${tokens.length}__`
+          const html = `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" style="${linkStyle}">${safeLabel}</a>`
+          tokens.push({ token, html })
+          return token
+        }
 
-        escaped = escaped.replace(urlRegex, (url) => {
-          const safeUrl = escapeHtml(url)
-          return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" style="${linkStyle}">${safeUrl}</a>`
+        escaped = escaped.replace(pipeTagRegex, (m, label, url) => makeToken(label, url))
+        escaped = escaped.replace(mdTagRegex, (m, label, url) => makeToken(label, url))
+        escaped = escaped.replace(urlRegex, (url) => makeToken(url, url))
+
+        tokens.forEach(({ token, html }) => {
+          escaped = escaped.replace(token, html)
         })
 
         return escaped
@@ -4569,7 +4579,7 @@ ${wrapClose}`
 
     // Seed defaults
     el('intro').value =
-      'Пример ссылки в тексте: [Документ|https://example.com]\nИли просто URL: https://openai.com'
+      'Пример ссылки в тексте: [Документ|https://example.com]\nили [Документ](https://example.com)\nИли просто URL: https://openai.com'
     el('linkColor').value = '#0b57d0'
 
     el('bgOuter').value = '#f6f7f9'
