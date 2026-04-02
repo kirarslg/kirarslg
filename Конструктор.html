@@ -615,6 +615,13 @@
       gap: 12px;
     }
 
+    .email-result-topbar-actions {
+      margin-left: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
     /* === Header line: logo left, tooltip icon right === */
     .header-wrap {
       max-width: 1200px;
@@ -1728,23 +1735,25 @@
         <div>
           <div style="font-weight: 600; font-size: 18px">Результат</div>
         </div>
-        <div class="email-view-toggle" role="group" aria-label="Режим отображения письма">
-          <button type="button" class="secondary email-view-btn is-active" id="emailModeInputs"
-            data-mode="inputs" aria-label="Режим полей" title="Режим полей" aria-pressed="true">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path fill="currentColor"
-                d="M4 7a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm16-2h-9v2h9V5ZM10 11a2 2 0 1 0-4 0 2 2 0 0 0 4 0Zm10-1h-9v2h9v-2ZM4 18a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm16-2h-9v2h9v-2Z" />
-            </svg>
-          </button>
-          <button type="button" class="secondary email-view-btn" id="emailModeBuilder"
-            data-mode="builder" aria-label="Режим конструктора" title="Режим конструктора" aria-pressed="false">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path fill="currentColor"
-                d="M4 4h7v7H4V4Zm9 0h7v4h-7V4ZM13 10h7v10h-7V10ZM4 13h7v7H4v-7Z" />
-            </svg>
-          </button>
+        <div class="email-result-topbar-actions">
+          <div class="pill" id="bytes">0 bytes</div>
+          <div class="email-view-toggle" role="group" aria-label="Режим отображения письма">
+            <button type="button" class="secondary email-view-btn is-active" id="emailModeInputs"
+              data-mode="inputs" aria-label="Режим полей" title="Режим полей" aria-pressed="true">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="currentColor"
+                  d="M4 7a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm16-2h-9v2h9V5ZM10 11a2 2 0 1 0-4 0 2 2 0 0 0 4 0Zm10-1h-9v2h9v-2ZM4 18a2 2 0 1 1 0-4 2 2 0 0 1 0 4Zm16-2h-9v2h9v-2Z" />
+              </svg>
+            </button>
+            <button type="button" class="secondary email-view-btn" id="emailModeBuilder"
+              data-mode="builder" aria-label="Режим конструктора" title="Режим конструктора" aria-pressed="false">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="currentColor"
+                  d="M4 4h7v7H4V4Zm9 0h7v4h-7V4ZM13 10h7v10h-7V10ZM4 13h7v7H4v-7Z" />
+              </svg>
+            </button>
+          </div>
         </div>
-        <div class="pill" id="bytes">0 bytes</div>
       </div>
 
       <div class="body outgrid">
@@ -1756,8 +1765,7 @@
             </div>
           </div>
         </div>
-        <div id="emailViewInputsPreview">
-          <h3>Превью результата</h3>
+        <div id="emailIframePreviewSection">
           <iframe id="preview" title="Preview"></iframe>
           <div class="btns" id="emailExportBar">
             <button class="secondary" id="btnCopy">Копировать HTML</button>
