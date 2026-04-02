@@ -1138,11 +1138,23 @@
       color: #fff;
     }
 
-    .report-grid {
-      display: grid;
-      grid-template-columns: 420px 1fr;
+    #tab-report.report-layout {
+      grid-template-columns: minmax(0, 1fr) 420px;
       gap: 16px;
-      align-items: start;
+    }
+
+    #tab-report .report-pane-inputs {
+      grid-column: 2;
+      grid-row: 1;
+      min-width: 0;
+      align-self: start;
+    }
+
+    #tab-report .report-pane-preview {
+      grid-column: 1;
+      grid-row: 1;
+      min-width: 0;
+      align-self: start;
     }
   </style>
 
@@ -1930,8 +1942,8 @@
 
   </div><!-- /#tab-email.wrap -->
 
-  <div id="tab-report" class="wrap" style="display:none">
-    <div class="card">
+  <div id="tab-report" class="wrap report-layout" style="display:none">
+    <div class="card report-pane-inputs">
       <h2>Отчёт по релизу</h2>
       <div class="body">
 
@@ -2360,7 +2372,7 @@
       </div>
     </div>
 
-    <div class="card rightpane">
+    <div class="card rightpane report-pane-preview">
       <h2>Результат</h2>
       <div class="body">
         <div>
@@ -2838,11 +2850,13 @@
   </div>
 ${wrapClose}`
               } else if (block.type === 'greeting') {
-                const text = el('greeting')?.value || block.text || 'Здравствуйте!'
+                const text = block.linkedField === 'greeting'
+                  ? (el('greeting')?.value || block.text || 'Здравствуйте!')
+                  : (block.text || 'Здравствуйте!')
                 const c = clampHexColor(el('builderGreetingColorText')?.value || el('builderGreetingColor')?.value || '#111111', '#111111')
                 const sz = Math.max(10, Math.min(40, parseInt((el('builderGreetingSize')?.value || '14').trim(), 10) || 14))
                 html += `${wrapOpen}
-  <div class="eb-text" data-block-id="${bid}" style="color:${escapeHtml(c)}; font-size:${sz}px;">${escapeHtml(text).replaceAll('\n', '<br>')}</div>
+  <div class="eb-text" data-block-id="${bid}" data-editable="true" style="color:${escapeHtml(c)}; font-size:${sz}px;">${escapeHtml(text).replaceAll('\n', '<br>')}</div>
 ${wrapClose}`
               } else if (block.type === 'heading') {
                 const c = clampHexColor(el('builderHeadingColorText')?.value || el('builderHeadingColor')?.value || '#111111', '#111111')
@@ -2853,9 +2867,9 @@ ${wrapClose}`
                 ).replaceAll('\n', '<br>')}</div>
 ${wrapClose}`
               } else if (block.type === 'text') {
-                const text = block.linkedField === 'intro' ? (el('intro')?.value || '') : (block.text || '')
+                const text = (block.text || '') || (block.linkedField === 'intro' ? (el('intro')?.value || '') : '')
                 html += `${wrapOpen}
-  <div class="eb-text" data-block-id="${bid}"${block.linkedField ? '' : ' data-editable="true"'}>${escapeHtml(
+  <div class="eb-text" data-block-id="${bid}" data-editable="true">${escapeHtml(
                   text,
                 ).replaceAll('\n', '<br>')}</div>
 ${wrapClose}`
@@ -3264,23 +3278,76 @@ ${wrapClose}`
     function setupBuilderEditing() {
       const canvas = el('builderCanvas')
       if (!canvas) return
+      const LINK_PASTE_COLOR = '#1a73e8'
 
-      canvas.addEventListener('dblclick', (e) => {
-        const target = e.target
-        if (
-          target &&
-          target.hasAttribute('data-block-id') &&
-          target.getAttribute('data-editable') === 'true'
-        ) {
-          target.setAttribute('contenteditable', 'true')
-          const range = document.createRange()
-          range.selectNodeContents(target)
-          range.collapse(false)
-          const sel = window.getSelection()
+      const isHttpUrl = (text) => /^https?:\/\/\S+$/i.test((text || '').trim())
+
+      const applyLinkToSelection = (selection, url) => {
+        if (!selection || selection.isCollapsed) return false
+        const safeUrl = (url || '').trim()
+        if (!safeUrl) return false
+        const range = selection.getRangeAt(0)
+        const selectedText = selection.toString()
+        if (!selectedText.trim()) return false
+        const link = document.createElement('a')
+        link.href = safeUrl
+        link.target = '_blank'
+        link.rel = 'noopener noreferrer'
+        link.style.color = LINK_PASTE_COLOR
+        link.style.textDecoration = 'underline'
+        link.textContent = selectedText
+        range.deleteContents()
+        range.insertNode(link)
+        range.setStartAfter(link)
+        range.setEndAfter(link)
+        selection.removeAllRanges()
+        selection.addRange(range)
+        return true
+      }
+
+      const getEditableTarget = (target) => {
+        if (!target) return null
+        const base = (target.nodeType === Node.TEXT_NODE) ? target.parentElement : target
+        if (!base || !base.closest) return null
+        const node = base.closest('[data-block-id][data-editable="true"]')
+        return node && canvas.contains(node) ? node : null
+      }
+
+      const startEditing = (target) => {
+        if (!target || target.getAttribute('contenteditable') === 'true') return
+        target.setAttribute('contenteditable', 'true')
+        const range = document.createRange()
+        range.selectNodeContents(target)
+        range.collapse(false)
+        const sel = window.getSelection()
+        if (sel) {
           sel.removeAllRanges()
           sel.addRange(range)
-          target.focus()
         }
+        target.focus()
+      }
+
+      canvas.addEventListener('click', (e) => {
+        const target = getEditableTarget(e.target)
+        if (!target) return
+        startEditing(target)
+      })
+
+      canvas.addEventListener('dblclick', (e) => {
+        const target = getEditableTarget(e.target)
+        if (!target) return
+        startEditing(target)
+      })
+
+      canvas.addEventListener('paste', (e) => {
+        const target = getEditableTarget(e.target)
+        if (!target || target.getAttribute('contenteditable') !== 'true') return
+        const pasted = (e.clipboardData && e.clipboardData.getData('text/plain')) || ''
+        if (!isHttpUrl(pasted)) return
+        const selection = window.getSelection()
+        if (!selection || selection.isCollapsed) return
+        if (!applyLinkToSelection(selection, pasted)) return
+        e.preventDefault()
       })
 
       canvas.addEventListener('blur', (e) => {
@@ -3298,6 +3365,7 @@ ${wrapClose}`
               for (const block of col.blocks || []) {
                 if (block.id === id) {
                   block.text = text.trim()
+                  if (block.linkedField) delete block.linkedField
                   break
                 }
               }
@@ -3317,27 +3385,37 @@ ${wrapClose}`
 
     // Convert text with:
     // 1) [label|https://...] -> <a>
-    // 2) raw URLs -> <a>
+    // 2) [label](https://...) -> <a>
+    // 3) raw URLs -> <a>
     // and preserve newlines as <br>
     function richTextToHtml(input, linkStyle) {
       const text = input ?? ''
       const lines = text.split(/\r?\n/)
 
       const urlRegex = /(https?:\/\/[^\s<>"']+)/g
-      const tagRegex = /\[([^\]|]+)\|(\s*https?:\/\/[^\]\s]+)\]/g
+      const pipeTagRegex = /\[([^\]|]+)\|(\s*https?:\/\/[^\]\s]+)\]/g
+      const mdTagRegex = /\[([^\]]+)\]\((\s*https?:\/\/[^)\s]+)\)/g
 
       const outLines = lines.map((line) => {
         let escaped = escapeHtml(line)
+        const tokens = []
 
-        escaped = escaped.replace(tagRegex, (m, label, url) => {
-          const safeLabel = escapeHtml(label.trim())
-          const safeUrl = escapeHtml(url.trim())
-          return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" style="${linkStyle}">${safeLabel}</a>`
-        })
+        const makeToken = (label, url) => {
+          const safeLabel = escapeHtml((label || '').trim())
+          const safeUrl = escapeHtml((url || '').trim())
+          if (!safeLabel || !safeUrl) return ''
+          const token = `__RT_LINK_${tokens.length}__`
+          const html = `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" style="${linkStyle}">${safeLabel}</a>`
+          tokens.push({ token, html })
+          return token
+        }
 
-        escaped = escaped.replace(urlRegex, (url) => {
-          const safeUrl = escapeHtml(url)
-          return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" style="${linkStyle}">${safeUrl}</a>`
+        escaped = escaped.replace(pipeTagRegex, (m, label, url) => makeToken(label, url))
+        escaped = escaped.replace(mdTagRegex, (m, label, url) => makeToken(label, url))
+        escaped = escaped.replace(urlRegex, (url) => makeToken(url, url))
+
+        tokens.forEach(({ token, html }) => {
+          escaped = escaped.replace(token, html)
         })
 
         return escaped
@@ -4259,6 +4337,61 @@ ${wrapClose}`
       return changed
     }
 
+
+    function serializePreviewDoc(doc) {
+      if (!doc || !doc.documentElement) return ''
+      const doctype = doc.doctype ? (`<!doctype ${doc.doctype.name}>` + '\n') : '<!doctype html>\n'
+      return doctype + doc.documentElement.outerHTML
+    }
+
+    function syncOutputFromPreviewDoc(doc) {
+      const html = serializePreviewDoc(doc)
+      if (!html) return
+      el('output').value = html
+      el('bytes').textContent = `${new Blob([html]).size} bytes`
+    }
+
+    function enablePreviewInlineEditing(doc) {
+      if (!doc || !doc.body) return
+      try { doc.designMode = 'on' } catch (e) {}
+      doc.body.setAttribute('spellcheck', 'false')
+      const LINK_PASTE_COLOR = '#1a73e8'
+      const isHttpUrl = (text) => /^https?:\/\/\S+$/i.test((text || '').trim())
+
+      const linkFromPastedUrl = (evt) => {
+        const pasted = (evt.clipboardData && evt.clipboardData.getData('text/plain')) || ''
+        if (!isHttpUrl(pasted)) return false
+        const selection = doc.getSelection ? doc.getSelection() : null
+        if (!selection || selection.isCollapsed || !selection.toString().trim()) return false
+        const url = pasted.trim()
+        const success = doc.execCommand && doc.execCommand('createLink', false, url)
+        if (!success) return false
+        const range = selection.rangeCount ? selection.getRangeAt(0) : null
+        let anchor = null
+        if (range) {
+          const start = range.startContainer
+          const base = start && start.nodeType === Node.TEXT_NODE ? start.parentElement : start
+          if (base && base.closest) anchor = base.closest('a')
+        }
+        if (anchor) {
+          anchor.style.color = LINK_PASTE_COLOR
+          anchor.style.textDecoration = 'underline'
+          anchor.target = '_blank'
+          anchor.rel = 'noopener noreferrer'
+        }
+        evt.preventDefault()
+        return true
+      }
+
+      const sync = () => syncOutputFromPreviewDoc(doc)
+      doc.addEventListener('input', sync)
+      doc.addEventListener('keyup', sync)
+      doc.addEventListener('paste', (e) => {
+        linkFromPastedUrl(e)
+        setTimeout(sync, 0)
+      })
+    }
+
     function render() {
       try { window.__syncHeaderTextControls && window.__syncHeaderTextControls() } catch (e) {}
       const linkedChanged = syncLinkedBuilderBlocks()
@@ -4270,11 +4403,11 @@ ${wrapClose}`
       el('bytes').textContent = `${new Blob([html]).size} bytes`
 
       const iframe = el('preview')
-      iframe.srcdoc = html
       const doc = iframe.contentDocument || iframe.contentWindow.document
       doc.open()
       doc.write(html)
       doc.close()
+      enablePreviewInlineEditing(doc)
     }
 
     // ---- Actions ----
@@ -4513,7 +4646,7 @@ ${wrapClose}`
 
     // Seed defaults
     el('intro').value =
-      'Пример ссылки в тексте: [Документ|https://example.com]\nИли просто URL: https://openai.com'
+      'Пример ссылки в тексте: [Документ|https://example.com]\nили [Документ](https://example.com)\nИли просто URL: https://openai.com'
     el('linkColor').value = '#0b57d0'
 
     el('bgOuter').value = '#f6f7f9'
@@ -5287,8 +5420,8 @@ function numOr(v, fallback) {
 
         const sec = readSec();
         const mode = opts.forceMode || getMode();
-        const previewWidthPx = 725;
-        const previewInnerWidthPx = 693;
+        const previewWidthPx = 632;
+        const previewInnerWidthPx = 600;
         const reportWrapWidth = isPreview ? `${previewInnerWidthPx}px` : "100%";
         const reportWrapMaxWidth = isPreview ? `${previewInnerWidthPx}px` : "100%";
         const reportWrapMinWidth = isPreview ? `${previewInnerWidthPx}px` : "0";
@@ -5626,7 +5759,7 @@ if (sec.alert && reportState.alert) {
 
         const fragment = parts.join("\n").trim();
         const exportBodyBg = esc((ui.bodyBg?.value || reportState.ui?.bodyBg || "#ffffff").trim());
-        const full = `<!doctype html><html lang="ru"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta http-equiv="x-ua-compatible" content="ie=edge"><meta name="format-detection" content="telephone=no,date=no,address=no,email=no,url=no"><meta name="color-scheme" content="dark light"><meta name="supported-color-schemes" content="dark light"><title>${esc(reportState.title || "Отчёт")}</title><style>${css}</style></head><body id="body" bgcolor="${exportBodyBg}" style="margin:0;padding:0;background:${exportBodyBg};"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="${exportBodyBg}" style="width:100%;background:${exportBodyBg};"><tr><td align="center" style="padding:0;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;max-width:${isPreview ? "725px" : "100%"};"><tr><td bgcolor="${exportBodyBg}" style="padding:16px;background:${exportBodyBg};border-radius:12px;">${fragment}</td></tr></table></td></tr></table></body></html>`;
+        const full = `<!doctype html><html lang="ru"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta http-equiv="x-ua-compatible" content="ie=edge"><meta name="format-detection" content="telephone=no,date=no,address=no,email=no,url=no"><meta name="color-scheme" content="dark light"><meta name="supported-color-schemes" content="dark light"><title>${esc(reportState.title || "Отчёт")}</title><style>${css}</style></head><body id="body" bgcolor="${exportBodyBg}" style="margin:0;padding:0;background:${exportBodyBg};"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" bgcolor="${exportBodyBg}" style="width:100%;background:${exportBodyBg};"><tr><td align="center" style="padding:0;"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;max-width:${isPreview ? "632px" : "100%"};"><tr><td bgcolor="${exportBodyBg}" style="padding:16px;background:${exportBodyBg};border-radius:12px;">${fragment}</td></tr></table></td></tr></table></body></html>`;
         return { css, html: (mode === "fragment") ? fragment : full };
       }
 
@@ -5848,7 +5981,10 @@ if (sec.alert && reportState.alert) {
           out.push(cur)
           cur = next
         }
-        while (out.length && out[out.length - 1]?.tagName === 'HR') out.pop()
+        while (out.length && out[out.length - 1]?.tagName === 'HR') {
+          const trailingHr = out.pop()
+          if (trailingHr && trailingHr.parentNode) trailingHr.parentNode.removeChild(trailingHr)
+        }
         return out
       }
 
@@ -5857,12 +5993,12 @@ if (sec.alert && reportState.alert) {
 
         const sec = document.createElement('section')
         sec.className = 'csec'
-        sec.dataset.open = 'true'
+        sec.dataset.open = 'false'
 
         const head = document.createElement('button')
         head.className = 'csec__head'
         head.type = 'button'
-        head.setAttribute('aria-expanded', 'true')
+        head.setAttribute('aria-expanded', 'false')
 
         const titleWrap = document.createElement('span')
         titleWrap.className = 'csec__title'
@@ -5919,6 +6055,9 @@ if (sec.alert && reportState.alert) {
         rowPr.remove()
       }
 
+      Array.from(reportBody.children).forEach((node) => {
+        if (node.tagName === 'HR') node.remove()
+      })
 
       reportBody.dataset.accordionReady = '1'
     }
@@ -6021,47 +6160,11 @@ if (sec.alert && reportState.alert) {
           syncHeights()
         })
 
-        body.addEventListener('transitionend', (e) => {
-          if (e.propertyName !== 'max-height') return
-          syncHeights(true)
-        })
-
-        body.addEventListener('transitionend', (e) => {
-          if (e.propertyName !== 'max-height') return
-          syncHeights()
-        })
-
-        body.addEventListener('transitionend', (e) => {
-          if (e.propertyName !== 'max-height') return
-          syncHeights()
-        })
-
-        body.addEventListener('transitionend', (e) => {
-          if (e.propertyName !== 'max-height') return
-          syncHeights()
-        })
-
-        body.addEventListener('transitionend', (e) => {
-          if (e.propertyName !== 'max-height') return
-          syncHeights()
-        })
-
-        body.addEventListener('transitionend', (e) => {
-          if (e.propertyName !== 'max-height') return
-          syncHeights()
-        })
-
         if (!isReportSec) {
           const mo = new MutationObserver(() => syncHeights())
           mo.observe(body, { childList: true, subtree: true })
           sec.addEventListener('change', () => syncHeights())
           sec.addEventListener('input', () => syncHeights())
-          sec.addEventListener('change', () => syncHeights())
-          sec.addEventListener('input', () => syncHeights())
-
-          sec.addEventListener('change', () => syncHeights())
-          sec.addEventListener('input', () => syncHeights())
-
         }
 
       })
