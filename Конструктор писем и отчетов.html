@@ -2850,7 +2850,9 @@
   </div>
 ${wrapClose}`
               } else if (block.type === 'greeting') {
-                const text = el('greeting')?.value || block.text || 'Здравствуйте!'
+                const text = block.linkedField === 'greeting'
+                  ? (el('greeting')?.value || block.text || 'Здравствуйте!')
+                  : (block.text || 'Здравствуйте!')
                 const c = clampHexColor(el('builderGreetingColorText')?.value || el('builderGreetingColor')?.value || '#111111', '#111111')
                 const sz = Math.max(10, Math.min(40, parseInt((el('builderGreetingSize')?.value || '14').trim(), 10) || 14))
                 html += `${wrapOpen}
