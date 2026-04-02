@@ -1139,19 +1139,31 @@
     }
 
     #tab-report.report-layout {
+<<<<<<< codex-hix6lq
+      grid-template-columns: minmax(0, 1fr) 420px;
+=======
       grid-template-columns: 420px minmax(0, 1fr);
+>>>>>>> main
       gap: 16px;
     }
 
     #tab-report .report-pane-inputs {
+<<<<<<< codex-hix6lq
+      grid-column: 2;
+=======
       grid-column: 1;
+>>>>>>> main
       grid-row: 1;
       min-width: 0;
       align-self: start;
     }
 
     #tab-report .report-pane-preview {
+<<<<<<< codex-hix6lq
+      grid-column: 1;
+=======
       grid-column: 2;
+>>>>>>> main
       grid-row: 1;
       min-width: 0;
       align-self: start;
@@ -5860,7 +5872,10 @@ if (sec.alert && reportState.alert) {
           out.push(cur)
           cur = next
         }
-        while (out.length && out[out.length - 1]?.tagName === 'HR') out.pop()
+        while (out.length && out[out.length - 1]?.tagName === 'HR') {
+          const trailingHr = out.pop()
+          if (trailingHr && trailingHr.parentNode) trailingHr.parentNode.removeChild(trailingHr)
+        }
         return out
       }
 
@@ -5931,6 +5946,9 @@ if (sec.alert && reportState.alert) {
         rowPr.remove()
       }
 
+      Array.from(reportBody.children).forEach((node) => {
+        if (node.tagName === 'HR') node.remove()
+      })
 
       reportBody.dataset.accordionReady = '1'
     }
