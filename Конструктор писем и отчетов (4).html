@@ -1230,29 +1230,36 @@
     /* body */
     .csec__body {
       overflow: hidden;
+      will-change: max-height;
 
       height: auto;
       max-height: 9999px;
       /* будет переопределяться JS-ом */
       opacity: 1;
 
-      padding: 14px 16px 16px;
       background: rgba(255, 255, 255, .18);
 
       transition:
-        max-height .35s ease,
-        opacity .25s ease,
-        padding .25s ease,
+        max-height .42s cubic-bezier(.22, 1, .36, 1),
         background .25s ease;
+    }
+
+    .csec__inner {
+      padding: 14px 16px 16px;
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity .25s ease, transform .42s cubic-bezier(.22, 1, .36, 1);
     }
 
     /* collapsed */
     .csec[data-open="false"] .csec__body {
       max-height: 0;
-      opacity: 0;
-      padding-top: 0;
-      padding-bottom: 0;
       background: rgba(255, 255, 255, 0);
+    }
+
+    .csec[data-open="false"] .csec__inner {
+      opacity: 0;
+      transform: translateY(-4px);
     }
 
     .csec[data-open="false"] .csec__chev {
@@ -2405,8 +2412,18 @@
     let builderRows = [] // [{ id, layout, columns: [{ id, blocks: [...] }] }]
     let builderIdCounter = 1
     let builderImageEditTarget = null
+    let builderImagePickerLocked = false
     let builderActiveColumnId = null
     let headerReplaceMode = false
+
+    function openBuilderImagePicker(targetBlockId) {
+      const imageInput = el('builderImageInput')
+      if (!imageInput || builderImagePickerLocked) return
+      builderImagePickerLocked = true
+      builderImageEditTarget = targetBlockId || null
+      imageInput.value = ''
+      imageInput.click()
+    }
 
     function pruneEmptyBuilderRows() {
       if (!builderRows || builderRows.length <= 1) return
@@ -2658,7 +2675,6 @@
       }
       builderActiveColumnId = col.id
       renderBuilder()
-      render()
     }
 
     function createBlock(type, extra) {
@@ -2672,8 +2688,7 @@
           return {
             id: nextBuilderId('gr'),
             type: 'greeting',
-            text: el('greeting')?.value || 'Здравствуйте!',
-            linkedField: 'greeting',
+            text: 'Здравствуйте!',
           }
         case 'heading':
           return {
@@ -2685,8 +2700,7 @@
           return {
             id: nextBuilderId('p'),
             type: 'text',
-            text: el('intro')?.value || 'Основной текст письма',
-            linkedField: 'intro',
+            text: 'Основной текст письма',
           }
         case 'button':
           return {
@@ -2742,7 +2756,7 @@
       if (type === 'heading') {
         const col = columnId ? findBuilderColumn(columnId) : getActiveOrFallbackColumn()
         const blocks = (col && col.blocks) ? col.blocks : []
-        const introIdx = blocks.findIndex((b) => b && b.linkedField === 'intro')
+        const introIdx = blocks.findIndex((b) => b && b.type === 'text')
         if (introIdx >= 0) insertIndex = introIdx
       }
 
@@ -2832,11 +2846,11 @@
   </div>
 ${wrapClose}`
               } else if (block.type === 'greeting') {
-                const text = el('greeting')?.value || block.text || 'Здравствуйте!'
+                const text = block.text || 'Здравствуйте!'
                 const c = clampHexColor(el('builderGreetingColorText')?.value || el('builderGreetingColor')?.value || '#111111', '#111111')
                 const sz = Math.max(10, Math.min(40, parseInt((el('builderGreetingSize')?.value || '14').trim(), 10) || 14))
                 html += `${wrapOpen}
-  <div class="eb-text" data-block-id="${bid}" style="color:${escapeHtml(c)}; font-size:${sz}px;">${escapeHtml(text).replaceAll('\n', '<br>')}</div>
+  <div class="eb-text" data-block-id="${bid}" data-editable="true" style="color:${escapeHtml(c)}; font-size:${sz}px;">${escapeHtml(text).replaceAll('\n', '<br>')}</div>
 ${wrapClose}`
               } else if (block.type === 'heading') {
                 const c = clampHexColor(el('builderHeadingColorText')?.value || el('builderHeadingColor')?.value || '#111111', '#111111')
@@ -2847,11 +2861,9 @@ ${wrapClose}`
                 ).replaceAll('\n', '<br>')}</div>
 ${wrapClose}`
               } else if (block.type === 'text') {
-                const text = block.linkedField === 'intro' ? (el('intro')?.value || '') : (block.text || '')
+                const text = block.text || ''
                 html += `${wrapOpen}
-  <div class="eb-text" data-block-id="${bid}"${block.linkedField ? '' : ' data-editable="true"'}>${escapeHtml(
-                  text,
-                ).replaceAll('\n', '<br>')}</div>
+  <div class="eb-text" data-block-id="${bid}" data-editable="true">${escapeHtml(text).replaceAll('\n', '<br>')}</div>
 ${wrapClose}`
               } else if (block.type === 'image') {
                 const src = block.src ? escapeHtml(block.src) : ''
@@ -2923,7 +2935,6 @@ ${wrapClose}`
               if (idx >= 0) {
                 col.blocks.splice(idx, 1)
                 renderBuilder()
-                render()
                 return
               }
             }
@@ -2957,7 +2968,6 @@ ${wrapClose}`
           }
 
           renderBuilder()
-          render()
         })
 
         // Header block actions
@@ -2982,7 +2992,6 @@ ${wrapClose}`
             if (urlInput) urlInput.value = ''
             updateHeaderImagesInfo()
             renderBuilder()
-            render()
           }
         })
 
@@ -3024,7 +3033,7 @@ ${wrapClose}`
               return
             }
             block.url = safe
-            render()
+            renderBuilder()
             return
           }
 
@@ -3040,7 +3049,6 @@ ${wrapClose}`
             if (!Number.isFinite(n)) return
             block.size = Math.max(0, Math.min(200, n))
             renderBuilder()
-            render()
           }
         }, true)
       }
@@ -3111,7 +3119,6 @@ ${wrapClose}`
                     const [moved] = fromCol.blocks.splice(idx, 1)
                     toCol.blocks.push(moved)
                     renderBuilder()
-                    render()
                     return
                   }
                 }
@@ -3127,33 +3134,12 @@ ${wrapClose}`
       }
       // Клик по картинке для замены
       const imageEls = Array.from(canvas.querySelectorAll('.eb-image[data-block-id]'))
-      const imageInput = el('builderImageInput')
       imageEls.forEach((imgEl) => {
         imgEl.addEventListener('click', (e) => {
           e.preventDefault()
           const blockId = imgEl.getAttribute('data-block-id')
           if (!blockId) return
-
-          const url = window.prompt(
-            'Вставьте URL картинки (оставьте пустым, чтобы выбрать файл с устройства):',
-          )
-          if (url && url.trim()) {
-            const safe = safeUrl(url)
-            if (!safe) {
-              toast('Некорректный URL')
-              return
-            }
-            const block = findBuilderBlock(blockId)
-            if (block) {
-              block.src = safe
-              block.name = safe
-              renderBuilder()
-              render()
-            }
-          } else if (imageInput) {
-            builderImageEditTarget = blockId
-            imageInput.click()
-          }
+          openBuilderImagePicker(blockId)
         })
       })
     }
@@ -3175,7 +3161,7 @@ ${wrapClose}`
 
         btn.addEventListener('click', () => {
           if (type === 'image') {
-            if (imageInput) imageInput.click()
+            openBuilderImagePicker(null)
             return
           }
           addBlockByType(type, null)
@@ -3184,6 +3170,7 @@ ${wrapClose}`
 
       if (imageInput) {
         imageInput.addEventListener('change', async () => {
+          builderImagePickerLocked = false
           if (!(imageInput.files && imageInput.files.length)) return
           if (builderImageEditTarget) {
             const file = imageInput.files[0]
@@ -3194,7 +3181,6 @@ ${wrapClose}`
                 block.src = dataUrl
                 block.name = file.name
                 renderBuilder()
-                render()
               }
             } catch {
               toast('Не удалось прочитать файл')
@@ -3205,6 +3191,11 @@ ${wrapClose}`
           }
 
           await handleBodyFiles(imageInput.files, null)
+          imageInput.value = ''
+        })
+        imageInput.addEventListener('cancel', () => {
+          builderImagePickerLocked = false
+          builderImageEditTarget = null
           imageInput.value = ''
         })
       }
@@ -3250,7 +3241,6 @@ ${wrapClose}`
           })
           if (cols[0] && cols[0].id) builderActiveColumnId = cols[0].id
           renderBuilder()
-          render()
         })
       })
     }
@@ -3297,7 +3287,7 @@ ${wrapClose}`
               }
             }
           }
-          render()
+          renderBuilder()
         }
       }, true)
     }
@@ -3581,7 +3571,7 @@ ${wrapClose}`
               return ''
             }
             if (block.type === 'greeting') {
-              const greetingText = (data.greeting || block.text || '').trim()
+              const greetingText = (block.text || '').trim()
               if (!greetingText || data.hideGreeting) return ''
               return `<tr>
       <td style="padding:0 0 14px 0; color:${greetingColor}; font-size:${greetingSize}px; line-height:1.6;">
@@ -3598,7 +3588,7 @@ ${wrapClose}`
     </tr>`
             }
             if (block.type === 'text') {
-              const blockText = block.linkedField === 'intro' ? (data.intro || '') : (block.text || '')
+              const blockText = block.text || ''
               return `<tr>
       <td style="padding: 0 0 12px 0; font-size:14px; line-height:1.6; color:${textColor};">
         ${richTextToHtml(blockText, linkStyle)}
@@ -3965,10 +3955,7 @@ ${wrapClose}`
             </td>
           </tr>`
 
-      const hasLinkedGreetingBlock = hasBuilderBlock((b) => b.type === 'greeting')
-      const hasLinkedIntroBlock = hasBuilderBlock((b) => b.type === 'text' && b.linkedField === 'intro')
-
-      const greetingBlock = (data.hideGreeting || hasLinkedGreetingBlock)
+      const greetingBlock = data.hideGreeting
         ? ''
         : `<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"><tr><td style="padding:0 0 14px 0; color:${escapeHtml(data.textColor)};">${escapeHtml(data.greeting || '')}</td></tr></table>`
 
@@ -4226,37 +4213,8 @@ ${wrapClose}`
       }
     }
 
-    function syncLinkedBuilderBlocks() {
-      const intro = (el('intro')?.value || '').trim()
-      const greeting = (el('greeting')?.value || '').trim()
-      let changed = false
-
-      for (const row of builderRows) {
-        for (const col of row.columns || []) {
-          for (const block of col.blocks || []) {
-            if (block.type === 'greeting' && block.linkedField === 'greeting') {
-              if ((block.text || '') !== greeting) {
-                block.text = greeting
-                changed = true
-              }
-            }
-            if (block.type === 'text' && block.linkedField === 'intro') {
-              if ((block.text || '') !== intro) {
-                block.text = intro
-                changed = true
-              }
-            }
-          }
-        }
-      }
-
-      return changed
-    }
-
     function render() {
       try { window.__syncHeaderTextControls && window.__syncHeaderTextControls() } catch (e) {}
-      const linkedChanged = syncLinkedBuilderBlocks()
-      if (linkedChanged) renderBuilder()
       const data = collectData()
       const html = buildEmailHTML(data)
 
@@ -5878,12 +5836,15 @@ if (sec.alert && reportState.alert) {
         const body = document.createElement('div')
         body.className = 'csec__body'
         body.setAttribute('role', 'region')
+        const inner = document.createElement('div')
+        inner.className = 'csec__inner'
+        body.appendChild(inner)
 
         sec.appendChild(head)
         sec.appendChild(body)
 
         reportBody.insertBefore(sec, anchorNode)
-        nodes.forEach((n) => body.appendChild(n))
+        nodes.forEach((n) => inner.appendChild(n))
       }
 
       // 1) Тело письма
@@ -5927,7 +5888,7 @@ if (sec.alert && reportState.alert) {
       ;(root || document).querySelectorAll('.csec').forEach((sec) => {
         const body = sec.querySelector('.csec__body')
         if (!body) return
-        if (sec.dataset.open === 'true') body.style.maxHeight = body.scrollHeight + 'px'
+        if (sec.dataset.open === 'true') body.style.maxHeight = 'none'
         else body.style.maxHeight = '0px'
       })
     }
@@ -5953,116 +5914,97 @@ if (sec.alert && reportState.alert) {
         const head = sec.querySelector('.csec__head')
         const body = sec.querySelector('.csec__body')
         if (!head || !body) return
+        let inner = body.querySelector(':scope > .csec__inner')
+        if (!inner) {
+          inner = document.createElement('div')
+          inner.className = 'csec__inner'
+          while (body.firstChild) {
+            inner.appendChild(body.firstChild)
+          }
+          body.appendChild(inner)
+        }
 
-        const isReportSec = !!sec.closest('#tab-report')
+        let rafId = null
+        let isAnimating = false
+
         const syncHeights = () => {
-          requestAnimationFrame(() => {
-            if (sec.dataset.open === 'true') body.style.maxHeight = body.scrollHeight + 'px'
+          if (isAnimating) return
+          if (rafId) cancelAnimationFrame(rafId)
+          rafId = requestAnimationFrame(() => {
+            rafId = null
+            if (sec.dataset.open === 'true') body.style.maxHeight = 'none'
             refreshParentSections(sec)
+          })
+        }
+
+        const setInstantly = (expanded) => {
+          const prevTransition = body.style.transition
+          body.style.transition = 'none'
+          body.style.maxHeight = expanded ? 'none' : '0px'
+          requestAnimationFrame(() => { body.style.transition = prevTransition })
+        }
+
+        const animateTo = (expanded) => {
+          isAnimating = true
+          const prevMaxHeight = body.style.maxHeight
+          if (prevMaxHeight === 'none') {
+            body.style.maxHeight = body.scrollHeight + 'px'
+          }
+          const startHeight = body.getBoundingClientRect().height
+          const targetHeight = expanded ? body.scrollHeight : 0
+          body.style.maxHeight = startHeight + 'px'
+          requestAnimationFrame(() => {
+            body.style.maxHeight = targetHeight + 'px'
           })
         }
 
         const open = (animate = true) => {
           sec.dataset.open = 'true'
           head.setAttribute('aria-expanded', 'true')
-          if (!animate || isReportSec) {
-
-
-            const prevTransition = body.style.transition
-            body.style.transition = 'none'
-            body.style.maxHeight = body.scrollHeight + 'px'
-            requestAnimationFrame(() => { body.style.transition = prevTransition })
+          if (!animate) {
+            setInstantly(true)
             return
           }
-          body.style.maxHeight = '0px'
-          requestAnimationFrame(() => { body.style.maxHeight = body.scrollHeight + 'px' })
+          animateTo(true)
         }
 
-        const close = () => {
+        const close = (animate = true) => {
           sec.dataset.open = 'false'
           head.setAttribute('aria-expanded', 'false')
-          if (isReportSec) {
-            const prevTransition = body.style.transition
-            body.style.transition = 'none'
-            body.style.maxHeight = '0px'
-            requestAnimationFrame(() => { body.style.transition = prevTransition })
+          if (!animate) {
+            setInstantly(false)
             return
           }
-
-          body.style.maxHeight = body.scrollHeight + 'px'
-          requestAnimationFrame(() => { body.style.maxHeight = '0px' })
+          animateTo(false)
         }
 
         if (sec.dataset.open !== 'false') open(false)
-        else close()
+        else close(false)
 
         const headCheckboxes = head.querySelectorAll('input[type="checkbox"]')
         headCheckboxes.forEach((checkbox) => {
-          checkbox.addEventListener('click', (e) => {
-            e.stopPropagation()
-          })
-          checkbox.addEventListener('mousedown', (e) => {
-            e.stopPropagation()
-          })
-          checkbox.addEventListener('keydown', (e) => {
-            e.stopPropagation()
-          })
+          checkbox.addEventListener('click', (e) => e.stopPropagation())
+          checkbox.addEventListener('mousedown', (e) => e.stopPropagation())
+          checkbox.addEventListener('keydown', (e) => e.stopPropagation())
         })
 
         head.addEventListener('click', (e) => {
           if (e.target && e.target.closest('input[type="checkbox"]')) return
-          ;(sec.dataset.open === 'true') ? close() : open(true)
-          syncHeights()
-          setTimeout(syncHeights, 380)
-        })
-
-        body.addEventListener('transitionend', (e) => {
-          if (e.propertyName !== 'max-height') return
+          ;(sec.dataset.open === 'true') ? close(true) : open(true)
           syncHeights()
         })
 
         body.addEventListener('transitionend', (e) => {
           if (e.propertyName !== 'max-height') return
-          syncHeights(true)
-        })
-
-        body.addEventListener('transitionend', (e) => {
-          if (e.propertyName !== 'max-height') return
+          isAnimating = false
+          if (sec.dataset.open === 'true') body.style.maxHeight = 'none'
           syncHeights()
         })
 
-        body.addEventListener('transitionend', (e) => {
-          if (e.propertyName !== 'max-height') return
-          syncHeights()
-        })
-
-        body.addEventListener('transitionend', (e) => {
-          if (e.propertyName !== 'max-height') return
-          syncHeights()
-        })
-
-        body.addEventListener('transitionend', (e) => {
-          if (e.propertyName !== 'max-height') return
-          syncHeights()
-        })
-
-        body.addEventListener('transitionend', (e) => {
-          if (e.propertyName !== 'max-height') return
-          syncHeights()
-        })
-
-        if (!isReportSec) {
-          const mo = new MutationObserver(() => syncHeights())
-          mo.observe(body, { childList: true, subtree: true })
-          sec.addEventListener('change', () => syncHeights())
-          sec.addEventListener('input', () => syncHeights())
-          sec.addEventListener('change', () => syncHeights())
-          sec.addEventListener('input', () => syncHeights())
-
-          sec.addEventListener('change', () => syncHeights())
-          sec.addEventListener('input', () => syncHeights())
-
-        }
+        const mo = new MutationObserver(() => syncHeights())
+        mo.observe(body, { childList: true, subtree: true })
+        sec.addEventListener('change', () => syncHeights())
+        sec.addEventListener('input', () => syncHeights())
 
       })
     }
