@@ -281,6 +281,8 @@
 
     .rich-input-wrap {
       position: relative;
+
+      width: 100%;
     }
 
     .rich-input-highlight {
@@ -308,7 +310,7 @@
       position: relative;
       z-index: 1;
       background: transparent !important;
-      color: #111111;
+      color: transparent;
       caret-color: #111111;
     }
 
@@ -4685,11 +4687,8 @@ ${wrapClose}`
 
     el('buttonText').value = 'Открыть документ'
 
-    // ;['intro', 'headerDesc'].forEach((id) => {
-    //   const node = el(id)
-    //   if (!node) return
-    //   node.dispatchEvent(new Event('input', { bubbles: true }))
-    // })
+    const introRichInput = el('intro')
+    if (introRichInput) setupRichTextInputHighlight(introRichInput)
 
     el('buttonUrl').value = 'https://example.com'
     el('buttonBgMode').value = 'solid'
