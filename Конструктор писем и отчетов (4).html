@@ -3176,7 +3176,7 @@ ${wrapClose}`
         })
       }
       // Клик по картинке для замены
-      const imageEls = Array.from(canvas.querySelectorAll('.eb-image[data-block-id]'))
+      const imageEls = Array.from(canvas.querySelectorAll('.eb-image[data-edit-image="true"][data-block-id]'))
       imageEls.forEach((imgEl) => {
         imgEl.addEventListener('click', (e) => {
           e.preventDefault()
