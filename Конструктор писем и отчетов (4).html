@@ -3415,6 +3415,7 @@ ${wrapClose}`
       const outLines = lines.map((line) => {
         const anchorTokens = []
         const compactTokens = []
+        const bracketTokens = []
         const withAnchorTokens = line.replace(anchorRegex, (m, hrefDouble, hrefSingle, anchorText) => {
           const hrefRaw = (hrefDouble || hrefSingle || '').trim()
           const hrefSafe = safeUrl(hrefRaw)
@@ -3440,19 +3441,18 @@ ${wrapClose}`
 
         let escaped = escapeHtml(withCompactTokens)
 
-        escaped = escaped.replace(tagRegex, (m, label, url) => {
+        const withBracketTokens = withCompactTokens.replace(tagRegex, (m, label, url) => {
           const safeLabel = escapeHtml(label.trim())
           const parsedUrl = safeUrl(url.trim())
           if (!parsedUrl) return safeLabel
-          return `<a href="${escapeHtml(parsedUrl)}" target="_blank" rel="noopener noreferrer" style="${linkStyle}">${safeLabel}</a>`
+          const token = `__RT_BRACKET_${bracketTokens.length}__`
+          bracketTokens.push(
+            `<a href="${escapeHtml(parsedUrl)}" target="_blank" rel="noopener noreferrer" style="${linkStyle}">${safeLabel}</a>`,
+          )
+          return token
         })
 
-        escaped = escaped.replace(compactRegex, (m, url, label) => {
-          const safeLabel = escapeHtml((label || '').trim())
-          const parsedUrl = safeUrl((url || '').trim())
-          if (!parsedUrl) return safeLabel
-          return `<a href="${escapeHtml(parsedUrl)}" target="_blank" rel="noopener noreferrer" style="${linkStyle}">${safeLabel || escapeHtml(parsedUrl)}</a>`
-        })
+        let escaped = escapeHtml(withBracketTokens)
 
         escaped = escaped.replace(urlRegex, (url) => {
           const parsedUrl = safeUrl(url)
@@ -3461,10 +3461,14 @@ ${wrapClose}`
           return `<a href="${escapedUrl}" target="_blank" rel="noopener noreferrer" style="${linkStyle}">${escapedUrl}</a>`
         })
 
+
+        bracketTokens.forEach((anchorHtml, idx) => {
+          escaped = escaped.replaceAll(`__RT_BRACKET_${idx}__`, anchorHtml)
+        })
+
         compactTokens.forEach((anchorHtml, idx) => {
           escaped = escaped.replaceAll(`__RT_COMPACT_${idx}__`, anchorHtml)
         })
-
 
         anchorTokens.forEach((anchorHtml, idx) => {
           escaped = escaped.replaceAll(`__RT_ANCHOR_${idx}__`, anchorHtml)
@@ -4680,6 +4684,12 @@ ${wrapClose}`
     el('headerDescColorText').value = el('textColor').value
 
     el('buttonText').value = 'Открыть документ'
+
+    ;['intro', 'headerDesc'].forEach((id) => {
+      const node = el(id)
+      if (!node) return
+      node.dispatchEvent(new Event('input', { bubbles: true }))
+    })
     el('buttonUrl').value = 'https://example.com'
     el('buttonBgMode').value = 'solid'
     el('buttonGradDir').value = 'lr'
