@@ -5975,7 +5975,6 @@ if (sec.alert && reportState.alert) {
 
         let rafId = null
         let isAnimating = false
-
         const syncHeights = () => {
           if (isAnimating) return
           if (rafId) cancelAnimationFrame(rafId)
@@ -6054,7 +6053,6 @@ if (sec.alert && reportState.alert) {
         mo.observe(body, { childList: true, subtree: true })
         sec.addEventListener('change', () => syncHeights())
         sec.addEventListener('input', () => syncHeights())
-
       })
     }
 
