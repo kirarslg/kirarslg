@@ -5973,10 +5973,8 @@ if (sec.alert && reportState.alert) {
           body.appendChild(inner)
         }
 
-        const isReportSec = !!sec.closest('#tab-report')
         let rafId = null
         let isAnimating = false
-
         const syncHeights = () => {
           if (isAnimating) return
           if (rafId) cancelAnimationFrame(rafId)
@@ -6011,7 +6009,7 @@ if (sec.alert && reportState.alert) {
         const open = (animate = true) => {
           sec.dataset.open = 'true'
           head.setAttribute('aria-expanded', 'true')
-          if (!animate || isReportSec) {
+          if (!animate) {
             setInstantly(true)
             return
           }
@@ -6021,7 +6019,7 @@ if (sec.alert && reportState.alert) {
         const close = (animate = true) => {
           sec.dataset.open = 'false'
           head.setAttribute('aria-expanded', 'false')
-          if (!animate || isReportSec) {
+          if (!animate) {
             setInstantly(false)
             return
           }
@@ -6051,13 +6049,10 @@ if (sec.alert && reportState.alert) {
           syncHeights()
         })
 
-        if (!isReportSec) {
-          const mo = new MutationObserver(() => syncHeights())
-          mo.observe(body, { childList: true, subtree: true })
-          sec.addEventListener('change', () => syncHeights())
-          sec.addEventListener('input', () => syncHeights())
-        }
-
+        const mo = new MutationObserver(() => syncHeights())
+        mo.observe(body, { childList: true, subtree: true })
+        sec.addEventListener('change', () => syncHeights())
+        sec.addEventListener('input', () => syncHeights())
       })
     }
 
