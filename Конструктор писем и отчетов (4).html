@@ -1230,29 +1230,36 @@
     /* body */
     .csec__body {
       overflow: hidden;
+      will-change: max-height;
 
       height: auto;
       max-height: 9999px;
       /* будет переопределяться JS-ом */
       opacity: 1;
 
-      padding: 14px 16px 16px;
       background: rgba(255, 255, 255, .18);
 
       transition:
-        max-height .35s ease,
-        opacity .25s ease,
-        padding .25s ease,
+        max-height .42s cubic-bezier(.22, 1, .36, 1),
         background .25s ease;
+    }
+
+    .csec__inner {
+      padding: 14px 16px 16px;
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity .25s ease, transform .42s cubic-bezier(.22, 1, .36, 1);
     }
 
     /* collapsed */
     .csec[data-open="false"] .csec__body {
       max-height: 0;
-      opacity: 0;
-      padding-top: 0;
-      padding-bottom: 0;
       background: rgba(255, 255, 255, 0);
+    }
+
+    .csec[data-open="false"] .csec__inner {
+      opacity: 0;
+      transform: translateY(-4px);
     }
 
     .csec[data-open="false"] .csec__chev {
@@ -5878,12 +5885,15 @@ if (sec.alert && reportState.alert) {
         const body = document.createElement('div')
         body.className = 'csec__body'
         body.setAttribute('role', 'region')
+        const inner = document.createElement('div')
+        inner.className = 'csec__inner'
+        body.appendChild(inner)
 
         sec.appendChild(head)
         sec.appendChild(body)
 
         reportBody.insertBefore(sec, anchorNode)
-        nodes.forEach((n) => body.appendChild(n))
+        nodes.forEach((n) => inner.appendChild(n))
       }
 
       // 1) Тело письма
@@ -5927,7 +5937,7 @@ if (sec.alert && reportState.alert) {
       ;(root || document).querySelectorAll('.csec').forEach((sec) => {
         const body = sec.querySelector('.csec__body')
         if (!body) return
-        if (sec.dataset.open === 'true') body.style.maxHeight = body.scrollHeight + 'px'
+        if (sec.dataset.open === 'true') body.style.maxHeight = 'none'
         else body.style.maxHeight = '0px'
       })
     }
@@ -5955,10 +5965,37 @@ if (sec.alert && reportState.alert) {
         if (!head || !body) return
 
         const isReportSec = !!sec.closest('#tab-report')
+        let rafId = null
+        let isAnimating = false
+
         const syncHeights = () => {
-          requestAnimationFrame(() => {
-            if (sec.dataset.open === 'true') body.style.maxHeight = body.scrollHeight + 'px'
+          if (isAnimating) return
+          if (rafId) cancelAnimationFrame(rafId)
+          rafId = requestAnimationFrame(() => {
+            rafId = null
+            if (sec.dataset.open === 'true') body.style.maxHeight = 'none'
             refreshParentSections(sec)
+          })
+        }
+
+        const setInstantly = (expanded) => {
+          const prevTransition = body.style.transition
+          body.style.transition = 'none'
+          body.style.maxHeight = expanded ? 'none' : '0px'
+          requestAnimationFrame(() => { body.style.transition = prevTransition })
+        }
+
+        const animateTo = (expanded) => {
+          isAnimating = true
+          const prevMaxHeight = body.style.maxHeight
+          if (prevMaxHeight === 'none') {
+            body.style.maxHeight = body.scrollHeight + 'px'
+          }
+          const startHeight = body.getBoundingClientRect().height
+          const targetHeight = expanded ? body.scrollHeight : 0
+          body.style.maxHeight = startHeight + 'px'
+          requestAnimationFrame(() => {
+            body.style.maxHeight = targetHeight + 'px'
           })
         }
 
@@ -5966,88 +6003,42 @@ if (sec.alert && reportState.alert) {
           sec.dataset.open = 'true'
           head.setAttribute('aria-expanded', 'true')
           if (!animate || isReportSec) {
-
-
-            const prevTransition = body.style.transition
-            body.style.transition = 'none'
-            body.style.maxHeight = body.scrollHeight + 'px'
-            requestAnimationFrame(() => { body.style.transition = prevTransition })
+            setInstantly(true)
             return
           }
-          body.style.maxHeight = '0px'
-          requestAnimationFrame(() => { body.style.maxHeight = body.scrollHeight + 'px' })
+          animateTo(true)
         }
 
-        const close = () => {
+        const close = (animate = true) => {
           sec.dataset.open = 'false'
           head.setAttribute('aria-expanded', 'false')
-          if (isReportSec) {
-            const prevTransition = body.style.transition
-            body.style.transition = 'none'
-            body.style.maxHeight = '0px'
-            requestAnimationFrame(() => { body.style.transition = prevTransition })
+          if (!animate || isReportSec) {
+            setInstantly(false)
             return
           }
-
-          body.style.maxHeight = body.scrollHeight + 'px'
-          requestAnimationFrame(() => { body.style.maxHeight = '0px' })
+          animateTo(false)
         }
 
         if (sec.dataset.open !== 'false') open(false)
-        else close()
+        else close(false)
 
         const headCheckboxes = head.querySelectorAll('input[type="checkbox"]')
         headCheckboxes.forEach((checkbox) => {
-          checkbox.addEventListener('click', (e) => {
-            e.stopPropagation()
-          })
-          checkbox.addEventListener('mousedown', (e) => {
-            e.stopPropagation()
-          })
-          checkbox.addEventListener('keydown', (e) => {
-            e.stopPropagation()
-          })
+          checkbox.addEventListener('click', (e) => e.stopPropagation())
+          checkbox.addEventListener('mousedown', (e) => e.stopPropagation())
+          checkbox.addEventListener('keydown', (e) => e.stopPropagation())
         })
 
         head.addEventListener('click', (e) => {
           if (e.target && e.target.closest('input[type="checkbox"]')) return
-          ;(sec.dataset.open === 'true') ? close() : open(true)
-          syncHeights()
-          setTimeout(syncHeights, 380)
-        })
-
-        body.addEventListener('transitionend', (e) => {
-          if (e.propertyName !== 'max-height') return
+          ;(sec.dataset.open === 'true') ? close(true) : open(true)
           syncHeights()
         })
 
         body.addEventListener('transitionend', (e) => {
           if (e.propertyName !== 'max-height') return
-          syncHeights(true)
-        })
-
-        body.addEventListener('transitionend', (e) => {
-          if (e.propertyName !== 'max-height') return
-          syncHeights()
-        })
-
-        body.addEventListener('transitionend', (e) => {
-          if (e.propertyName !== 'max-height') return
-          syncHeights()
-        })
-
-        body.addEventListener('transitionend', (e) => {
-          if (e.propertyName !== 'max-height') return
-          syncHeights()
-        })
-
-        body.addEventListener('transitionend', (e) => {
-          if (e.propertyName !== 'max-height') return
-          syncHeights()
-        })
-
-        body.addEventListener('transitionend', (e) => {
-          if (e.propertyName !== 'max-height') return
+          isAnimating = false
+          if (sec.dataset.open === 'true') body.style.maxHeight = 'none'
           syncHeights()
         })
 
@@ -6056,12 +6047,6 @@ if (sec.alert && reportState.alert) {
           mo.observe(body, { childList: true, subtree: true })
           sec.addEventListener('change', () => syncHeights())
           sec.addEventListener('input', () => syncHeights())
-          sec.addEventListener('change', () => syncHeights())
-          sec.addEventListener('input', () => syncHeights())
-
-          sec.addEventListener('change', () => syncHeights())
-          sec.addEventListener('input', () => syncHeights())
-
         }
 
       })
