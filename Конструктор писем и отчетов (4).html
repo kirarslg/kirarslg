@@ -2412,8 +2412,18 @@
     let builderRows = [] // [{ id, layout, columns: [{ id, blocks: [...] }] }]
     let builderIdCounter = 1
     let builderImageEditTarget = null
+    let builderImagePickerLocked = false
     let builderActiveColumnId = null
     let headerReplaceMode = false
+
+    function openBuilderImagePicker(targetBlockId) {
+      const imageInput = el('builderImageInput')
+      if (!imageInput || builderImagePickerLocked) return
+      builderImagePickerLocked = true
+      builderImageEditTarget = targetBlockId || null
+      imageInput.value = ''
+      imageInput.click()
+    }
 
     function pruneEmptyBuilderRows() {
       if (!builderRows || builderRows.length <= 1) return
@@ -3124,15 +3134,12 @@ ${wrapClose}`
       }
       // Клик по картинке для замены
       const imageEls = Array.from(canvas.querySelectorAll('.eb-image[data-block-id]'))
-      const imageInput = el('builderImageInput')
       imageEls.forEach((imgEl) => {
         imgEl.addEventListener('click', (e) => {
           e.preventDefault()
           const blockId = imgEl.getAttribute('data-block-id')
           if (!blockId) return
-          if (!imageInput) return
-          builderImageEditTarget = blockId
-          imageInput.click()
+          openBuilderImagePicker(blockId)
         })
       })
     }
@@ -3154,7 +3161,7 @@ ${wrapClose}`
 
         btn.addEventListener('click', () => {
           if (type === 'image') {
-            if (imageInput) imageInput.click()
+            openBuilderImagePicker(null)
             return
           }
           addBlockByType(type, null)
@@ -3163,6 +3170,7 @@ ${wrapClose}`
 
       if (imageInput) {
         imageInput.addEventListener('change', async () => {
+          builderImagePickerLocked = false
           if (!(imageInput.files && imageInput.files.length)) return
           if (builderImageEditTarget) {
             const file = imageInput.files[0]
@@ -3183,6 +3191,11 @@ ${wrapClose}`
           }
 
           await handleBodyFiles(imageInput.files, null)
+          imageInput.value = ''
+        })
+        imageInput.addEventListener('cancel', () => {
+          builderImagePickerLocked = false
+          builderImageEditTarget = null
           imageInput.value = ''
         })
       }
