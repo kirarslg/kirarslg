@@ -2413,6 +2413,9 @@
     let builderIdCounter = 1
     let builderImageEditTarget = null
     let builderImagePickerLocked = false
+    let builderHeaderImages = [] // [{ src, name }]
+    let builderHeaderReplaceMode = false
+    let builderHeaderPickerLocked = false
     let builderActiveColumnId = null
     let headerReplaceMode = false
 
@@ -2423,6 +2426,53 @@
       builderImageEditTarget = targetBlockId || null
       imageInput.value = ''
       imageInput.click()
+    }
+
+    function getBuilderHeaderFileInput() {
+      let input = document.getElementById('builderHeaderFileInput')
+      if (input) return input
+      input = document.createElement('input')
+      input.id = 'builderHeaderFileInput'
+      input.type = 'file'
+      input.accept = 'image/*'
+      input.multiple = true
+      input.style.display = 'none'
+      document.body.appendChild(input)
+      return input
+    }
+
+    async function handleBuilderHeaderFiles(fileList) {
+      const files = fileList ? Array.from(fileList) : []
+      if (!files.length) return
+
+      const maxBytes = 900 * 1024
+      const newImages = []
+
+      for (const file of files) {
+        if (!file.type || !file.type.startsWith('image/')) continue
+        if (file.size > maxBytes) {
+          toast(`Файл "${file.name}" слишком большой (для рассылок лучше URL).`)
+        }
+        try {
+          const dataUrl = await fileToDataUrl(file)
+          newImages.push({ src: dataUrl, name: file.name })
+        } catch {
+          toast(`Не удалось прочитать файл "${file.name}"`)
+        }
+      }
+
+      if (!newImages.length) return
+      builderHeaderImages = builderHeaderReplaceMode ? newImages.slice(0, 1) : builderHeaderImages.concat(newImages)
+      renderBuilder()
+    }
+
+    function openBuilderHeaderPicker(replaceMode) {
+      const input = getBuilderHeaderFileInput()
+      if (!input || builderHeaderPickerLocked) return
+      builderHeaderPickerLocked = true
+      builderHeaderReplaceMode = !!replaceMode
+      input.value = ''
+      input.click()
     }
 
     function pruneEmptyBuilderRows() {
@@ -2835,7 +2885,7 @@
               const wrapClose = `</div>`
 
               if (block.type === 'header') {
-                const src = (headerImages && headerImages[0] && headerImages[0].src) ? headerImages[0].src : safeUrl(el('headerImageUrl')?.value || '')
+                const src = (builderHeaderImages && builderHeaderImages[0] && builderHeaderImages[0].src) ? builderHeaderImages[0].src : ''
                 html += `${wrapOpen}
   <div class="eb-image" data-block-id="${bid}" style="padding:8px; border:1px dashed #9fb3cf; background:#f5f8ff;">
     ${src ? `<img src="${escapeHtml(src)}" alt="Шапка" style="max-height:120px; object-fit:cover;">` : '<span>Шапка письма: выберите изображение с компьютера</span>'}
@@ -2976,21 +3026,14 @@ ${wrapClose}`
           if (up) {
             e.preventDefault()
             e.stopPropagation()
-            const fileInput = el('headerImageFile')
-            if (fileInput) {
-              headerReplaceMode = true
-              fileInput.click()
-            }
+            openBuilderHeaderPicker(true)
             return
           }
           const rm = e.target && e.target.closest && e.target.closest('[data-header-remove]')
           if (rm) {
             e.preventDefault()
             e.stopPropagation()
-            headerImages = []
-            const urlInput = el('headerImageUrl')
-            if (urlInput) urlInput.value = ''
-            updateHeaderImagesInfo()
+            builderHeaderImages = []
             renderBuilder()
           }
         })
@@ -3149,6 +3192,7 @@ ${wrapClose}`
         document.querySelectorAll('.builder-block-btn[data-block-type]'),
       )
       const imageInput = el('builderImageInput')
+      const builderHeaderInput = getBuilderHeaderFileInput()
 
       buttons.forEach((btn) => {
         const type = btn.getAttribute('data-block-type')
@@ -3197,6 +3241,22 @@ ${wrapClose}`
           builderImagePickerLocked = false
           builderImageEditTarget = null
           imageInput.value = ''
+        })
+      }
+
+      if (builderHeaderInput && !builderHeaderInput.dataset.bound) {
+        builderHeaderInput.dataset.bound = '1'
+        builderHeaderInput.addEventListener('change', async () => {
+          builderHeaderPickerLocked = false
+          if (!(builderHeaderInput.files && builderHeaderInput.files.length)) return
+          await handleBuilderHeaderFiles(builderHeaderInput.files)
+          builderHeaderInput.value = ''
+          builderHeaderReplaceMode = false
+        })
+        builderHeaderInput.addEventListener('cancel', () => {
+          builderHeaderPickerLocked = false
+          builderHeaderReplaceMode = false
+          builderHeaderInput.value = ''
         })
       }
     }
@@ -6005,6 +6065,7 @@ if (sec.alert && reportState.alert) {
         mo.observe(body, { childList: true, subtree: true })
         sec.addEventListener('change', () => syncHeights())
         sec.addEventListener('input', () => syncHeights())
+
       })
     }
 
