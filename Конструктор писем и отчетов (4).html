@@ -281,6 +281,7 @@
 
     .rich-input-wrap {
       position: relative;
+
       width: 100%;
     }
 
@@ -4660,6 +4661,13 @@ ${wrapClose}`
       })
     })
 
+    // Rich-input highlight is intentionally disabled by default to avoid UI interaction regressions.
+    // Enable only after full cross-browser validation:
+    // document.querySelectorAll('textarea[data-rich-links="true"]').forEach((node) => {
+    //   setupRichTextInputHighlight(node)
+    // })
+
+
     // Seed defaults
     el('intro').value =
       'Пример ссылки в тексте: [Документ|https://example.com]\nИли просто URL: https://openai.com'
@@ -4681,6 +4689,7 @@ ${wrapClose}`
 
     const introRichInput = el('intro')
     if (introRichInput) setupRichTextInputHighlight(introRichInput)
+
     el('buttonUrl').value = 'https://example.com'
     el('buttonBgMode').value = 'solid'
     el('buttonGradDir').value = 'lr'
