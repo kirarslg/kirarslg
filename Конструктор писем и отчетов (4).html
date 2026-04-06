@@ -3360,8 +3360,9 @@ ${wrapClose}`
         .replaceAll("'", '&#039;')
 
     // Convert text with:
-    // 1) [label|https://...] -> <a>
-    // 2) raw URLs -> <a>
+    // 1) <a href="https://...">Текст</a>
+    // 2) [label|https://...] -> <a>
+    // 3) raw URLs -> <a>
     // and preserve newlines as <br>
     function richTextToHtml(input, linkStyle) {
       const text = input ?? ''
@@ -3369,19 +3370,40 @@ ${wrapClose}`
 
       const urlRegex = /(https?:\/\/[^\s<>"']+)/g
       const tagRegex = /\[([^\]|]+)\|(\s*https?:\/\/[^\]\s]+)\]/g
+      const anchorRegex = /<a\b[^>]*href\s*=\s*(?:"([^"]+)"|'([^']+)')[^>]*>([\s\S]*?)<\/a>/gi
 
       const outLines = lines.map((line) => {
-        let escaped = escapeHtml(line)
+        const anchorTokens = []
+        const withAnchorTokens = line.replace(anchorRegex, (m, hrefDouble, hrefSingle, anchorText) => {
+          const hrefRaw = (hrefDouble || hrefSingle || '').trim()
+          const hrefSafe = safeUrl(hrefRaw)
+          if (!hrefSafe) return escapeHtml(anchorText || '')
+          const labelSafe = escapeHtml((anchorText || '').trim() || hrefSafe)
+          const token = `__RT_ANCHOR_${anchorTokens.length}__`
+          anchorTokens.push(
+            `<a href="${escapeHtml(hrefSafe)}" target="_blank" rel="noopener noreferrer" style="${linkStyle}">${labelSafe}</a>`,
+          )
+          return token
+        })
+
+        let escaped = escapeHtml(withAnchorTokens)
 
         escaped = escaped.replace(tagRegex, (m, label, url) => {
           const safeLabel = escapeHtml(label.trim())
-          const safeUrl = escapeHtml(url.trim())
-          return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" style="${linkStyle}">${safeLabel}</a>`
+          const parsedUrl = safeUrl(url.trim())
+          if (!parsedUrl) return safeLabel
+          return `<a href="${escapeHtml(parsedUrl)}" target="_blank" rel="noopener noreferrer" style="${linkStyle}">${safeLabel}</a>`
         })
 
         escaped = escaped.replace(urlRegex, (url) => {
-          const safeUrl = escapeHtml(url)
-          return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" style="${linkStyle}">${safeUrl}</a>`
+          const parsedUrl = safeUrl(url)
+          if (!parsedUrl) return escapeHtml(url)
+          const escapedUrl = escapeHtml(parsedUrl)
+          return `<a href="${escapedUrl}" target="_blank" rel="noopener noreferrer" style="${linkStyle}">${escapedUrl}</a>`
+        })
+
+        anchorTokens.forEach((anchorHtml, idx) => {
+          escaped = escaped.replaceAll(`__RT_ANCHOR_${idx}__`, anchorHtml)
         })
 
         return escaped
