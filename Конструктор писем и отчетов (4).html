@@ -308,7 +308,7 @@
       position: relative;
       z-index: 1;
       background: transparent !important;
-      color: transparent;
+      color: #111111;
       caret-color: #111111;
     }
 
@@ -3439,8 +3439,6 @@ ${wrapClose}`
           return token
         })
 
-        let escaped = escapeHtml(withCompactTokens)
-
         const withBracketTokens = withCompactTokens.replace(tagRegex, (m, label, url) => {
           const safeLabel = escapeHtml(label.trim())
           const parsedUrl = safeUrl(url.trim())
@@ -3460,7 +3458,6 @@ ${wrapClose}`
           const escapedUrl = escapeHtml(parsedUrl)
           return `<a href="${escapedUrl}" target="_blank" rel="noopener noreferrer" style="${linkStyle}">${escapedUrl}</a>`
         })
-
 
         bracketTokens.forEach((anchorHtml, idx) => {
           escaped = escaped.replaceAll(`__RT_BRACKET_${idx}__`, anchorHtml)
@@ -4662,9 +4659,12 @@ ${wrapClose}`
       })
     })
 
-    document.querySelectorAll('textarea[data-rich-links="true"]').forEach((node) => {
-      setupRichTextInputHighlight(node)
-    })
+    // Rich-input highlight is intentionally disabled by default to avoid UI interaction regressions.
+    // Enable only after full cross-browser validation:
+    // document.querySelectorAll('textarea[data-rich-links="true"]').forEach((node) => {
+    //   setupRichTextInputHighlight(node)
+    // })
+
 
     // Seed defaults
     el('intro').value =
@@ -4685,11 +4685,12 @@ ${wrapClose}`
 
     el('buttonText').value = 'Открыть документ'
 
-    ;['intro', 'headerDesc'].forEach((id) => {
-      const node = el(id)
-      if (!node) return
-      node.dispatchEvent(new Event('input', { bubbles: true }))
-    })
+    // ;['intro', 'headerDesc'].forEach((id) => {
+    //   const node = el(id)
+    //   if (!node) return
+    //   node.dispatchEvent(new Event('input', { bubbles: true }))
+    // })
+
     el('buttonUrl').value = 'https://example.com'
     el('buttonBgMode').value = 'solid'
     el('buttonGradDir').value = 'lr'
