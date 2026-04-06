@@ -3130,26 +3130,9 @@ ${wrapClose}`
           e.preventDefault()
           const blockId = imgEl.getAttribute('data-block-id')
           if (!blockId) return
-
-          const url = window.prompt(
-            'Вставьте URL картинки (оставьте пустым, чтобы выбрать файл с устройства):',
-          )
-          if (url && url.trim()) {
-            const safe = safeUrl(url)
-            if (!safe) {
-              toast('Некорректный URL')
-              return
-            }
-            const block = findBuilderBlock(blockId)
-            if (block) {
-              block.src = safe
-              block.name = safe
-              renderBuilder()
-            }
-          } else if (imageInput) {
-            builderImageEditTarget = blockId
-            imageInput.click()
-          }
+          if (!imageInput) return
+          builderImageEditTarget = blockId
+          imageInput.click()
         })
       })
     }
