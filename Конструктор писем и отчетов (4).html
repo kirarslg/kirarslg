@@ -5963,6 +5963,15 @@ if (sec.alert && reportState.alert) {
         const head = sec.querySelector('.csec__head')
         const body = sec.querySelector('.csec__body')
         if (!head || !body) return
+        let inner = body.querySelector(':scope > .csec__inner')
+        if (!inner) {
+          inner = document.createElement('div')
+          inner.className = 'csec__inner'
+          while (body.firstChild) {
+            inner.appendChild(body.firstChild)
+          }
+          body.appendChild(inner)
+        }
 
         const isReportSec = !!sec.closest('#tab-report')
         let rafId = null
