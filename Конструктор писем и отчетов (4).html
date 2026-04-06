@@ -279,6 +279,43 @@
       padding: 10px 12px !important;
     }
 
+    .rich-input-wrap {
+      position: relative;
+    }
+
+    .rich-input-highlight {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      padding: 10px 12px;
+      font: inherit;
+      font-size: 13px;
+      line-height: 1.4;
+      color: transparent;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .rich-input-highlight .rich-link-label {
+      color: #0F860F;
+    }
+
+    textarea.rich-input-target {
+      position: relative;
+      z-index: 1;
+      background: transparent !important;
+      color: transparent;
+      caret-color: #111111;
+    }
+
+    textarea.rich-input-target::placeholder {
+      color: #9BA6B1;
+    }
+
     .row {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -1575,7 +1612,7 @@
                 <input type="checkbox" id="headerDescEnabled" />
                 <span>Добавить текст</span>
               </label>
-              <textarea id="headerDesc" placeholder="Текст в шапке"
+              <textarea id="headerDesc" data-rich-links="true" placeholder="Текст в шапке"
                 style="display:none; margin-top: 8px; min-height:84px;"></textarea>
 
               <div class="row">
@@ -1632,8 +1669,9 @@
 
   <div class="csec__body" role="region">
     <label for="intro" class="label-min">Основной текст (поддержка ссылок)</label>
-        <textarea id="intro" placeholder="Текст. Ссылка в формате:
+        <textarea id="intro" data-rich-links="true" placeholder="Текст. Ссылка в формате:
 [текст|https://example.com]
+или <https://example.com=Кастомный текст>
 или просто https://example.com"></textarea>
 
         <div class="row">
@@ -3362,7 +3400,8 @@ ${wrapClose}`
     // Convert text with:
     // 1) <a href="https://...">Текст</a>
     // 2) [label|https://...] -> <a>
-    // 3) raw URLs -> <a>
+    // 3) <https://...=label> -> <a>
+    // 4) raw URLs -> <a>
     // and preserve newlines as <br>
     function richTextToHtml(input, linkStyle) {
       const text = input ?? ''
@@ -3370,6 +3409,7 @@ ${wrapClose}`
 
       const urlRegex = /(https?:\/\/[^\s<>"']+)/g
       const tagRegex = /\[([^\]|]+)\|(\s*https?:\/\/[^\]\s]+)\]/g
+      const compactRegex = /<\s*(https?:\/\/[^=\s>]+)\s*=\s*([^>]+?)\s*>/g
       const anchorRegex = /<a\b[^>]*href\s*=\s*(?:"([^"]+)"|'([^']+)')[^>]*>([\s\S]*?)<\/a>/gi
 
       const outLines = lines.map((line) => {
@@ -3395,6 +3435,13 @@ ${wrapClose}`
           return `<a href="${escapeHtml(parsedUrl)}" target="_blank" rel="noopener noreferrer" style="${linkStyle}">${safeLabel}</a>`
         })
 
+        escaped = escaped.replace(compactRegex, (m, url, label) => {
+          const safeLabel = escapeHtml((label || '').trim())
+          const parsedUrl = safeUrl((url || '').trim())
+          if (!parsedUrl) return safeLabel
+          return `<a href="${escapeHtml(parsedUrl)}" target="_blank" rel="noopener noreferrer" style="${linkStyle}">${safeLabel || escapeHtml(parsedUrl)}</a>`
+        })
+
         escaped = escaped.replace(urlRegex, (url) => {
           const parsedUrl = safeUrl(url)
           if (!parsedUrl) return escapeHtml(url)
@@ -3410,6 +3457,55 @@ ${wrapClose}`
       })
 
       return outLines.join('<br>')
+    }
+
+    function decorateRichTextInput(rawText) {
+      const escaped = escapeHtml(rawText ?? '')
+      const compactRegexEscaped = /&lt;\s*(https?:\/\/[^=\s&gt;]+)\s*=\s*([^&]*?)\s*&gt;/gi
+      const bracketRegexEscaped = /\[([^\]|]+)\|(\s*https?:\/\/[^\]\s]+)\]/gi
+
+      let decorated = escaped
+      decorated = decorated.replace(compactRegexEscaped, (m, url, label) => {
+        const safeLabel = escapeHtml((label || '').trim())
+        const safeUrl = escapeHtml((url || '').trim())
+        return `&lt;${safeUrl}=<span class="rich-link-label">${safeLabel || safeUrl}</span>&gt;`
+      })
+      decorated = decorated.replace(bracketRegexEscaped, (m, label, url) => {
+        const safeLabel = escapeHtml((label || '').trim())
+        const safeUrl = escapeHtml((url || '').trim())
+        return `[<span class="rich-link-label">${safeLabel || safeUrl}</span>|${safeUrl}]`
+      })
+
+      return decorated
+    }
+
+    function setupRichTextInputHighlight(inputEl) {
+      if (!inputEl || inputEl.dataset.richHighlightInit === '1') return
+      inputEl.dataset.richHighlightInit = '1'
+      inputEl.classList.add('rich-input-target')
+
+      const wrap = document.createElement('div')
+      wrap.className = 'rich-input-wrap'
+      inputEl.parentNode.insertBefore(wrap, inputEl)
+      wrap.appendChild(inputEl)
+
+      const highlight = document.createElement('div')
+      highlight.className = 'rich-input-highlight'
+      highlight.setAttribute('aria-hidden', 'true')
+      wrap.insertBefore(highlight, inputEl)
+
+      const sync = () => {
+        highlight.innerHTML = decorateRichTextInput(inputEl.value || '') + '<br>'
+        highlight.scrollTop = inputEl.scrollTop
+        highlight.scrollLeft = inputEl.scrollLeft
+      }
+
+      inputEl.addEventListener('input', sync)
+      inputEl.addEventListener('scroll', () => {
+        highlight.scrollTop = inputEl.scrollTop
+        highlight.scrollLeft = inputEl.scrollLeft
+      })
+      sync()
     }
 
     function toast(msg) {
@@ -4543,6 +4639,10 @@ ${wrapClose}`
         clearTimeout(t)
         t = setTimeout(render, 0)
       })
+    })
+
+    document.querySelectorAll('textarea[data-rich-links="true"]').forEach((node) => {
+      setupRichTextInputHighlight(node)
     })
 
     // Seed defaults
