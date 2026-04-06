@@ -3439,6 +3439,8 @@ ${wrapClose}`
           return token
         })
 
+        let escaped = escapeHtml(withCompactTokens)
+
         const withBracketTokens = withCompactTokens.replace(tagRegex, (m, label, url) => {
           const safeLabel = escapeHtml(label.trim())
           const parsedUrl = safeUrl(url.trim())
@@ -3458,6 +3460,7 @@ ${wrapClose}`
           const escapedUrl = escapeHtml(parsedUrl)
           return `<a href="${escapedUrl}" target="_blank" rel="noopener noreferrer" style="${linkStyle}">${escapedUrl}</a>`
         })
+
 
         bracketTokens.forEach((anchorHtml, idx) => {
           escaped = escaped.replaceAll(`__RT_BRACKET_${idx}__`, anchorHtml)
