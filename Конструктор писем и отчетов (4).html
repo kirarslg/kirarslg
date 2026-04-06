@@ -3447,6 +3447,13 @@ ${wrapClose}`
           return `<a href="${escapeHtml(parsedUrl)}" target="_blank" rel="noopener noreferrer" style="${linkStyle}">${safeLabel}</a>`
         })
 
+        escaped = escaped.replace(compactRegex, (m, url, label) => {
+          const safeLabel = escapeHtml((label || '').trim())
+          const parsedUrl = safeUrl((url || '').trim())
+          if (!parsedUrl) return safeLabel
+          return `<a href="${escapeHtml(parsedUrl)}" target="_blank" rel="noopener noreferrer" style="${linkStyle}">${safeLabel || escapeHtml(parsedUrl)}</a>`
+        })
+
         escaped = escaped.replace(urlRegex, (url) => {
           const parsedUrl = safeUrl(url)
           if (!parsedUrl) return escapeHtml(url)
@@ -3457,6 +3464,7 @@ ${wrapClose}`
         compactTokens.forEach((anchorHtml, idx) => {
           escaped = escaped.replaceAll(`__RT_COMPACT_${idx}__`, anchorHtml)
         })
+
 
         anchorTokens.forEach((anchorHtml, idx) => {
           escaped = escaped.replaceAll(`__RT_ANCHOR_${idx}__`, anchorHtml)
