@@ -4197,7 +4197,7 @@ ${wrapClose}`
         ? ''
         : `<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"><tr><td style="padding:0 0 14px 0; color:${escapeHtml(data.builderGreetingColor || data.textColor || '#111111')}; font-size:${Math.max(10, Math.min(40, Number(data.builderGreetingSize) || 14))}px; line-height:1.6;">${escapeHtml(data.greeting || '')}</td></tr></table>`
 
-      const bodyTopPadding = data.hideSubject ? '22px' : '18px'
+      const bodyTopPadding = '18px'
 
       const builderBody = buildBodyFromBuilder(data)
 
@@ -4725,6 +4725,7 @@ ${wrapClose}`
     el('headerDescColor').value = el('textColor').value
     el('headerDescColorText').value = el('textColor').value
 
+    el('subject').value = 'Заголовок письма'
     el('buttonText').value = 'Открыть документ'
 
     const introRichInput = el('intro')
