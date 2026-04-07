@@ -6259,7 +6259,36 @@ if (sec.alert && reportState.alert) {
       })
     }
 
+    function reorderEmailFormSections() {
+      const body = document.querySelector('#emailInputsCard .body')
+      if (!body) return
+      const sections = Array.from(body.querySelectorAll(':scope > section.csec'))
+      if (!sections.length) return
+
+      const byTitle = new Map()
+      sections.forEach((sec) => {
+        const title = (sec.querySelector('.csec__title h3')?.textContent || '').trim()
+        if (title) byTitle.set(title, sec)
+      })
+
+      const order = [
+        'Фон письма',
+        'Шапка письма',
+        'Заголовок и приветствие',
+        'Тело письма',
+        'Настройка кнопок',
+        'Разделитель',
+        'Подпись',
+      ]
+
+      order.forEach((title) => {
+        const sec = byTitle.get(title)
+        if (sec) body.appendChild(sec)
+      })
+    }
+
     setupReportAccordionSections()
+    reorderEmailFormSections()
     initCollapsibleSections(document)
     window.__refreshCollapsibleSections = (root) => refreshCollapsibleSections(root || document)
     window.addEventListener('resize', () => {
