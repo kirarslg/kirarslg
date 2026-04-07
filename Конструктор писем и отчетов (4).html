@@ -281,7 +281,6 @@
 
     .rich-input-wrap {
       position: relative;
-
       width: 100%;
     }
 
@@ -1435,6 +1434,16 @@
           <div class="csec__body" role="region">
             <div class="row">
               <div>
+                <label>Заголовок письма</label>
+                <input id="subject" placeholder="Например: Обновление по задаче" value="" />
+              </div>
+              <div>
+                <label>Приветствие</label>
+                <input id="greeting" placeholder="Например: Здравствуйте, коллега!" value="" />
+              </div>
+            </div>
+            <div class="row">
+              <div>
                 <label>Размер заголовка (px)</label>
                 <input id="builderHeadingSize" placeholder="22" value="22" />
               </div>
@@ -1458,11 +1467,9 @@
               </div>
             </div>
             <div style="display:none;">
-              <input id="subject" value="" />
               <input id="hideSubject" type="checkbox" />
               <input id="recipientName" value="коллега" />
               <select id="tone"><option value="neutral" selected>Нейтральный</option><option value="formal">Официальный</option><option value="friendly">Дружелюбный</option><option value="direct">Коротко/по делу</option></select>
-              <input id="greeting" value="" />
               <input id="hideGreeting" type="checkbox" />
             </div>
           </div>
@@ -4689,7 +4696,6 @@ ${wrapClose}`
 
     const introRichInput = el('intro')
     if (introRichInput) setupRichTextInputHighlight(introRichInput)
-
     el('buttonUrl').value = 'https://example.com'
     el('buttonBgMode').value = 'solid'
     el('buttonGradDir').value = 'lr'
