@@ -279,6 +279,44 @@
       padding: 10px 12px !important;
     }
 
+    .rich-input-wrap {
+      position: relative;
+      width: 100%;
+    }
+
+    .rich-input-highlight {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      padding: 10px 12px;
+      font: inherit;
+      font-size: 13px;
+      line-height: 1.4;
+      color: #111111;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .rich-input-highlight .rich-link-label {
+      color: #0F860F;
+    }
+
+    textarea.rich-input-target {
+      position: relative;
+      z-index: 1;
+      background: transparent !important;
+      color: transparent;
+      caret-color: #111111;
+    }
+
+    textarea.rich-input-target::placeholder {
+      color: #9BA6B1;
+    }
+
     .row {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -1230,29 +1268,36 @@
     /* body */
     .csec__body {
       overflow: hidden;
+      will-change: max-height;
 
       height: auto;
       max-height: 9999px;
       /* будет переопределяться JS-ом */
       opacity: 1;
 
-      padding: 14px 16px 16px;
       background: rgba(255, 255, 255, .18);
 
       transition:
-        max-height .35s ease,
-        opacity .25s ease,
-        padding .25s ease,
+        max-height .42s cubic-bezier(.22, 1, .36, 1),
         background .25s ease;
+    }
+
+    .csec__inner {
+      padding: 14px 16px 16px;
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity .25s ease, transform .42s cubic-bezier(.22, 1, .36, 1);
     }
 
     /* collapsed */
     .csec[data-open="false"] .csec__body {
       max-height: 0;
-      opacity: 0;
-      padding-top: 0;
-      padding-bottom: 0;
       background: rgba(255, 255, 255, 0);
+    }
+
+    .csec[data-open="false"] .csec__inner {
+      opacity: 0;
+      transform: translateY(-4px);
     }
 
     .csec[data-open="false"] .csec__chev {
@@ -1387,7 +1432,15 @@
           </button>
 
           <div class="csec__body" role="region">
-            <div class="row">
+            <div>
+              <label>Заголовок письма</label>
+              <input id="subject" placeholder="Например: Обновление по задаче" value="" />
+            </div>
+            <label class="check" style="margin-top:8px;">
+              <input id="showSubjectInEmail" type="checkbox" checked />
+              <span>Показывать в письме</span>
+            </label>
+            <div class="row" id="headingStyleRow">
               <div>
                 <label>Размер заголовка (px)</label>
                 <input id="builderHeadingSize" placeholder="22" value="22" />
@@ -1399,6 +1452,16 @@
                   <input type="color" id="builderHeadingColor" value="#111111" style="width:30px; padding:0; height:38px;" />
                 </div>
               </div>
+            </div>
+            <div>
+              <label>Приветствие</label>
+              <input id="greeting" placeholder="Например: Здравствуйте, коллега!" value="" />
+            </div>
+            <label class="check" style="margin-top:8px;">
+              <input id="showGreetingInEmail" type="checkbox" checked />
+              <span>Показывать в письме</span>
+            </label>
+            <div class="row" id="greetingStyleRow">
               <div>
                 <label>Размер приветствия (px)</label>
                 <input id="builderGreetingSize" placeholder="14" value="14" />
@@ -1412,11 +1475,9 @@
               </div>
             </div>
             <div style="display:none;">
-              <input id="subject" value="" />
               <input id="hideSubject" type="checkbox" />
               <input id="recipientName" value="коллега" />
               <select id="tone"><option value="neutral" selected>Нейтральный</option><option value="formal">Официальный</option><option value="friendly">Дружелюбный</option><option value="direct">Коротко/по делу</option></select>
-              <input id="greeting" value="" />
               <input id="hideGreeting" type="checkbox" />
             </div>
           </div>
@@ -1568,7 +1629,7 @@
                 <input type="checkbox" id="headerDescEnabled" />
                 <span>Добавить текст</span>
               </label>
-              <textarea id="headerDesc" placeholder="Текст в шапке"
+              <textarea id="headerDesc" data-rich-links="true" placeholder="Текст в шапке"
                 style="display:none; margin-top: 8px; min-height:84px;"></textarea>
 
               <div class="row">
@@ -1625,8 +1686,9 @@
 
   <div class="csec__body" role="region">
     <label for="intro" class="label-min">Основной текст (поддержка ссылок)</label>
-        <textarea id="intro" placeholder="Текст. Ссылка в формате:
+        <textarea id="intro" data-rich-links="true" placeholder="Текст. Ссылка в формате:
 [текст|https://example.com]
+или <https://example.com=Кастомный текст>
 или просто https://example.com"></textarea>
 
         <div class="row">
@@ -2405,8 +2467,68 @@
     let builderRows = [] // [{ id, layout, columns: [{ id, blocks: [...] }] }]
     let builderIdCounter = 1
     let builderImageEditTarget = null
+    let builderImagePickerLocked = false
+    let builderHeaderImages = [] // [{ src, name }]
+    let builderHeaderReplaceMode = false
+    let builderHeaderPickerLocked = false
     let builderActiveColumnId = null
     let headerReplaceMode = false
+
+    function openBuilderImagePicker(targetBlockId) {
+      const imageInput = el('builderImageInput')
+      if (!imageInput || builderImagePickerLocked) return
+      builderImagePickerLocked = true
+      builderImageEditTarget = targetBlockId || null
+      imageInput.value = ''
+      imageInput.click()
+    }
+
+    function getBuilderHeaderFileInput() {
+      let input = document.getElementById('builderHeaderFileInput')
+      if (input) return input
+      input = document.createElement('input')
+      input.id = 'builderHeaderFileInput'
+      input.type = 'file'
+      input.accept = 'image/*'
+      input.multiple = true
+      input.style.display = 'none'
+      document.body.appendChild(input)
+      return input
+    }
+
+    async function handleBuilderHeaderFiles(fileList) {
+      const files = fileList ? Array.from(fileList) : []
+      if (!files.length) return
+
+      const maxBytes = 900 * 1024
+      const newImages = []
+
+      for (const file of files) {
+        if (!file.type || !file.type.startsWith('image/')) continue
+        if (file.size > maxBytes) {
+          toast(`Файл "${file.name}" слишком большой (для рассылок лучше URL).`)
+        }
+        try {
+          const dataUrl = await fileToDataUrl(file)
+          newImages.push({ src: dataUrl, name: file.name })
+        } catch {
+          toast(`Не удалось прочитать файл "${file.name}"`)
+        }
+      }
+
+      if (!newImages.length) return
+      builderHeaderImages = builderHeaderReplaceMode ? newImages.slice(0, 1) : builderHeaderImages.concat(newImages)
+      renderBuilder()
+    }
+
+    function openBuilderHeaderPicker(replaceMode) {
+      const input = getBuilderHeaderFileInput()
+      if (!input || builderHeaderPickerLocked) return
+      builderHeaderPickerLocked = true
+      builderHeaderReplaceMode = !!replaceMode
+      input.value = ''
+      input.click()
+    }
 
     function pruneEmptyBuilderRows() {
       if (!builderRows || builderRows.length <= 1) return
@@ -2658,7 +2780,6 @@
       }
       builderActiveColumnId = col.id
       renderBuilder()
-      render()
     }
 
     function createBlock(type, extra) {
@@ -2672,8 +2793,7 @@
           return {
             id: nextBuilderId('gr'),
             type: 'greeting',
-            text: el('greeting')?.value || 'Здравствуйте!',
-            linkedField: 'greeting',
+            text: 'Здравствуйте!',
           }
         case 'heading':
           return {
@@ -2685,8 +2805,7 @@
           return {
             id: nextBuilderId('p'),
             type: 'text',
-            text: el('intro')?.value || 'Основной текст письма',
-            linkedField: 'intro',
+            text: 'Основной текст письма',
           }
         case 'button':
           return {
@@ -2742,7 +2861,7 @@
       if (type === 'heading') {
         const col = columnId ? findBuilderColumn(columnId) : getActiveOrFallbackColumn()
         const blocks = (col && col.blocks) ? col.blocks : []
-        const introIdx = blocks.findIndex((b) => b && b.linkedField === 'intro')
+        const introIdx = blocks.findIndex((b) => b && b.type === 'text')
         if (introIdx >= 0) insertIndex = introIdx
       }
 
@@ -2821,7 +2940,7 @@
               const wrapClose = `</div>`
 
               if (block.type === 'header') {
-                const src = (headerImages && headerImages[0] && headerImages[0].src) ? headerImages[0].src : safeUrl(el('headerImageUrl')?.value || '')
+                const src = (builderHeaderImages && builderHeaderImages[0] && builderHeaderImages[0].src) ? builderHeaderImages[0].src : ''
                 html += `${wrapOpen}
   <div class="eb-image" data-block-id="${bid}" style="padding:8px; border:1px dashed #9fb3cf; background:#f5f8ff;">
     ${src ? `<img src="${escapeHtml(src)}" alt="Шапка" style="max-height:120px; object-fit:cover;">` : '<span>Шапка письма: выберите изображение с компьютера</span>'}
@@ -2832,11 +2951,11 @@
   </div>
 ${wrapClose}`
               } else if (block.type === 'greeting') {
-                const text = el('greeting')?.value || block.text || 'Здравствуйте!'
+                const text = block.text || 'Здравствуйте!'
                 const c = clampHexColor(el('builderGreetingColorText')?.value || el('builderGreetingColor')?.value || '#111111', '#111111')
                 const sz = Math.max(10, Math.min(40, parseInt((el('builderGreetingSize')?.value || '14').trim(), 10) || 14))
                 html += `${wrapOpen}
-  <div class="eb-text" data-block-id="${bid}" style="color:${escapeHtml(c)}; font-size:${sz}px;">${escapeHtml(text).replaceAll('\n', '<br>')}</div>
+  <div class="eb-text" data-block-id="${bid}" data-editable="true" style="color:${escapeHtml(c)}; font-size:${sz}px;">${escapeHtml(text).replaceAll('\n', '<br>')}</div>
 ${wrapClose}`
               } else if (block.type === 'heading') {
                 const c = clampHexColor(el('builderHeadingColorText')?.value || el('builderHeadingColor')?.value || '#111111', '#111111')
@@ -2847,11 +2966,9 @@ ${wrapClose}`
                 ).replaceAll('\n', '<br>')}</div>
 ${wrapClose}`
               } else if (block.type === 'text') {
-                const text = block.linkedField === 'intro' ? (el('intro')?.value || '') : (block.text || '')
+                const text = block.text || ''
                 html += `${wrapOpen}
-  <div class="eb-text" data-block-id="${bid}"${block.linkedField ? '' : ' data-editable="true"'}>${escapeHtml(
-                  text,
-                ).replaceAll('\n', '<br>')}</div>
+  <div class="eb-text" data-block-id="${bid}" data-editable="true">${escapeHtml(text).replaceAll('\n', '<br>')}</div>
 ${wrapClose}`
               } else if (block.type === 'image') {
                 const src = block.src ? escapeHtml(block.src) : ''
@@ -2923,7 +3040,6 @@ ${wrapClose}`
               if (idx >= 0) {
                 col.blocks.splice(idx, 1)
                 renderBuilder()
-                render()
                 return
               }
             }
@@ -2957,7 +3073,6 @@ ${wrapClose}`
           }
 
           renderBuilder()
-          render()
         })
 
         // Header block actions
@@ -2966,23 +3081,15 @@ ${wrapClose}`
           if (up) {
             e.preventDefault()
             e.stopPropagation()
-            const fileInput = el('headerImageFile')
-            if (fileInput) {
-              headerReplaceMode = true
-              fileInput.click()
-            }
+            openBuilderHeaderPicker(true)
             return
           }
           const rm = e.target && e.target.closest && e.target.closest('[data-header-remove]')
           if (rm) {
             e.preventDefault()
             e.stopPropagation()
-            headerImages = []
-            const urlInput = el('headerImageUrl')
-            if (urlInput) urlInput.value = ''
-            updateHeaderImagesInfo()
+            builderHeaderImages = []
             renderBuilder()
-            render()
           }
         })
 
@@ -3024,7 +3131,7 @@ ${wrapClose}`
               return
             }
             block.url = safe
-            render()
+            renderBuilder()
             return
           }
 
@@ -3040,7 +3147,6 @@ ${wrapClose}`
             if (!Number.isFinite(n)) return
             block.size = Math.max(0, Math.min(200, n))
             renderBuilder()
-            render()
           }
         }, true)
       }
@@ -3111,7 +3217,6 @@ ${wrapClose}`
                     const [moved] = fromCol.blocks.splice(idx, 1)
                     toCol.blocks.push(moved)
                     renderBuilder()
-                    render()
                     return
                   }
                 }
@@ -3126,34 +3231,13 @@ ${wrapClose}`
         })
       }
       // Клик по картинке для замены
-      const imageEls = Array.from(canvas.querySelectorAll('.eb-image[data-block-id]'))
-      const imageInput = el('builderImageInput')
+      const imageEls = Array.from(canvas.querySelectorAll('.eb-image[data-edit-image="true"][data-block-id]'))
       imageEls.forEach((imgEl) => {
         imgEl.addEventListener('click', (e) => {
           e.preventDefault()
           const blockId = imgEl.getAttribute('data-block-id')
           if (!blockId) return
-
-          const url = window.prompt(
-            'Вставьте URL картинки (оставьте пустым, чтобы выбрать файл с устройства):',
-          )
-          if (url && url.trim()) {
-            const safe = safeUrl(url)
-            if (!safe) {
-              toast('Некорректный URL')
-              return
-            }
-            const block = findBuilderBlock(blockId)
-            if (block) {
-              block.src = safe
-              block.name = safe
-              renderBuilder()
-              render()
-            }
-          } else if (imageInput) {
-            builderImageEditTarget = blockId
-            imageInput.click()
-          }
+          openBuilderImagePicker(blockId)
         })
       })
     }
@@ -3163,6 +3247,7 @@ ${wrapClose}`
         document.querySelectorAll('.builder-block-btn[data-block-type]'),
       )
       const imageInput = el('builderImageInput')
+      const builderHeaderInput = getBuilderHeaderFileInput()
 
       buttons.forEach((btn) => {
         const type = btn.getAttribute('data-block-type')
@@ -3175,7 +3260,7 @@ ${wrapClose}`
 
         btn.addEventListener('click', () => {
           if (type === 'image') {
-            if (imageInput) imageInput.click()
+            openBuilderImagePicker(null)
             return
           }
           addBlockByType(type, null)
@@ -3184,6 +3269,7 @@ ${wrapClose}`
 
       if (imageInput) {
         imageInput.addEventListener('change', async () => {
+          builderImagePickerLocked = false
           if (!(imageInput.files && imageInput.files.length)) return
           if (builderImageEditTarget) {
             const file = imageInput.files[0]
@@ -3194,7 +3280,6 @@ ${wrapClose}`
                 block.src = dataUrl
                 block.name = file.name
                 renderBuilder()
-                render()
               }
             } catch {
               toast('Не удалось прочитать файл')
@@ -3206,6 +3291,27 @@ ${wrapClose}`
 
           await handleBodyFiles(imageInput.files, null)
           imageInput.value = ''
+        })
+        imageInput.addEventListener('cancel', () => {
+          builderImagePickerLocked = false
+          builderImageEditTarget = null
+          imageInput.value = ''
+        })
+      }
+
+      if (builderHeaderInput && !builderHeaderInput.dataset.bound) {
+        builderHeaderInput.dataset.bound = '1'
+        builderHeaderInput.addEventListener('change', async () => {
+          builderHeaderPickerLocked = false
+          if (!(builderHeaderInput.files && builderHeaderInput.files.length)) return
+          await handleBuilderHeaderFiles(builderHeaderInput.files)
+          builderHeaderInput.value = ''
+          builderHeaderReplaceMode = false
+        })
+        builderHeaderInput.addEventListener('cancel', () => {
+          builderHeaderPickerLocked = false
+          builderHeaderReplaceMode = false
+          builderHeaderInput.value = ''
         })
       }
     }
@@ -3250,7 +3356,6 @@ ${wrapClose}`
           })
           if (cols[0] && cols[0].id) builderActiveColumnId = cols[0].id
           renderBuilder()
-          render()
         })
       })
     }
@@ -3297,7 +3402,7 @@ ${wrapClose}`
               }
             }
           }
-          render()
+          renderBuilder()
         }
       }, true)
     }
@@ -3310,8 +3415,10 @@ ${wrapClose}`
         .replaceAll("'", '&#039;')
 
     // Convert text with:
-    // 1) [label|https://...] -> <a>
-    // 2) raw URLs -> <a>
+    // 1) <a href="https://...">Текст</a>
+    // 2) [label|https://...] -> <a>
+    // 3) <https://...=label> -> <a>
+    // 4) raw URLs -> <a>
     // and preserve newlines as <br>
     function richTextToHtml(input, linkStyle) {
       const text = input ?? ''
@@ -3319,25 +3426,121 @@ ${wrapClose}`
 
       const urlRegex = /(https?:\/\/[^\s<>"']+)/g
       const tagRegex = /\[([^\]|]+)\|(\s*https?:\/\/[^\]\s]+)\]/g
+      const compactRegex = /<\s*(https?:\/\/[^=\s>]+)\s*=\s*([^>]+?)\s*>/g
+      const anchorRegex = /<a\b[^>]*href\s*=\s*(?:"([^"]+)"|'([^']+)')[^>]*>([\s\S]*?)<\/a>/gi
 
       const outLines = lines.map((line) => {
-        let escaped = escapeHtml(line)
-
-        escaped = escaped.replace(tagRegex, (m, label, url) => {
-          const safeLabel = escapeHtml(label.trim())
-          const safeUrl = escapeHtml(url.trim())
-          return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" style="${linkStyle}">${safeLabel}</a>`
+        const anchorTokens = []
+        const compactTokens = []
+        const bracketTokens = []
+        const withAnchorTokens = line.replace(anchorRegex, (m, hrefDouble, hrefSingle, anchorText) => {
+          const hrefRaw = (hrefDouble || hrefSingle || '').trim()
+          const hrefSafe = safeUrl(hrefRaw)
+          if (!hrefSafe) return escapeHtml(anchorText || '')
+          const labelSafe = escapeHtml((anchorText || '').trim() || hrefSafe)
+          const token = `__RT_ANCHOR_${anchorTokens.length}__`
+          anchorTokens.push(
+            `<a href="${escapeHtml(hrefSafe)}" target="_blank" rel="noopener noreferrer" style="${linkStyle}">${labelSafe}</a>`,
+          )
+          return token
         })
 
+        const withCompactTokens = withAnchorTokens.replace(compactRegex, (m, url, label) => {
+          const safeLabel = escapeHtml((label || '').trim())
+          const parsedUrl = safeUrl((url || '').trim())
+          if (!parsedUrl) return safeLabel
+          const token = `__RT_COMPACT_${compactTokens.length}__`
+          compactTokens.push(
+            `<a href="${escapeHtml(parsedUrl)}" target="_blank" rel="noopener noreferrer" style="${linkStyle}">${safeLabel || escapeHtml(parsedUrl)}</a>`,
+          )
+          return token
+        })
+
+        const withBracketTokens = withCompactTokens.replace(tagRegex, (m, label, url) => {
+          const safeLabel = escapeHtml(label.trim())
+          const parsedUrl = safeUrl(url.trim())
+          if (!parsedUrl) return safeLabel
+          const token = `__RT_BRACKET_${bracketTokens.length}__`
+          bracketTokens.push(
+            `<a href="${escapeHtml(parsedUrl)}" target="_blank" rel="noopener noreferrer" style="${linkStyle}">${safeLabel}</a>`,
+          )
+          return token
+        })
+
+        let escaped = escapeHtml(withBracketTokens)
+
         escaped = escaped.replace(urlRegex, (url) => {
-          const safeUrl = escapeHtml(url)
-          return `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" style="${linkStyle}">${safeUrl}</a>`
+          const parsedUrl = safeUrl(url)
+          if (!parsedUrl) return escapeHtml(url)
+          const escapedUrl = escapeHtml(parsedUrl)
+          return `<a href="${escapedUrl}" target="_blank" rel="noopener noreferrer" style="${linkStyle}">${escapedUrl}</a>`
+        })
+
+        bracketTokens.forEach((anchorHtml, idx) => {
+          escaped = escaped.replaceAll(`__RT_BRACKET_${idx}__`, anchorHtml)
+        })
+
+        compactTokens.forEach((anchorHtml, idx) => {
+          escaped = escaped.replaceAll(`__RT_COMPACT_${idx}__`, anchorHtml)
+        })
+
+        anchorTokens.forEach((anchorHtml, idx) => {
+          escaped = escaped.replaceAll(`__RT_ANCHOR_${idx}__`, anchorHtml)
         })
 
         return escaped
       })
 
       return outLines.join('<br>')
+    }
+
+    function decorateRichTextInput(rawText) {
+      const escaped = escapeHtml(rawText ?? '')
+      const compactRegexEscaped = /&lt;\s*(https?:\/\/[^=\s&gt;]+)\s*=\s*([^&]*?)\s*&gt;/gi
+      const bracketRegexEscaped = /\[([^\]|]+)\|(\s*https?:\/\/[^\]\s]+)\]/gi
+
+      let decorated = escaped
+      decorated = decorated.replace(compactRegexEscaped, (m, url, label) => {
+        const safeLabel = escapeHtml((label || '').trim())
+        const safeUrl = escapeHtml((url || '').trim())
+        return `&lt;${safeUrl}=<span class="rich-link-label">${safeLabel || safeUrl}</span>&gt;`
+      })
+      decorated = decorated.replace(bracketRegexEscaped, (m, label, url) => {
+        const safeLabel = escapeHtml((label || '').trim())
+        const safeUrl = escapeHtml((url || '').trim())
+        return `[<span class="rich-link-label">${safeLabel || safeUrl}</span>|${safeUrl}]`
+      })
+
+      return decorated
+    }
+
+    function setupRichTextInputHighlight(inputEl) {
+      if (!inputEl || inputEl.dataset.richHighlightInit === '1') return
+      inputEl.dataset.richHighlightInit = '1'
+      inputEl.classList.add('rich-input-target')
+
+      const wrap = document.createElement('div')
+      wrap.className = 'rich-input-wrap'
+      inputEl.parentNode.insertBefore(wrap, inputEl)
+      wrap.appendChild(inputEl)
+
+      const highlight = document.createElement('div')
+      highlight.className = 'rich-input-highlight'
+      highlight.setAttribute('aria-hidden', 'true')
+      wrap.insertBefore(highlight, inputEl)
+
+      const sync = () => {
+        highlight.innerHTML = decorateRichTextInput(inputEl.value || '') + '<br>'
+        highlight.scrollTop = inputEl.scrollTop
+        highlight.scrollLeft = inputEl.scrollLeft
+      }
+
+      inputEl.addEventListener('input', sync)
+      inputEl.addEventListener('scroll', () => {
+        highlight.scrollTop = inputEl.scrollTop
+        highlight.scrollLeft = inputEl.scrollLeft
+      })
+      sync()
     }
 
     function toast(msg) {
@@ -3418,6 +3621,31 @@ ${wrapClose}`
 
       sync()
       window.__syncHeaderTextControls = sync
+    }
+
+    function setupSubjectGreetingVisibilityControls() {
+      const showSubject = el('showSubjectInEmail')
+      const showGreeting = el('showGreetingInEmail')
+      const hideSubject = el('hideSubject')
+      const hideGreeting = el('hideGreeting')
+      const headingStyleRow = el('headingStyleRow')
+      const greetingStyleRow = el('greetingStyleRow')
+      if (!showSubject || !showGreeting || !hideSubject || !hideGreeting) return
+
+      const sync = () => {
+        hideSubject.checked = !showSubject.checked
+        hideGreeting.checked = !showGreeting.checked
+        if (headingStyleRow) headingStyleRow.style.display = showSubject.checked ? '' : 'none'
+        if (greetingStyleRow) greetingStyleRow.style.display = showGreeting.checked ? '' : 'none'
+      }
+
+      ;[showSubject, showGreeting].forEach((node) => {
+        node.addEventListener('change', () => {
+          sync()
+          render()
+        })
+      })
+      sync()
     }
 
 
@@ -3581,7 +3809,7 @@ ${wrapClose}`
               return ''
             }
             if (block.type === 'greeting') {
-              const greetingText = (data.greeting || block.text || '').trim()
+              const greetingText = (block.text || '').trim()
               if (!greetingText || data.hideGreeting) return ''
               return `<tr>
       <td style="padding:0 0 14px 0; color:${greetingColor}; font-size:${greetingSize}px; line-height:1.6;">
@@ -3598,7 +3826,7 @@ ${wrapClose}`
     </tr>`
             }
             if (block.type === 'text') {
-              const blockText = block.linkedField === 'intro' ? (data.intro || '') : (block.text || '')
+              const blockText = block.text || ''
               return `<tr>
       <td style="padding: 0 0 12px 0; font-size:14px; line-height:1.6; color:${textColor};">
         ${richTextToHtml(blockText, linkStyle)}
@@ -3957,7 +4185,7 @@ ${wrapClose}`
             <td class="px-24" style="padding: 22px 24px 0 24px; font-family: 'SB Sans Text'; color:${escapeHtml(data.textColor)};">
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                 <tr>
-                  <td style="font-size:18px; font-weight:600; line-height:1.3; padding:0; margin:0; color:${escapeHtml(data.textColor)};">
+                  <td style="font-size:${Math.max(12, Math.min(56, Number(data.builderHeadingSize) || 22))}px; font-weight:600; line-height:1.3; padding:0; margin:0; color:${escapeHtml(data.builderHeadingColor || data.textColor || '#111111')};">
                     ${subject}
                   </td>
                 </tr>
@@ -3965,14 +4193,11 @@ ${wrapClose}`
             </td>
           </tr>`
 
-      const hasLinkedGreetingBlock = hasBuilderBlock((b) => b.type === 'greeting')
-      const hasLinkedIntroBlock = hasBuilderBlock((b) => b.type === 'text' && b.linkedField === 'intro')
-
-      const greetingBlock = (data.hideGreeting || hasLinkedGreetingBlock)
+      const greetingBlock = data.hideGreeting
         ? ''
-        : `<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"><tr><td style="padding:0 0 14px 0; color:${escapeHtml(data.textColor)};">${escapeHtml(data.greeting || '')}</td></tr></table>`
+        : `<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"><tr><td style="padding:0 0 14px 0; color:${escapeHtml(data.builderGreetingColor || data.textColor || '#111111')}; font-size:${Math.max(10, Math.min(40, Number(data.builderGreetingSize) || 14))}px; line-height:1.6;">${escapeHtml(data.greeting || '')}</td></tr></table>`
 
-      const bodyTopPadding = data.hideSubject ? '22px' : '18px'
+      const bodyTopPadding = '18px'
 
       const builderBody = buildBodyFromBuilder(data)
 
@@ -4226,37 +4451,8 @@ ${wrapClose}`
       }
     }
 
-    function syncLinkedBuilderBlocks() {
-      const intro = (el('intro')?.value || '').trim()
-      const greeting = (el('greeting')?.value || '').trim()
-      let changed = false
-
-      for (const row of builderRows) {
-        for (const col of row.columns || []) {
-          for (const block of col.blocks || []) {
-            if (block.type === 'greeting' && block.linkedField === 'greeting') {
-              if ((block.text || '') !== greeting) {
-                block.text = greeting
-                changed = true
-              }
-            }
-            if (block.type === 'text' && block.linkedField === 'intro') {
-              if ((block.text || '') !== intro) {
-                block.text = intro
-                changed = true
-              }
-            }
-          }
-        }
-      }
-
-      return changed
-    }
-
     function render() {
       try { window.__syncHeaderTextControls && window.__syncHeaderTextControls() } catch (e) {}
-      const linkedChanged = syncLinkedBuilderBlocks()
-      if (linkedChanged) renderBuilder()
       const data = collectData()
       const html = buildEmailHTML(data)
 
@@ -4522,7 +4718,11 @@ ${wrapClose}`
     el('headerDescColor').value = el('textColor').value
     el('headerDescColorText').value = el('textColor').value
 
+    el('subject').value = 'Заголовок письма'
     el('buttonText').value = 'Открыть документ'
+
+    const introRichInput = el('intro')
+    if (introRichInput) setupRichTextInputHighlight(introRichInput)
     el('buttonUrl').value = 'https://example.com'
     el('buttonBgMode').value = 'solid'
     el('buttonGradDir').value = 'lr'
@@ -4532,6 +4732,7 @@ ${wrapClose}`
     el('buttonRadius').value = '10'
 
     setupHeaderTextControls()
+    setupSubjectGreetingVisibilityControls()
     setupHeaderColorPickers()
     setupColorPickers()
 
@@ -5878,12 +6079,15 @@ if (sec.alert && reportState.alert) {
         const body = document.createElement('div')
         body.className = 'csec__body'
         body.setAttribute('role', 'region')
+        const inner = document.createElement('div')
+        inner.className = 'csec__inner'
+        body.appendChild(inner)
 
         sec.appendChild(head)
         sec.appendChild(body)
 
         reportBody.insertBefore(sec, anchorNode)
-        nodes.forEach((n) => body.appendChild(n))
+        nodes.forEach((n) => inner.appendChild(n))
       }
 
       // 1) Тело письма
@@ -5927,7 +6131,7 @@ if (sec.alert && reportState.alert) {
       ;(root || document).querySelectorAll('.csec').forEach((sec) => {
         const body = sec.querySelector('.csec__body')
         if (!body) return
-        if (sec.dataset.open === 'true') body.style.maxHeight = body.scrollHeight + 'px'
+        if (sec.dataset.open === 'true') body.style.maxHeight = 'none'
         else body.style.maxHeight = '0px'
       })
     }
@@ -5953,121 +6157,131 @@ if (sec.alert && reportState.alert) {
         const head = sec.querySelector('.csec__head')
         const body = sec.querySelector('.csec__body')
         if (!head || !body) return
+        let inner = body.querySelector(':scope > .csec__inner')
+        if (!inner) {
+          inner = document.createElement('div')
+          inner.className = 'csec__inner'
+          while (body.firstChild) {
+            inner.appendChild(body.firstChild)
+          }
+          body.appendChild(inner)
+        }
 
-        const isReportSec = !!sec.closest('#tab-report')
+        let rafId = null
+        let isAnimating = false
+
         const syncHeights = () => {
-          requestAnimationFrame(() => {
-            if (sec.dataset.open === 'true') body.style.maxHeight = body.scrollHeight + 'px'
+          if (isAnimating) return
+          if (rafId) cancelAnimationFrame(rafId)
+          rafId = requestAnimationFrame(() => {
+            rafId = null
+            if (sec.dataset.open === 'true') body.style.maxHeight = 'none'
             refreshParentSections(sec)
+          })
+        }
+
+        const setInstantly = (expanded) => {
+          const prevTransition = body.style.transition
+          body.style.transition = 'none'
+          body.style.maxHeight = expanded ? 'none' : '0px'
+          requestAnimationFrame(() => { body.style.transition = prevTransition })
+        }
+
+        const animateTo = (expanded) => {
+          isAnimating = true
+          const prevMaxHeight = body.style.maxHeight
+          if (prevMaxHeight === 'none') {
+            body.style.maxHeight = body.scrollHeight + 'px'
+          }
+          const startHeight = body.getBoundingClientRect().height
+          const targetHeight = expanded ? body.scrollHeight : 0
+          body.style.maxHeight = startHeight + 'px'
+          requestAnimationFrame(() => {
+            body.style.maxHeight = targetHeight + 'px'
           })
         }
 
         const open = (animate = true) => {
           sec.dataset.open = 'true'
           head.setAttribute('aria-expanded', 'true')
-          if (!animate || isReportSec) {
-
-
-            const prevTransition = body.style.transition
-            body.style.transition = 'none'
-            body.style.maxHeight = body.scrollHeight + 'px'
-            requestAnimationFrame(() => { body.style.transition = prevTransition })
+          if (!animate) {
+            setInstantly(true)
             return
           }
-          body.style.maxHeight = '0px'
-          requestAnimationFrame(() => { body.style.maxHeight = body.scrollHeight + 'px' })
+          animateTo(true)
         }
 
-        const close = () => {
+        const close = (animate = true) => {
           sec.dataset.open = 'false'
           head.setAttribute('aria-expanded', 'false')
-          if (isReportSec) {
-            const prevTransition = body.style.transition
-            body.style.transition = 'none'
-            body.style.maxHeight = '0px'
-            requestAnimationFrame(() => { body.style.transition = prevTransition })
+          if (!animate) {
+            setInstantly(false)
             return
           }
-
-          body.style.maxHeight = body.scrollHeight + 'px'
-          requestAnimationFrame(() => { body.style.maxHeight = '0px' })
+          animateTo(false)
         }
 
         if (sec.dataset.open !== 'false') open(false)
-        else close()
+        else close(false)
 
         const headCheckboxes = head.querySelectorAll('input[type="checkbox"]')
         headCheckboxes.forEach((checkbox) => {
-          checkbox.addEventListener('click', (e) => {
-            e.stopPropagation()
-          })
-          checkbox.addEventListener('mousedown', (e) => {
-            e.stopPropagation()
-          })
-          checkbox.addEventListener('keydown', (e) => {
-            e.stopPropagation()
-          })
+          checkbox.addEventListener('click', (e) => e.stopPropagation())
+          checkbox.addEventListener('mousedown', (e) => e.stopPropagation())
+          checkbox.addEventListener('keydown', (e) => e.stopPropagation())
         })
 
         head.addEventListener('click', (e) => {
           if (e.target && e.target.closest('input[type="checkbox"]')) return
-          ;(sec.dataset.open === 'true') ? close() : open(true)
-          syncHeights()
-          setTimeout(syncHeights, 380)
-        })
-
-        body.addEventListener('transitionend', (e) => {
-          if (e.propertyName !== 'max-height') return
+          ;(sec.dataset.open === 'true') ? close(true) : open(true)
           syncHeights()
         })
 
         body.addEventListener('transitionend', (e) => {
           if (e.propertyName !== 'max-height') return
-          syncHeights(true)
-        })
-
-        body.addEventListener('transitionend', (e) => {
-          if (e.propertyName !== 'max-height') return
+          isAnimating = false
+          if (sec.dataset.open === 'true') body.style.maxHeight = 'none'
           syncHeights()
         })
 
-        body.addEventListener('transitionend', (e) => {
-          if (e.propertyName !== 'max-height') return
-          syncHeights()
-        })
-
-        body.addEventListener('transitionend', (e) => {
-          if (e.propertyName !== 'max-height') return
-          syncHeights()
-        })
-
-        body.addEventListener('transitionend', (e) => {
-          if (e.propertyName !== 'max-height') return
-          syncHeights()
-        })
-
-        body.addEventListener('transitionend', (e) => {
-          if (e.propertyName !== 'max-height') return
-          syncHeights()
-        })
-
-        if (!isReportSec) {
-          const mo = new MutationObserver(() => syncHeights())
-          mo.observe(body, { childList: true, subtree: true })
-          sec.addEventListener('change', () => syncHeights())
-          sec.addEventListener('input', () => syncHeights())
-          sec.addEventListener('change', () => syncHeights())
-          sec.addEventListener('input', () => syncHeights())
-
-          sec.addEventListener('change', () => syncHeights())
-          sec.addEventListener('input', () => syncHeights())
-
-        }
+        const mo = new MutationObserver(() => syncHeights())
+        mo.observe(body, { childList: true, subtree: true })
+        sec.addEventListener('change', () => syncHeights())
+        sec.addEventListener('input', () => syncHeights())
 
       })
     }
 
+    function reorderEmailFormSections() {
+      const body = document.querySelector('#emailInputsCard .body')
+      if (!body) return
+      const sections = Array.from(body.querySelectorAll(':scope > section.csec'))
+      if (!sections.length) return
+
+      const byTitle = new Map()
+      sections.forEach((sec) => {
+        const title = (sec.querySelector('.csec__title h3')?.textContent || '').trim()
+        if (title) byTitle.set(title, sec)
+      })
+
+      const order = [
+        'Фон письма',
+        'Шапка письма',
+        'Заголовок и приветствие',
+        'Тело письма',
+        'Настройка кнопок',
+        'Разделитель',
+        'Подпись',
+      ]
+
+      order.forEach((title) => {
+        const sec = byTitle.get(title)
+        if (sec) body.appendChild(sec)
+      })
+    }
+
     setupReportAccordionSections()
+    reorderEmailFormSections()
     initCollapsibleSections(document)
     window.__refreshCollapsibleSections = (root) => refreshCollapsibleSections(root || document)
     window.addEventListener('resize', () => {
