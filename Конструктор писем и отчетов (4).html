@@ -1436,17 +1436,11 @@
               <label>Заголовок письма</label>
               <input id="subject" placeholder="Например: Обновление по задаче" value="" />
             </div>
-            <div class="row">
-              <div>
-                <label>Заголовок письма</label>
-                <input id="subject" placeholder="Например: Обновление по задаче" value="" />
-              </div>
-              <div>
-                <label>Приветствие</label>
-                <input id="greeting" placeholder="Например: Здравствуйте, коллега!" value="" />
-              </div>
-            </div>
-            <div class="row">
+            <label class="check" style="margin-top:8px;">
+              <input id="showSubjectInEmail" type="checkbox" checked />
+              <span>Показывать в письме</span>
+            </label>
+            <div class="row" id="headingStyleRow">
               <div>
                 <label>Размер заголовка (px)</label>
                 <input id="builderHeadingSize" placeholder="22" value="22" />
@@ -1463,7 +1457,11 @@
               <label>Приветствие</label>
               <input id="greeting" placeholder="Например: Здравствуйте, коллега!" value="" />
             </div>
-            <div class="row">
+            <label class="check" style="margin-top:8px;">
+              <input id="showGreetingInEmail" type="checkbox" checked />
+              <span>Показывать в письме</span>
+            </label>
+            <div class="row" id="greetingStyleRow">
               <div>
                 <label>Размер приветствия (px)</label>
                 <input id="builderGreetingSize" placeholder="14" value="14" />
@@ -3625,6 +3623,31 @@ ${wrapClose}`
       window.__syncHeaderTextControls = sync
     }
 
+    function setupSubjectGreetingVisibilityControls() {
+      const showSubject = el('showSubjectInEmail')
+      const showGreeting = el('showGreetingInEmail')
+      const hideSubject = el('hideSubject')
+      const hideGreeting = el('hideGreeting')
+      const headingStyleRow = el('headingStyleRow')
+      const greetingStyleRow = el('greetingStyleRow')
+      if (!showSubject || !showGreeting || !hideSubject || !hideGreeting) return
+
+      const sync = () => {
+        hideSubject.checked = !showSubject.checked
+        hideGreeting.checked = !showGreeting.checked
+        if (headingStyleRow) headingStyleRow.style.display = showSubject.checked ? '' : 'none'
+        if (greetingStyleRow) greetingStyleRow.style.display = showGreeting.checked ? '' : 'none'
+      }
+
+      ;[showSubject, showGreeting].forEach((node) => {
+        node.addEventListener('change', () => {
+          sync()
+          render()
+        })
+      })
+      sync()
+    }
+
 
     function setupHeaderColorPickers() {
       const pairs = [
@@ -4162,7 +4185,7 @@ ${wrapClose}`
             <td class="px-24" style="padding: 22px 24px 0 24px; font-family: 'SB Sans Text'; color:${escapeHtml(data.textColor)};">
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                 <tr>
-                  <td style="font-size:18px; font-weight:600; line-height:1.3; padding:0; margin:0; color:${escapeHtml(data.textColor)};">
+                  <td style="font-size:${Math.max(12, Math.min(56, Number(data.builderHeadingSize) || 22))}px; font-weight:600; line-height:1.3; padding:0; margin:0; color:${escapeHtml(data.builderHeadingColor || data.textColor || '#111111')};">
                     ${subject}
                   </td>
                 </tr>
@@ -4172,7 +4195,7 @@ ${wrapClose}`
 
       const greetingBlock = data.hideGreeting
         ? ''
-        : `<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"><tr><td style="padding:0 0 14px 0; color:${escapeHtml(data.textColor)};">${escapeHtml(data.greeting || '')}</td></tr></table>`
+        : `<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"><tr><td style="padding:0 0 14px 0; color:${escapeHtml(data.builderGreetingColor || data.textColor || '#111111')}; font-size:${Math.max(10, Math.min(40, Number(data.builderGreetingSize) || 14))}px; line-height:1.6;">${escapeHtml(data.greeting || '')}</td></tr></table>`
 
       const bodyTopPadding = data.hideSubject ? '22px' : '18px'
 
@@ -4715,6 +4738,7 @@ ${wrapClose}`
     el('buttonRadius').value = '10'
 
     setupHeaderTextControls()
+    setupSubjectGreetingVisibilityControls()
     setupHeaderColorPickers()
     setupColorPickers()
 
