@@ -3945,10 +3945,10 @@ ${wrapClose}`
       const c1 = escapeHtml(data.buttonBg1 || '#0DC1E7')
       const c2 = escapeHtml(data.buttonBg2 || c1)
 
-      const width = Number(data.buttonWidth || 526)
+      const contentMaxWidth = EMAIL_WIDTH - 48
+      const width = Number(data.buttonWidth ?? contentMaxWidth)
       const maxW = Number(data._maxWidth || 0)
       const fluid = data._forceFluid === true && maxW > 0
-      const contentMaxWidth = EMAIL_WIDTH - 48
       const widthPx = fluid
         ? Math.min(maxW, contentMaxWidth)
         : Math.max(80, Math.min(width, contentMaxWidth))
