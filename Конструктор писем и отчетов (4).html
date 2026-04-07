@@ -3948,7 +3948,10 @@ ${wrapClose}`
       const width = Number(data.buttonWidth || 526)
       const maxW = Number(data._maxWidth || 0)
       const fluid = data._forceFluid === true && maxW > 0
-      const widthPx = fluid ? maxW : width
+      const contentMaxWidth = EMAIL_WIDTH - 48
+      const widthPx = fluid
+        ? Math.min(maxW, contentMaxWidth)
+        : Math.max(80, Math.min(width, contentMaxWidth))
 
       const height = 44
       // VML uses arcsize as percent of width/height; keep it reasonable.
@@ -3965,7 +3968,7 @@ ${wrapClose}`
       // Outlook-safe button: VML for (some) Outlook + table fallback for others.
       return `
     <tr>
-      <td align="${escapeHtml(btnAlign)}" bgcolor="${escapeHtml(padBg)}" style="background:${escapeHtml(padBg)}; padding: 18px 0 14px 0;">
+      <td class="px-24" align="${escapeHtml(btnAlign)}" bgcolor="${escapeHtml(padBg)}" style="background:${escapeHtml(padBg)}; padding: 18px 24px 14px 24px;">
 
         <!--[if mso]>
         <v:roundrect
@@ -4763,7 +4766,6 @@ ${wrapClose}`
     setupHeaderTextControls()
     setupSubjectGreetingVisibilityControls()
     setupButtonControls()
-
     setupHeaderColorPickers()
     setupColorPickers()
 
