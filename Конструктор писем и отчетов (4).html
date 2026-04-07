@@ -4095,18 +4095,12 @@ ${wrapClose}`
 
         return `
     <tr>
-      <td style="padding:0; margin:0;">
+      <td style="padding:0; margin:0; background-image:url('${firstSrc}'); background-size:cover; background-position:center; background-repeat:no-repeat; height:200px; vertical-align:top;">
         ${linkOpen}
-          <img src="${firstSrc}"
-               width="${EMAIL_WIDTH}" height="200"
-               alt="${escapeHtml(data.headerAlt || '')}"
-               class="img-fluid" style="display:block; width:${EMAIL_WIDTH}px; height:200px; max-width:100%; border:0; outline:none; text-decoration:none; -ms-interpolation-mode:bicubic;">
+          <div style="display:block; width:${EMAIL_WIDTH}px; max-width:100%; min-height:200px; padding:18px 24px 24px 24px; box-sizing:border-box;">
+            ${overlayInner}
+          </div>
         ${linkClose}
-      </td>
-    </tr>
-    <tr>
-      <td class="px-24" style="padding: 18px 24px 0 24px; vertical-align: top;">
-        ${overlayInner}
       </td>
     </tr>`
       })()
