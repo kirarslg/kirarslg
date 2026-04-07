@@ -3937,7 +3937,8 @@ ${wrapClose}`
         : null
     }
 
-    function buildButtonBlock(data) {
+    function buildButtonBlock(data, opts = {}) {
+      const asRow = opts.asRow !== false
       // Require both text and URL for any builder button block.
       if (!(data.buttonText && data.buttonUrl)) return ''
       const r = Number(data.buttonRadius || 0)
@@ -3965,9 +3966,7 @@ ${wrapClose}`
       const padBg = data.bgBody || data.bgOuter || '#000000'
       const btnAlign = data.buttonAlign || 'center'
 
-      // Outlook-safe button: VML for (some) Outlook + table fallback for others.
-      return `
-    <tr>
+      const buttonCell = `
       <td class="px-24" align="${escapeHtml(btnAlign)}" bgcolor="${escapeHtml(padBg)}" style="background:${escapeHtml(padBg)}; padding: 18px 24px 14px 24px;">
 
         <!--[if mso]>
@@ -4007,7 +4006,12 @@ ${wrapClose}`
         <!--<![endif]-->
 
       </td>
-    </tr>`
+`
+
+      if (asRow) {
+        return `<tr>${buttonCell}</tr>`
+      }
+      return `<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"><tr>${buttonCell}</tr></table>`
     }
 
     // ---- Email HTML template (Gmail/Outlook-friendly) ----
@@ -4325,7 +4329,7 @@ ${wrapClose}`
                 ${cta}
               </table>
 
-              ${(builderBody && builderBody.trim()) ? builderBody : buildButtonBlock(data)}
+              ${(builderBody && builderBody.trim()) ? builderBody : buildButtonBlock(data, { asRow: false })}
 
               ${signatureSection}
             </td>
