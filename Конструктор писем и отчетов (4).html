@@ -3947,12 +3947,16 @@ ${wrapClose}`
       const c2 = escapeHtml(data.buttonBg2 || c1)
 
       const contentMaxWidth = EMAIL_WIDTH - 48
+      const autoFull = data.buttonWidth == null
       const width = Number(data.buttonWidth ?? contentMaxWidth)
       const maxW = Number(data._maxWidth || 0)
-      const fluid = data._forceFluid === true && maxW > 0
-      const widthPx = fluid
-        ? Math.min(maxW, contentMaxWidth)
-        : Math.max(80, Math.min(width, contentMaxWidth))
+      const forcedFluid = data._forceFluid === true && maxW > 0
+      const fluid = autoFull || forcedFluid
+      const widthPx = autoFull
+        ? contentMaxWidth
+        : forcedFluid
+          ? Math.min(maxW, contentMaxWidth)
+          : Math.max(80, Math.min(width, contentMaxWidth))
 
       const height = 44
       // VML uses arcsize as percent of width/height; keep it reasonable.
