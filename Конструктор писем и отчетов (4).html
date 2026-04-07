@@ -1857,7 +1857,6 @@
 
 
         <div class="btns">
-          <button id="btnGenerate">Собрать письмо</button>
         </div>
       </div>
     </div>
@@ -4468,7 +4467,12 @@ ${wrapClose}`
     }
 
     // ---- Actions ----
-    el('btnGenerate').addEventListener('click', () => { try { render(); } catch (e) { console.error(e); alert('Ошибка при сборке письма: ' + (e && e.message ? e.message : e)); } })
+    const btnGenerate = el('btnGenerate')
+    if (btnGenerate) {
+      btnGenerate.addEventListener('click', () => {
+        try { render() } catch (e) { console.error(e); alert('Ошибка при сборке письма: ' + (e && e.message ? e.message : e)) }
+      })
+    }
 
     el('btnCopy').addEventListener('click', async () => {
       if (!el('output').value) render()
@@ -4633,7 +4637,14 @@ ${wrapClose}`
     })
 
     // Auto-render on change (debounced)
-    let t = null
+    let renderRafId = 0
+    const scheduleRealtimeRender = () => {
+      if (renderRafId) cancelAnimationFrame(renderRafId)
+      renderRafId = requestAnimationFrame(() => {
+        renderRafId = 0
+        render()
+      })
+    }
     const inputs = [
       'subject',
       'hideSubject',
@@ -4692,12 +4703,10 @@ ${wrapClose}`
       const node = el(id)
       if (!node) return
       node.addEventListener('input', () => {
-        clearTimeout(t)
-        t = setTimeout(render, 250)
+        scheduleRealtimeRender()
       })
       node.addEventListener('change', () => {
-        clearTimeout(t)
-        t = setTimeout(render, 0)
+        scheduleRealtimeRender()
       })
     })
 
