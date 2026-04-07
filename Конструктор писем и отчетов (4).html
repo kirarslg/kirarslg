@@ -4734,6 +4734,13 @@ ${wrapClose}`
       })
     })
 
+    // Rich-input highlight is intentionally disabled by default to avoid UI interaction regressions.
+    // Enable only after full cross-browser validation:
+    // document.querySelectorAll('textarea[data-rich-links="true"]').forEach((node) => {
+    //   setupRichTextInputHighlight(node)
+    // })
+
+
     // Seed defaults
     el('intro').value =
       'Пример ссылки в тексте: [Документ|https://example.com]\nИли просто URL: https://openai.com'
@@ -6282,7 +6289,6 @@ if (sec.alert && reportState.alert) {
         mo.observe(body, { childList: true, subtree: true })
         sec.addEventListener('change', () => syncHeights())
         sec.addEventListener('input', () => syncHeights())
-
       })
     }
 
