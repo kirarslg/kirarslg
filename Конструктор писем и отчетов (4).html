@@ -1765,7 +1765,7 @@
               <option value="gradient">Градиент (2 цвета)</option>
             </select>
           </div>
-          <div>
+          <div id="buttonGradDirWrap">
             <label>Направление градиента</label>
             <select id="buttonGradDir">
               <option value="lr" selected>Слева → направо</option>
@@ -1784,7 +1784,7 @@
                 data-bind="buttonBg1" aria-label="Выбрать цвет" />
             </div>
           </div>
-          <div>
+          <div id="buttonBg2Wrap">
             <label>Цвет 2</label>
             <div class="colorline">
               <input id="buttonBg2" placeholder="#0b57d0" /><input type="color" class="colorPicker"
@@ -3647,6 +3647,25 @@ ${wrapClose}`
       sync()
     }
 
+    function setupButtonControls() {
+      const mode = el('buttonBgMode')
+      const gradDirWrap = el('buttonGradDirWrap')
+      const bg2Wrap = el('buttonBg2Wrap')
+      if (!mode) return
+
+      const sync = () => {
+        const isGradient = mode.value === 'gradient'
+        if (gradDirWrap) gradDirWrap.style.display = isGradient ? '' : 'none'
+        if (bg2Wrap) bg2Wrap.style.display = isGradient ? '' : 'none'
+      }
+
+      mode.addEventListener('change', () => {
+        sync()
+        render()
+      })
+      sync()
+    }
+
 
     function setupHeaderColorPickers() {
       const pairs = [
@@ -4303,7 +4322,7 @@ ${wrapClose}`
                 ${cta}
               </table>
 
-              ${builderBody || ''}
+              ${(builderBody && builderBody.trim()) ? builderBody : buildButtonBlock(data)}
 
               ${signatureSection}
             </td>
@@ -4743,6 +4762,8 @@ ${wrapClose}`
 
     setupHeaderTextControls()
     setupSubjectGreetingVisibilityControls()
+    setupButtonControls()
+
     setupHeaderColorPickers()
     setupColorPickers()
 
@@ -6258,7 +6279,6 @@ if (sec.alert && reportState.alert) {
         mo.observe(body, { childList: true, subtree: true })
         sec.addEventListener('change', () => syncHeights())
         sec.addEventListener('input', () => syncHeights())
-
       })
     }
 
