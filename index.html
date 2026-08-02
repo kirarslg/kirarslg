@@ -1,0 +1,1195 @@
+<!doctype html>
+<html lang="ru">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0E7C4A" />
+  <title>ПФК «Рязань» — официальный сайт футбольного клуба</title>
+  <meta name="description"
+    content="Профессиональный футбольный клуб «Рязань». Расписание матчей, состав команды, новости, билеты. Стадион «Рязань-Арена»." />
+
+  <style>
+    /* ============ TOKENS ============ */
+    :root {
+      color-scheme: light;
+
+      --paper: #f4f6f1;
+      --surface: #ffffff;
+      --surface-2: #fbfcfa;
+      --ink: #0c1410;
+      --ink-soft: #26332c;
+      --muted: #5c6b62;
+      --faint: #8a988f;
+
+      --green: #0e7c4a;
+      --green-deep: #0a5c37;
+      --green-bright: #16a34a;
+      --green-wash: #e8f1ea;
+      --amber: #e8a13a;
+
+      --line: rgba(12, 20, 16, .12);
+      --line-soft: rgba(12, 20, 16, .07);
+      --pitch-line: rgba(14, 124, 74, .16);
+
+      --shadow-s: 0 1px 2px rgba(12, 20, 16, .04), 0 8px 24px rgba(12, 20, 16, .05);
+      --shadow-m: 0 2px 6px rgba(12, 20, 16, .05), 0 24px 60px rgba(12, 20, 16, .10);
+
+      --r-s: 12px;
+      --r-m: 18px;
+      --r-l: 28px;
+
+      --maxw: 1200px;
+      --gutter: clamp(20px, 5vw, 64px);
+
+      --f-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+      --ease: cubic-bezier(.22, 1, .36, 1);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        color-scheme: dark;
+        --paper: #0a0e0c;
+        --surface: #10160f;
+        --surface-2: #0d1310;
+        --ink: #eef3ee;
+        --ink-soft: #cdd8cf;
+        --muted: #94a49a;
+        --faint: #6a7a70;
+
+        --green: #2fbb6d;
+        --green-deep: #1c9a55;
+        --green-bright: #46d483;
+        --green-wash: #14251b;
+        --amber: #f0b24e;
+
+        --line: rgba(230, 240, 232, .12);
+        --line-soft: rgba(230, 240, 232, .07);
+        --pitch-line: rgba(47, 187, 109, .18);
+
+        --shadow-s: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px rgba(0, 0, 0, .35);
+        --shadow-m: 0 2px 6px rgba(0, 0, 0, .45), 0 24px 60px rgba(0, 0, 0, .55);
+      }
+    }
+
+    /* Explicit toggles win over the media query in both directions */
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --paper: #f4f6f1;
+      --surface: #ffffff;
+      --surface-2: #fbfcfa;
+      --ink: #0c1410;
+      --ink-soft: #26332c;
+      --muted: #5c6b62;
+      --faint: #8a988f;
+      --green: #0e7c4a;
+      --green-deep: #0a5c37;
+      --green-bright: #16a34a;
+      --green-wash: #e8f1ea;
+      --amber: #e8a13a;
+      --line: rgba(12, 20, 16, .12);
+      --line-soft: rgba(12, 20, 16, .07);
+      --pitch-line: rgba(14, 124, 74, .16);
+      --shadow-s: 0 1px 2px rgba(12, 20, 16, .04), 0 8px 24px rgba(12, 20, 16, .05);
+      --shadow-m: 0 2px 6px rgba(12, 20, 16, .05), 0 24px 60px rgba(12, 20, 16, .10);
+    }
+
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --paper: #0a0e0c;
+      --surface: #10160f;
+      --surface-2: #0d1310;
+      --ink: #eef3ee;
+      --ink-soft: #cdd8cf;
+      --muted: #94a49a;
+      --faint: #6a7a70;
+      --green: #2fbb6d;
+      --green-deep: #1c9a55;
+      --green-bright: #46d483;
+      --green-wash: #14251b;
+      --amber: #f0b24e;
+      --line: rgba(230, 240, 232, .12);
+      --line-soft: rgba(230, 240, 232, .07);
+      --pitch-line: rgba(47, 187, 109, .18);
+      --shadow-s: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px rgba(0, 0, 0, .35);
+      --shadow-m: 0 2px 6px rgba(0, 0, 0, .45), 0 24px 60px rgba(0, 0, 0, .55);
+    }
+
+    /* ============ RESET ============ */
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      * { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--f-sans);
+      background: var(--paper);
+      color: var(--ink);
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      overflow-x: hidden;
+    }
+
+    img { max-width: 100%; display: block; }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; cursor: pointer; }
+
+    ::selection { background: var(--green); color: #fff; }
+
+    :focus-visible {
+      outline: 2px solid var(--green-bright);
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: var(--maxw);
+      margin-inline: auto;
+      padding-inline: var(--gutter);
+    }
+
+    .num { font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+
+    .eyebrow {
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: var(--green);
+      display: inline-flex;
+      align-items: center;
+      gap: .6em;
+    }
+    .eyebrow::before {
+      content: "";
+      width: 22px;
+      height: 2px;
+      background: var(--green);
+      display: inline-block;
+    }
+
+    /* ============ HEADER ============ */
+    header.nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: color-mix(in srgb, var(--paper) 78%, transparent);
+      backdrop-filter: saturate(1.4) blur(14px);
+      -webkit-backdrop-filter: saturate(1.4) blur(14px);
+      border-bottom: 1px solid transparent;
+      transition: border-color .3s, background .3s;
+    }
+    header.nav.scrolled {
+      border-bottom-color: var(--line);
+      background: color-mix(in srgb, var(--paper) 90%, transparent);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      height: 68px;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; margin-right: auto; }
+    .crest { width: 36px; height: 36px; flex: none; }
+    .brand-name {
+      font-weight: 800;
+      letter-spacing: -.02em;
+      font-size: 1.05rem;
+      line-height: 1;
+    }
+    .brand-name small {
+      display: block;
+      font-size: .58rem;
+      font-weight: 600;
+      letter-spacing: .18em;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+    nav.links { display: flex; gap: 4px; }
+    nav.links a {
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: .92rem;
+      font-weight: 500;
+      color: var(--ink-soft);
+      transition: background .2s, color .2s;
+    }
+    nav.links a:hover { background: var(--green-wash); color: var(--green-deep); }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5em;
+      padding: 11px 20px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: .92rem;
+      border: 1px solid transparent;
+      transition: transform .18s var(--ease), background .2s, box-shadow .2s, border-color .2s, color .2s;
+      white-space: nowrap;
+    }
+    .btn:active { transform: translateY(1px); }
+    .btn-primary { background: var(--green); color: #fff; box-shadow: var(--shadow-s); }
+    .btn-primary:hover { background: var(--green-deep); box-shadow: var(--shadow-m); }
+    .btn-ghost { border-color: var(--line); color: var(--ink); background: transparent; }
+    .btn-ghost:hover { border-color: var(--green); color: var(--green-deep); background: var(--green-wash); }
+
+    .theme-toggle {
+      width: 40px; height: 40px;
+      display: grid; place-items: center;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: transparent;
+      color: var(--ink);
+      transition: border-color .2s, background .2s;
+    }
+    .theme-toggle:hover { border-color: var(--green); background: var(--green-wash); }
+    .theme-toggle .moon { display: none; }
+    :root[data-theme="dark"] .theme-toggle .sun { display: none; }
+    :root[data-theme="dark"] .theme-toggle .moon { display: block; }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) .theme-toggle .sun { display: none; }
+      :root:not([data-theme="light"]) .theme-toggle .moon { display: block; }
+    }
+
+    .burger { display: none; width: 40px; height: 40px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--ink); place-items: center; }
+
+    @media (max-width: 900px) {
+      nav.links { display: none; }
+      .burger { display: grid; }
+      .nav-cta { display: none; }
+    }
+
+    /* mobile drawer */
+    .drawer {
+      position: fixed; inset: 68px 0 auto 0; z-index: 49;
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+      padding: 12px var(--gutter) 24px;
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      box-shadow: var(--shadow-m);
+    }
+    .drawer.open { display: flex; }
+    .drawer a { padding: 13px 8px; border-radius: 10px; font-weight: 500; border-bottom: 1px solid var(--line-soft); }
+    .drawer a:last-of-type { border-bottom: 0; }
+    .drawer .btn { margin-top: 12px; }
+
+    /* ============ HERO ============ */
+    .hero {
+      position: relative;
+      padding-top: clamp(48px, 8vw, 96px);
+      padding-bottom: clamp(40px, 6vw, 80px);
+      overflow: hidden;
+    }
+    .pitch-bg {
+      position: absolute; inset: 0;
+      pointer-events: none;
+      opacity: .9;
+    }
+    .pitch-bg svg { width: 100%; height: 100%; }
+
+    .hero-grid {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: clamp(28px, 4vw, 56px);
+      align-items: end;
+    }
+    @media (max-width: 940px) { .hero-grid { grid-template-columns: 1fr; align-items: start; } }
+
+    .hero-copy .eyebrow { margin-bottom: 22px; }
+    .wordmark {
+      font-weight: 800;
+      letter-spacing: -.045em;
+      line-height: .84;
+      text-transform: uppercase;
+      font-size: clamp(4.2rem, 17vw, 12rem);
+      margin: 0;
+    }
+    .wordmark .outline {
+      color: transparent;
+      -webkit-text-stroke: 2px var(--ink);
+      display: block;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) .wordmark .outline { -webkit-text-stroke-color: var(--ink); }
+    }
+    .wordmark .solid { display: block; color: var(--ink); }
+    .wordmark .accent { color: var(--green); }
+
+    .hero-sub {
+      margin: 26px 0 0;
+      font-size: clamp(1rem, 1.4vw, 1.18rem);
+      color: var(--muted);
+      max-width: 42ch;
+      text-wrap: balance;
+    }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+
+    .hero-stats {
+      display: flex; gap: clamp(20px, 3vw, 40px);
+      margin-top: 40px;
+      flex-wrap: wrap;
+    }
+    .hero-stats .st b { display: block; font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 800; letter-spacing: -.03em; }
+    .hero-stats .st span { font-size: .8rem; color: var(--muted); }
+
+    /* Next match card */
+    .matchcard {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--r-l);
+      padding: 26px;
+      box-shadow: var(--shadow-m);
+      position: relative;
+      overflow: hidden;
+    }
+    .matchcard::before {
+      content: "";
+      position: absolute; top: 0; left: 0; right: 0; height: 4px;
+      background: linear-gradient(90deg, var(--green), var(--green-bright));
+    }
+    .mc-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .mc-tag {
+      font-size: .68rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+      color: var(--green-deep); background: var(--green-wash);
+      padding: 5px 10px; border-radius: 999px;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green-bright); box-shadow: 0 0 0 0 var(--green-bright); animation: pulse 2s infinite; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(22,163,74,.5); } 70% { box-shadow: 0 0 0 8px rgba(22,163,74,0); } 100% { box-shadow: 0 0 0 0 rgba(22,163,74,0); } }
+    .mc-comp { font-size: .78rem; color: var(--muted); }
+
+    .mc-teams { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 14px; margin: 10px 0 22px; }
+    .mc-team { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
+    .mc-team .badge { width: 52px; height: 52px; display: grid; place-items: center; border-radius: 14px; background: var(--green-wash); color: var(--green-deep); font-weight: 800; font-size: 1.1rem; }
+    .mc-team .badge.away { background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); }
+    .mc-team .tname { font-weight: 700; font-size: .92rem; }
+    .mc-vs { font-weight: 800; color: var(--faint); font-size: .9rem; letter-spacing: .1em; }
+
+    .countdown { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px; }
+    .cd-cell { background: var(--surface-2); border: 1px solid var(--line-soft); border-radius: var(--r-s); padding: 12px 6px; text-align: center; }
+    .cd-cell b { display: block; font-size: 1.5rem; font-weight: 800; letter-spacing: -.02em; }
+    .cd-cell span { font-size: .62rem; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); }
+
+    .mc-meta { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; font-size: .86rem; color: var(--ink-soft); }
+    .mc-meta div { display: flex; align-items: center; gap: 10px; }
+    .mc-meta svg { color: var(--green); flex: none; }
+    .matchcard .btn { width: 100%; }
+
+    /* ============ TICKER ============ */
+    .ticker {
+      border-block: 1px solid var(--line);
+      background: var(--surface-2);
+      overflow: hidden;
+      padding: 14px 0;
+    }
+    .ticker-track { display: flex; gap: 48px; width: max-content; animation: marquee 38s linear infinite; }
+    .ticker:hover .ticker-track { animation-play-state: paused; }
+    @keyframes marquee { to { transform: translateX(-50%); } }
+    .ti { display: inline-flex; align-items: center; gap: 14px; font-size: .9rem; white-space: nowrap; }
+    .ti .score { font-weight: 800; letter-spacing: .02em; }
+    .ti .w { color: var(--green); font-weight: 800; }
+    .ti .l { color: var(--faint); font-weight: 800; }
+    .ti .d { color: var(--amber); font-weight: 800; }
+    .ti .op { color: var(--muted); }
+    .ti .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--line); }
+
+    /* ============ SECTIONS ============ */
+    section { padding-block: clamp(64px, 9vw, 128px); }
+    .sec-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; margin-bottom: 44px; flex-wrap: wrap; }
+    .sec-title {
+      font-size: clamp(1.9rem, 4.5vw, 3.4rem);
+      font-weight: 800;
+      letter-spacing: -.035em;
+      line-height: 1.02;
+      margin: 14px 0 0;
+      text-wrap: balance;
+    }
+    .sec-head p { color: var(--muted); max-width: 40ch; margin: 0; }
+
+    /* Bento about */
+    .bento { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .bento .cell {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--r-m);
+      padding: 26px;
+      box-shadow: var(--shadow-s);
+      transition: transform .3s var(--ease), box-shadow .3s;
+    }
+    .bento .cell:hover { transform: translateY(-4px); box-shadow: var(--shadow-m); }
+    .cell.big { grid-column: span 2; grid-row: span 2; display: flex; flex-direction: column; justify-content: space-between; background: var(--ink); color: var(--paper); border-color: transparent; }
+    .cell.big .kicker { color: var(--green-bright); }
+    .cell.big h3 { font-size: clamp(1.4rem, 2.6vw, 2rem); font-weight: 800; letter-spacing: -.03em; margin: 16px 0 10px; line-height: 1.08; }
+    .cell.big p { color: color-mix(in srgb, var(--paper) 72%, transparent); margin: 0; font-size: .95rem; }
+    .cell.wide { grid-column: span 2; }
+    .cell .kicker { font-size: .72rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--green); }
+    .cell .stat { font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; letter-spacing: -.04em; margin: 8px 0 4px; line-height: 1; }
+    .cell .lbl { font-size: .88rem; color: var(--muted); }
+    @media (max-width: 860px) { .bento { grid-template-columns: repeat(2, 1fr); } .cell.big { grid-column: span 2; grid-row: auto; } }
+    @media (max-width: 480px) { .bento { grid-template-columns: 1fr; } .cell.big, .cell.wide { grid-column: auto; } }
+
+    /* Fixtures */
+    .fixtures { display: grid; gap: 0; border: 1px solid var(--line); border-radius: var(--r-m); overflow: hidden; background: var(--surface); }
+    .fx {
+      display: grid;
+      grid-template-columns: 92px 1fr auto 1fr 78px;
+      align-items: center;
+      gap: 16px;
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--pitch-line);
+      transition: background .2s;
+    }
+    .fx:last-child { border-bottom: 0; }
+    .fx:hover { background: var(--green-wash); }
+    .fx .date { font-size: .78rem; color: var(--muted); line-height: 1.3; }
+    .fx .date b { display: block; color: var(--ink); font-size: .92rem; font-weight: 700; }
+    .fx .home { text-align: right; font-weight: 600; }
+    .fx .away { text-align: left; font-weight: 600; }
+    .fx .home.us, .fx .away.us { color: var(--green-deep); font-weight: 800; }
+    .fx .score { text-align: center; font-weight: 800; font-size: 1.1rem; padding: 6px 12px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line-soft); min-width: 62px; }
+    .fx .score.up { background: transparent; border-style: dashed; color: var(--muted); font-weight: 700; font-size: .82rem; letter-spacing: .04em; }
+    .fx .res { justify-self: end; font-size: .68rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; padding: 4px 9px; border-radius: 999px; }
+    .res.win { color: var(--green-deep); background: var(--green-wash); }
+    .res.loss { color: var(--faint); background: var(--surface-2); border: 1px solid var(--line-soft); }
+    .res.draw { color: var(--amber); background: color-mix(in srgb, var(--amber) 14%, transparent); }
+    .res.next { color: var(--green); background: transparent; border: 1px solid var(--green); }
+    @media (max-width: 720px) {
+      .fx { grid-template-columns: 64px 1fr auto 1fr; padding: 14px 16px; gap: 8px; }
+      .fx .res { display: none; }
+      .fx .home, .fx .away { font-size: .86rem; }
+    }
+
+    /* Table */
+    .layout-2 { display: grid; grid-template-columns: 1.1fr .9fr; gap: 24px; align-items: start; }
+    @media (max-width: 900px) { .layout-2 { grid-template-columns: 1fr; } }
+    .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-m); box-shadow: var(--shadow-s); overflow: hidden; }
+    .panel h3 { margin: 0; padding: 20px 24px; font-size: 1rem; font-weight: 800; letter-spacing: -.01em; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; }
+    .panel h3 span { font-size: .72rem; color: var(--muted); font-weight: 600; letter-spacing: .04em; }
+    table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+    thead th { text-align: left; font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 700; padding: 12px 10px; }
+    thead th:first-child { padding-left: 24px; }
+    tbody td { padding: 12px 10px; border-top: 1px solid var(--line-soft); }
+    tbody td:first-child { padding-left: 24px; }
+    tbody tr.us { background: var(--green-wash); }
+    tbody tr.us td:nth-child(2) { color: var(--green-deep); font-weight: 800; }
+    .pos { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 7px; font-size: .78rem; font-weight: 800; background: var(--surface-2); border: 1px solid var(--line-soft); }
+    tr.us .pos { background: var(--green); color: #fff; border-color: transparent; }
+    td.c { text-align: center; }
+    td.pts { font-weight: 800; }
+
+    /* Form badges in table */
+    .form { display: inline-flex; gap: 3px; }
+    .form i { width: 16px; height: 16px; border-radius: 4px; font-style: normal; font-size: .58rem; font-weight: 800; display: grid; place-items: center; color: #fff; }
+    .form i.w { background: var(--green); }
+    .form i.d { background: var(--amber); }
+    .form i.l { background: #c2554b; }
+
+    /* Squad */
+    .squad-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+    .squad-tabs button {
+      padding: 8px 16px; border-radius: 999px; border: 1px solid var(--line);
+      background: transparent; color: var(--ink-soft); font-weight: 600; font-size: .86rem;
+      transition: all .2s;
+    }
+    .squad-tabs button.active { background: var(--green); color: #fff; border-color: transparent; }
+    .squad-tabs button:hover:not(.active) { border-color: var(--green); color: var(--green-deep); }
+
+    .squad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 32px; }
+    @media (max-width: 860px) { .squad { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 420px) { .squad { grid-template-columns: 1fr; } }
+    .player {
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--r-m);
+      padding: 24px 22px 22px;
+      overflow: hidden;
+      transition: transform .3s var(--ease), box-shadow .3s, border-color .3s;
+    }
+    .player:hover { transform: translateY(-5px); box-shadow: var(--shadow-m); border-color: var(--green); }
+    .player .pn { position: absolute; top: 10px; right: 14px; font-size: 3.2rem; font-weight: 800; letter-spacing: -.04em; color: var(--pitch-line); line-height: 1; }
+    .player .avatar { width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, var(--green), var(--green-deep)); color: #fff; display: grid; place-items: center; font-weight: 800; font-size: 1.2rem; margin-bottom: 40px; }
+    .player .role { font-size: .68rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--green); }
+    .player .name { font-weight: 800; letter-spacing: -.02em; margin-top: 4px; font-size: 1.05rem; }
+    .player .meta { font-size: .78rem; color: var(--muted); margin-top: 6px; display: flex; gap: 12px; }
+
+    /* News */
+    .news { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    @media (max-width: 860px) { .news { grid-template-columns: 1fr; } }
+    .card {
+      display: flex; flex-direction: column;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--r-m);
+      overflow: hidden;
+      transition: transform .3s var(--ease), box-shadow .3s;
+    }
+    .card:hover { transform: translateY(-5px); box-shadow: var(--shadow-m); }
+    .card .thumb { aspect-ratio: 16/10; position: relative; overflow: hidden; }
+    .card .thumb svg { width: 100%; height: 100%; }
+    .card .cat { position: absolute; top: 14px; left: 14px; font-size: .66rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; background: color-mix(in srgb, var(--surface) 88%, transparent); backdrop-filter: blur(6px); color: var(--green-deep); padding: 5px 10px; border-radius: 999px; }
+    .card .body { padding: 22px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+    .card .date { font-size: .74rem; color: var(--faint); }
+    .card h4 { margin: 0; font-size: 1.08rem; font-weight: 700; letter-spacing: -.02em; line-height: 1.28; }
+    .card p { margin: 0; color: var(--muted); font-size: .9rem; }
+    .card .more { margin-top: auto; font-weight: 700; font-size: .84rem; color: var(--green); display: inline-flex; align-items: center; gap: 6px; }
+    .card:hover .more svg { transform: translateX(3px); }
+    .card .more svg { transition: transform .2s; }
+
+    /* Tickets CTA */
+    .cta-band {
+      position: relative;
+      background: var(--ink);
+      color: var(--paper);
+      border-radius: var(--r-l);
+      padding: clamp(40px, 6vw, 72px);
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1.4fr .6fr;
+      gap: 40px;
+      align-items: center;
+    }
+    @media (max-width: 760px) { .cta-band { grid-template-columns: 1fr; } }
+    .cta-band .cta-lines { position: absolute; inset: 0; opacity: .5; pointer-events: none; }
+    .cta-band h2 { position: relative; font-size: clamp(2rem, 5vw, 3.6rem); font-weight: 800; letter-spacing: -.04em; line-height: 1; margin: 0 0 18px; text-wrap: balance; }
+    .cta-band p { position: relative; color: color-mix(in srgb, var(--paper) 72%, transparent); margin: 0 0 28px; max-width: 44ch; }
+    .cta-band .prices { position: relative; display: flex; gap: 28px; }
+    .cta-band .prices b { display: block; font-size: 1.6rem; font-weight: 800; letter-spacing: -.03em; }
+    .cta-band .prices span { font-size: .78rem; color: color-mix(in srgb, var(--paper) 60%, transparent); }
+    .cta-actions { position: relative; display: flex; flex-direction: column; gap: 12px; }
+    .cta-band .btn-primary { background: var(--green-bright); }
+    .cta-band .btn-primary:hover { background: #fff; color: var(--green-deep); }
+    .cta-band .btn-ghost { border-color: color-mix(in srgb, var(--paper) 30%, transparent); color: var(--paper); }
+    .cta-band .btn-ghost:hover { background: color-mix(in srgb, var(--paper) 12%, transparent); border-color: var(--paper); }
+
+    /* ============ FOOTER ============ */
+    footer {
+      border-top: 1px solid var(--line);
+      padding-block: 64px 32px;
+      background: var(--surface-2);
+    }
+    .foot-grid { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1.2fr; gap: 40px; }
+    @media (max-width: 860px) { .foot-grid { grid-template-columns: 1fr 1fr; gap: 32px; } }
+    @media (max-width: 480px) { .foot-grid { grid-template-columns: 1fr; } }
+    .foot-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+    .foot-about { color: var(--muted); font-size: .9rem; max-width: 34ch; }
+    .foot-col h5 { font-size: .72rem; letter-spacing: .16em; text-transform: uppercase; color: var(--faint); margin: 0 0 16px; font-weight: 700; }
+    .foot-col a, .foot-col p { display: block; color: var(--ink-soft); font-size: .92rem; margin-bottom: 11px; transition: color .2s; }
+    .foot-col a:hover { color: var(--green); }
+    .socials { display: flex; gap: 10px; margin-top: 4px; }
+    .socials a { width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--line); display: grid; place-items: center; color: var(--ink); transition: all .2s; }
+    .socials a:hover { background: var(--green); color: #fff; border-color: transparent; transform: translateY(-3px); }
+    .foot-bottom { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--line); color: var(--faint); font-size: .82rem; }
+
+    /* Reveal animation */
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
+    .reveal.in { opacity: 1; transform: none; }
+    @media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; } }
+
+    /* hero load-in */
+    .hero-copy > * { opacity: 0; transform: translateY(20px); animation: rise .9s var(--ease) forwards; }
+    .hero-copy > *:nth-child(1) { animation-delay: .05s; }
+    .hero-copy > *:nth-child(2) { animation-delay: .14s; }
+    .hero-copy > *:nth-child(3) { animation-delay: .23s; }
+    .hero-copy > *:nth-child(4) { animation-delay: .32s; }
+    .hero-copy > *:nth-child(5) { animation-delay: .41s; }
+    .matchcard { opacity: 0; transform: translateY(20px) scale(.98); animation: rise .9s var(--ease) .3s forwards; }
+    @keyframes rise { to { opacity: 1; transform: none; } }
+    @media (prefers-reduced-motion: reduce) { .hero-copy > *, .matchcard { opacity: 1; transform: none; animation: none; } }
+  </style>
+</head>
+
+<body>
+  <!-- ============ HEADER ============ -->
+  <header class="nav" id="nav">
+    <div class="wrap nav-inner">
+      <a class="brand" href="#top" aria-label="ПФК Рязань — на главную">
+        <svg class="crest" viewBox="0 0 40 40" aria-hidden="true">
+          <path d="M20 2 L36 8 V20 C36 30 29 36 20 39 C11 36 4 30 4 20 V8 Z" fill="var(--green)" />
+          <path d="M20 2 L36 8 V20 C36 30 29 36 20 39 C11 36 4 30 4 20 V8 Z" fill="none" stroke="var(--green-deep)" stroke-width="1" />
+          <circle cx="20" cy="19" r="8.5" fill="none" stroke="#fff" stroke-width="1.6" />
+          <path d="M20 12.5 L23.2 15 L22 18.7 H18 L16.8 15 Z" fill="#fff" />
+          <path d="M20 26 v5" stroke="#fff" stroke-width="1.4" opacity=".6" />
+        </svg>
+        <span class="brand-name">РЯЗАНЬ<small>ПФК · ОСНОВАН 2010</small></span>
+      </a>
+
+      <nav class="links" aria-label="Основная навигация">
+        <a href="#club">Клуб</a>
+        <a href="#matches">Матчи</a>
+        <a href="#table">Таблица</a>
+        <a href="#squad">Команда</a>
+        <a href="#news">Новости</a>
+      </nav>
+
+      <button class="theme-toggle" id="themeToggle" aria-label="Переключить тему" title="Тема">
+        <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+
+      <a class="btn btn-primary nav-cta" href="#tickets">Билеты</a>
+
+      <button class="burger" id="burger" aria-label="Меню" aria-expanded="false">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="drawer" id="drawer">
+    <a href="#club">Клуб</a>
+    <a href="#matches">Матчи</a>
+    <a href="#table">Таблица</a>
+    <a href="#squad">Команда</a>
+    <a href="#news">Новости</a>
+    <a class="btn btn-primary" href="#tickets">Купить билеты</a>
+  </div>
+
+  <main id="top">
+    <!-- ============ HERO ============ -->
+    <section class="hero">
+      <div class="pitch-bg" aria-hidden="true">
+        <svg viewBox="0 0 1200 600" preserveAspectRatio="xMidYMid slice" fill="none" stroke="var(--pitch-line)" stroke-width="1.5">
+          <circle cx="600" cy="300" r="120" />
+          <line x1="600" y1="0" x2="600" y2="600" />
+          <rect x="0" y="170" width="150" height="260" />
+          <rect x="1050" y="170" width="150" height="260" />
+          <rect x="0" y="240" width="60" height="120" />
+          <rect x="1140" y="240" width="60" height="120" />
+        </svg>
+      </div>
+
+      <div class="wrap hero-grid">
+        <div class="hero-copy">
+          <span class="eyebrow">Вторая лига · Дивизион Б · Сезон 2026</span>
+          <h1 class="wordmark">
+            <span class="solid">Наш</span>
+            <span class="outline">город</span>
+            <span class="accent">наша игра</span>
+          </h1>
+          <p class="hero-sub">Профессиональный футбольный клуб «Рязань». Мы играем за родной город с 2010 года — на «Рязань-Арене», при полных трибунах.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#tickets">Билеты на матч</a>
+            <a class="btn btn-ghost" href="#matches">Календарь игр</a>
+          </div>
+          <div class="hero-stats num">
+            <div class="st"><b>7</b><span>место в дивизионе</span></div>
+            <div class="st"><b>2 400</b><span>средняя посещаемость</span></div>
+            <div class="st"><b>16</b><span>лет истории</span></div>
+          </div>
+        </div>
+
+        <!-- Next match card -->
+        <aside class="matchcard" aria-label="Ближайший матч">
+          <div class="mc-head">
+            <span class="mc-tag"><span class="live-dot"></span>Ближайший матч</span>
+            <span class="mc-comp">14-й тур</span>
+          </div>
+
+          <div class="mc-teams">
+            <div class="mc-team">
+              <span class="badge">РЯЗ</span>
+              <span class="tname">Рязань</span>
+            </div>
+            <span class="mc-vs">VS</span>
+            <div class="mc-team">
+              <span class="badge away">САЛ</span>
+              <span class="tname">Салют</span>
+            </div>
+          </div>
+
+          <div class="countdown num" id="countdown" aria-live="polite">
+            <div class="cd-cell"><b id="cd-d">00</b><span>дней</span></div>
+            <div class="cd-cell"><b id="cd-h">00</b><span>часов</span></div>
+            <div class="cd-cell"><b id="cd-m">00</b><span>минут</span></div>
+            <div class="cd-cell"><b id="cd-s">00</b><span>секунд</span></div>
+          </div>
+
+          <div class="mc-meta">
+            <div>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+              9 августа 2026, суббота · 17:00
+            </div>
+            <div>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-5.2-7-11a7 7 0 0 1 14 0c0 5.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+              Стадион «Рязань-Арена»
+            </div>
+          </div>
+
+          <a class="btn btn-primary" href="#tickets">Купить билеты от 250 ₽</a>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ============ TICKER ============ -->
+    <div class="ticker" aria-label="Последние результаты">
+      <div class="ticker-track" id="ticker">
+        <!-- filled by JS (duplicated for seamless loop) -->
+      </div>
+    </div>
+
+    <!-- ============ CLUB / ABOUT ============ -->
+    <section id="club">
+      <div class="wrap">
+        <div class="sec-head">
+          <div>
+            <span class="eyebrow">О клубе</span>
+            <h2 class="sec-title">Клуб с характером<br>рабочего города</h2>
+          </div>
+          <p>«Рязань» — это про труд, верность и футбол, который объединяет поколения болельщиков.</p>
+        </div>
+
+        <div class="bento">
+          <div class="cell big reveal">
+            <span class="kicker">Наша арена</span>
+            <div>
+              <h3>«Рязань-Арена» — дом, где нас поддерживают</h3>
+              <p>Стадион в самом сердце города, ул. Маяковского, 46. Каждую субботу здесь собираются те, кто по-настоящему любит свой клуб.</p>
+            </div>
+          </div>
+          <div class="cell reveal">
+            <span class="kicker">Основан</span>
+            <div class="stat num">2010</div>
+            <div class="lbl">год возрождения клуба</div>
+          </div>
+          <div class="cell reveal">
+            <span class="kicker">Вместимость</span>
+            <div class="stat num">3 500</div>
+            <div class="lbl">мест на трибунах</div>
+          </div>
+          <div class="cell wide reveal">
+            <span class="kicker">Академия</span>
+            <div class="stat num">4 команды</div>
+            <div class="lbl">от детской школы до основного состава участвуют в сезоне 2026</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ MATCHES ============ -->
+    <section id="matches">
+      <div class="wrap">
+        <div class="sec-head">
+          <div>
+            <span class="eyebrow">Календарь</span>
+            <h2 class="sec-title">Матчи и результаты</h2>
+          </div>
+          <p>Расписание игр «Рязани» во Второй лиге. Пример сезона 2026 — актуальный календарь на официальных ресурсах клуба.</p>
+        </div>
+
+        <div class="fixtures">
+          <div class="fx">
+            <div class="date">19 июля<b class="num">13-й тур</b></div>
+            <div class="home us">Рязань</div>
+            <div class="score num">2 : 0</div>
+            <div class="away">Металлург</div>
+            <span class="res win">Победа</span>
+          </div>
+          <div class="fx">
+            <div class="date">12 июля<b class="num">12-й тур</b></div>
+            <div class="home">Динамо Бр</div>
+            <div class="score num">1 : 1</div>
+            <div class="away us">Рязань</div>
+            <span class="res draw">Ничья</span>
+          </div>
+          <div class="fx">
+            <div class="date">5 июля<b class="num">11-й тур</b></div>
+            <div class="home us">Рязань</div>
+            <div class="score num">3 : 1</div>
+            <div class="away">Локомотив</div>
+            <span class="res win">Победа</span>
+          </div>
+          <div class="fx">
+            <div class="date">9 августа<b class="num">14-й тур</b></div>
+            <div class="home us">Рязань</div>
+            <div class="score up num">17:00</div>
+            <div class="away">Салют</div>
+            <span class="res next">Скоро</span>
+          </div>
+          <div class="fx">
+            <div class="date">16 августа<b class="num">15-й тур</b></div>
+            <div class="home">Авангард</div>
+            <div class="score up num">18:30</div>
+            <div class="away us">Рязань</div>
+            <span class="res next">Скоро</span>
+          </div>
+          <div class="fx">
+            <div class="date">23 августа<b class="num">16-й тур</b></div>
+            <div class="home us">Рязань</div>
+            <div class="score up num">17:00</div>
+            <div class="away">Спартак Тм</div>
+            <span class="res next">Скоро</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TABLE + FORM ============ -->
+    <section id="table" style="padding-top:0">
+      <div class="wrap">
+        <div class="sec-head">
+          <div>
+            <span class="eyebrow">Турнирная таблица</span>
+            <h2 class="sec-title">Положение в дивизионе</h2>
+          </div>
+          <p>Фрагмент таблицы Второй лиги, дивизион Б. Данные приведены как пример оформления.</p>
+        </div>
+
+        <div class="layout-2">
+          <div class="panel reveal">
+            <h3>Таблица <span>Вторая лига · дивизион Б</span></h3>
+            <div style="overflow-x:auto">
+              <table class="num">
+                <thead>
+                  <tr><th>#</th><th>Клуб</th><th class="c">И</th><th class="c">Р</th><th class="c">О</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><span class="pos">5</span></td><td>Салют Белгород</td><td class="c">13</td><td class="c">+9</td><td class="pts">24</td></tr>
+                  <tr><td><span class="pos">6</span></td><td>Авангард Курск</td><td class="c">13</td><td class="c">+6</td><td class="pts">22</td></tr>
+                  <tr class="us"><td><span class="pos">7</span></td><td>Рязань</td><td class="c">13</td><td class="c">+4</td><td class="pts">21</td></tr>
+                  <tr><td><span class="pos">8</span></td><td>Динамо Брянск</td><td class="c">13</td><td class="c">+2</td><td class="pts">19</td></tr>
+                  <tr><td><span class="pos">9</span></td><td>Локомотив Лиски</td><td class="c">13</td><td class="c">−1</td><td class="pts">17</td></tr>
+                  <tr><td><span class="pos">10</span></td><td>Металлург Липецк</td><td class="c">13</td><td class="c">−3</td><td class="pts">15</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="panel reveal">
+            <h3>Форма команды <span>последние 6</span></h3>
+            <div style="padding:24px">
+              <div class="form" style="margin-bottom:22px" aria-label="Последние результаты: победа, ничья, победа, поражение, победа, победа">
+                <i class="w" title="Победа">В</i>
+                <i class="d" title="Ничья">Н</i>
+                <i class="w" title="Победа">В</i>
+                <i class="l" title="Поражение">П</i>
+                <i class="w" title="Победа">В</i>
+                <i class="w" title="Победа">В</i>
+              </div>
+              <div style="display:grid;gap:16px" class="num">
+                <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--line-soft);padding-bottom:12px"><span style="color:var(--muted)">Забито мячей</span><b>21</b></div>
+                <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--line-soft);padding-bottom:12px"><span style="color:var(--muted)">Пропущено</span><b>17</b></div>
+                <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--line-soft);padding-bottom:12px"><span style="color:var(--muted)">«Сухих» матчей</span><b>5</b></div>
+                <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">Лучший бомбардир</span><b>А. Кузнецов · 8</b></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ SQUAD ============ -->
+    <section id="squad">
+      <div class="wrap">
+        <div class="sec-head">
+          <div>
+            <span class="eyebrow">Команда</span>
+            <h2 class="sec-title">Состав сезона 2026</h2>
+          </div>
+          <div class="squad-tabs" role="tablist" aria-label="Фильтр по амплуа">
+            <button class="active" data-role="all">Все</button>
+            <button data-role="gk">Вратари</button>
+            <button data-role="df">Защита</button>
+            <button data-role="mf">Полузащита</button>
+            <button data-role="fw">Нападение</button>
+          </div>
+        </div>
+
+        <div class="squad" id="squad"></div>
+      </div>
+    </section>
+
+    <!-- ============ NEWS ============ -->
+    <section id="news" style="padding-top:0">
+      <div class="wrap">
+        <div class="sec-head">
+          <div>
+            <span class="eyebrow">Новости</span>
+            <h2 class="sec-title">Жизнь клуба</h2>
+          </div>
+          <a class="btn btn-ghost" href="#news">Все новости</a>
+        </div>
+
+        <div class="news">
+          <article class="card reveal">
+            <div class="thumb">
+              <svg viewBox="0 0 400 250" preserveAspectRatio="xMidYMid slice"><rect width="400" height="250" fill="var(--green)"/><circle cx="200" cy="125" r="70" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="2"/><path d="M0 210 H400 M0 40 H400" stroke="#fff" stroke-opacity=".18" stroke-width="1"/></svg>
+              <span class="cat">Матч</span>
+            </div>
+            <div class="body">
+              <span class="date">28 июля 2026</span>
+              <h4>«Рязань» уверенно обыграла «Металлург» на своём поле</h4>
+              <p>Дубль Александра Кузнецова принёс команде три очка в домашнем матче 13-го тура.</p>
+              <a class="more" href="#news">Читать <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+            </div>
+          </article>
+
+          <article class="card reveal">
+            <div class="thumb">
+              <svg viewBox="0 0 400 250" preserveAspectRatio="xMidYMid slice"><rect width="400" height="250" fill="var(--ink)"/><path d="M200 60 L250 82 V128 C250 165 227 185 200 195 C173 185 150 165 150 128 V82 Z" fill="none" stroke="var(--green-bright)" stroke-width="3"/><circle cx="200" cy="120" r="24" fill="none" stroke="#fff" stroke-opacity=".4" stroke-width="2"/></svg>
+              <span class="cat">Трансфер</span>
+            </div>
+            <div class="body">
+              <span class="date">24 июля 2026</span>
+              <h4>Новый полузащитник подписал контракт с клубом до 2028 года</h4>
+              <p>Опытный игрок усилит центр поля и поможет команде в борьбе за место в верхней части таблицы.</p>
+              <a class="more" href="#news">Читать <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+            </div>
+          </article>
+
+          <article class="card reveal">
+            <div class="thumb">
+              <svg viewBox="0 0 400 250" preserveAspectRatio="xMidYMid slice"><rect width="400" height="250" fill="var(--green-deep)"/><g fill="none" stroke="#fff" stroke-opacity=".28" stroke-width="2"><rect x="120" y="70" width="160" height="110"/><line x1="200" y1="70" x2="200" y2="180"/><circle cx="200" cy="125" r="30"/></g></svg>
+              <span class="cat">Болельщикам</span>
+            </div>
+            <div class="body">
+              <span class="date">20 июля 2026</span>
+              <h4>Открыта продажа абонементов на вторую половину сезона</h4>
+              <p>Поддержите команду на всех домашних матчах и получите скидку на клубную атрибутику.</p>
+              <a class="more" href="#news">Читать <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TICKETS CTA ============ -->
+    <section id="tickets" style="padding-top:0">
+      <div class="wrap">
+        <div class="cta-band reveal">
+          <div class="cta-lines" aria-hidden="true">
+            <svg width="100%" height="100%" viewBox="0 0 800 300" preserveAspectRatio="none" fill="none" stroke="var(--green-bright)" stroke-width="1.5"><circle cx="400" cy="150" r="80"/><line x1="400" y1="0" x2="400" y2="300"/><rect x="0" y="90" width="90" height="120"/><rect x="710" y="90" width="90" height="120"/></svg>
+          </div>
+          <div>
+            <h2>Твоё место<br>на трибуне ждёт</h2>
+            <p>Приходи на «Рязань-Арену» и стань частью движения. Билеты на каждый домашний матч — онлайн, за пару минут.</p>
+            <div class="prices num">
+              <div><b>250 ₽</b><span>обычный сектор</span></div>
+              <div><b>500 ₽</b><span>центральная трибуна</span></div>
+              <div><b>3 900 ₽</b><span>абонемент</span></div>
+            </div>
+          </div>
+          <div class="cta-actions">
+            <a class="btn btn-primary" href="#tickets">Купить билет</a>
+            <a class="btn btn-ghost" href="#tickets">Оформить абонемент</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ FOOTER ============ -->
+  <footer>
+    <div class="wrap">
+      <div class="foot-grid">
+        <div>
+          <div class="foot-brand">
+            <svg class="crest" viewBox="0 0 40 40" aria-hidden="true">
+              <path d="M20 2 L36 8 V20 C36 30 29 36 20 39 C11 36 4 30 4 20 V8 Z" fill="var(--green)" />
+              <circle cx="20" cy="19" r="8.5" fill="none" stroke="#fff" stroke-width="1.6" />
+              <path d="M20 12.5 L23.2 15 L22 18.7 H18 L16.8 15 Z" fill="#fff" />
+            </svg>
+            <span class="brand-name">РЯЗАНЬ<small>ПРОФЕССИОНАЛЬНЫЙ ФК</small></span>
+          </div>
+          <p class="foot-about">Профессиональный футбольный клуб «Рязань». Играем за родной город с 2010 года.</p>
+          <div class="socials" style="margin-top:20px">
+            <a href="https://www.instagram.com/ryazanfc/" aria-label="Instagram" target="_blank" rel="noopener">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17" cy="7" r="1" fill="currentColor" stroke="none"/></svg>
+            </a>
+            <a href="#top" aria-label="ВКонтакте">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M13.2 17c-5 0-8.2-3.5-8.4-9.2h2.6c.1 4.2 2 6 3.5 6.3V7.8h2.4v3.7c1.4-.2 2.9-1.8 3.4-3.7h2.4c-.4 2.3-1.9 3.9-2.9 4.6 1 .6 2.7 2 3.4 4.6h-2.7c-.5-1.7-1.9-3-3.6-3.2V17z"/></svg>
+            </a>
+            <a href="#top" aria-label="Telegram">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M21.5 4.3 2.9 11.5c-.9.4-.9 1.6.1 1.9l4.7 1.5 1.8 5.6c.2.7 1.1.9 1.6.3l2.6-2.6 4.8 3.5c.6.4 1.5.1 1.7-.7l3.2-15c.2-1-.7-1.8-1.6-1.4zM9.9 14.6l8.3-5.1c.2-.1.4.2.2.3l-6.8 6.2c-.2.2-.4.5-.4.8l-.2 2.3z"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <div class="foot-col">
+          <h5>Клуб</h5>
+          <a href="#club">О клубе</a>
+          <a href="#squad">Команда</a>
+          <a href="#matches">Календарь</a>
+          <a href="#table">Таблица</a>
+          <a href="#news">Новости</a>
+        </div>
+
+        <div class="foot-col">
+          <h5>Болельщикам</h5>
+          <a href="#tickets">Билеты</a>
+          <a href="#tickets">Абонементы</a>
+          <a href="#top">Атрибутика</a>
+          <a href="#top">Академия</a>
+        </div>
+
+        <div class="foot-col">
+          <h5>Контакты</h5>
+          <p>г. Рязань, ул. Маяковского, 46<br>Стадион «Рязань-Арена»</p>
+          <a href="tel:+74912000000">+7 (4912) 00-00-00</a>
+          <a href="mailto:info@pfcryazan.ru">info@pfcryazan.ru</a>
+        </div>
+      </div>
+
+      <div class="foot-bottom">
+        <span>© 2026 ПФК «Рязань». Все права защищены.</span>
+        <span>Концепт-редизайн · трибуна ждёт</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      "use strict";
+
+      /* ---- Theme toggle ---- */
+      var root = document.documentElement;
+      var toggle = document.getElementById("themeToggle");
+      try {
+        var saved = localStorage.getItem("ryazan-theme");
+        if (saved) root.setAttribute("data-theme", saved);
+      } catch (e) {}
+      toggle.addEventListener("click", function () {
+        var mqDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        var current = root.getAttribute("data-theme") || (mqDark ? "dark" : "light");
+        var next = current === "dark" ? "light" : "dark";
+        root.setAttribute("data-theme", next);
+        try { localStorage.setItem("ryazan-theme", next); } catch (e) {}
+      });
+
+      /* ---- Sticky nav shadow ---- */
+      var nav = document.getElementById("nav");
+      var onScroll = function () { nav.classList.toggle("scrolled", window.scrollY > 12); };
+      onScroll();
+      window.addEventListener("scroll", onScroll, { passive: true });
+
+      /* ---- Mobile drawer ---- */
+      var burger = document.getElementById("burger");
+      var drawer = document.getElementById("drawer");
+      burger.addEventListener("click", function () {
+        var open = drawer.classList.toggle("open");
+        burger.setAttribute("aria-expanded", open ? "true" : "false");
+      });
+      drawer.querySelectorAll("a").forEach(function (a) {
+        a.addEventListener("click", function () {
+          drawer.classList.remove("open");
+          burger.setAttribute("aria-expanded", "false");
+        });
+      });
+
+      /* ---- Countdown to next match (2026-08-09 17:00 MSK, UTC+3) ---- */
+      var target = new Date("2026-08-09T17:00:00+03:00").getTime();
+      var el = {
+        d: document.getElementById("cd-d"),
+        h: document.getElementById("cd-h"),
+        m: document.getElementById("cd-m"),
+        s: document.getElementById("cd-s")
+      };
+      var pad = function (n) { return (n < 10 ? "0" : "") + n; };
+      function tick() {
+        var diff = target - Date.now();
+        if (diff < 0) diff = 0;
+        var s = Math.floor(diff / 1000);
+        el.d.textContent = pad(Math.floor(s / 86400));
+        el.h.textContent = pad(Math.floor((s % 86400) / 3600));
+        el.m.textContent = pad(Math.floor((s % 3600) / 60));
+        el.s.textContent = pad(s % 60);
+      }
+      tick();
+      setInterval(tick, 1000);
+
+      /* ---- Results ticker ---- */
+      var results = [
+        { op: "Металлург", sc: "2:0", r: "w" },
+        { op: "Динамо Брянск", sc: "1:1", r: "d" },
+        { op: "Локомотив", sc: "3:1", r: "w" },
+        { op: "Салют", sc: "0:1", r: "l" },
+        { op: "Авангард", sc: "2:2", r: "d" },
+        { op: "Спартак Тамбов", sc: "2:1", r: "w" },
+        { op: "Факел-М", sc: "1:0", r: "w" }
+      ];
+      var ticker = document.getElementById("ticker");
+      function buildTicker() {
+        var frag = "";
+        for (var pass = 0; pass < 2; pass++) {
+          results.forEach(function (m) {
+            frag += '<span class="ti"><span class="op">Рязань — ' + m.op +
+              '</span><span class="score num ' + m.r + '">' + m.sc +
+              '</span><span class="dot"></span></span>';
+          });
+        }
+        ticker.innerHTML = frag;
+      }
+      buildTicker();
+
+      /* ---- Squad ---- */
+      var players = [
+        { n: 1, name: "Илья Морозов", role: "gk", pos: "Вратарь", age: 28, apps: 13 },
+        { n: 16, name: "Денис Волков", role: "gk", pos: "Вратарь", age: 22, apps: 1 },
+        { n: 4, name: "Артём Соколов", role: "df", pos: "Защитник", age: 30, apps: 12 },
+        { n: 5, name: "Максим Орлов", role: "df", pos: "Защитник", age: 26, apps: 13 },
+        { n: 3, name: "Павел Гусев", role: "df", pos: "Защитник", age: 24, apps: 11 },
+        { n: 2, name: "Роман Зайцев", role: "df", pos: "Защитник", age: 27, apps: 10 },
+        { n: 8, name: "Никита Лебедев", role: "mf", pos: "Полузащитник", age: 25, apps: 13 },
+        { n: 10, name: "Сергей Новиков", role: "mf", pos: "Плеймейкер", age: 29, apps: 12 },
+        { n: 6, name: "Егор Титов", role: "mf", pos: "Опорник", age: 23, apps: 13 },
+        { n: 7, name: "Дмитрий Панов", role: "mf", pos: "Вингер", age: 21, apps: 9 },
+        { n: 9, name: "Алексей Кузнецов", role: "fw", pos: "Нападающий", age: 26, apps: 13 },
+        { n: 11, name: "Владислав Смирнов", role: "fw", pos: "Нападающий", age: 24, apps: 11 }
+      ];
+      var squad = document.getElementById("squad");
+      function initials(name) {
+        var p = name.split(" ");
+        return (p[0][0] + (p[1] ? p[1][0] : "")).toUpperCase();
+      }
+      function renderSquad(role) {
+        var html = "";
+        players.forEach(function (p) {
+          if (role !== "all" && p.role !== role) return;
+          html += '<article class="player">' +
+            '<span class="pn num">' + p.n + '</span>' +
+            '<div class="avatar">' + initials(p.name) + '</div>' +
+            '<span class="role">' + p.pos + '</span>' +
+            '<div class="name">' + p.name + '</div>' +
+            '<div class="meta num"><span>' + p.age + ' лет</span><span>' + p.apps + ' матчей</span></div>' +
+            '</article>';
+        });
+        squad.innerHTML = html;
+      }
+      renderSquad("all");
+
+      document.querySelectorAll(".squad-tabs button").forEach(function (b) {
+        b.addEventListener("click", function () {
+          document.querySelectorAll(".squad-tabs button").forEach(function (x) { x.classList.remove("active"); });
+          b.classList.add("active");
+          renderSquad(b.getAttribute("data-role"));
+        });
+      });
+
+      /* ---- Scroll reveal ---- */
+      if ("IntersectionObserver" in window) {
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
+          });
+        }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
+        document.querySelectorAll(".reveal").forEach(function (el) { io.observe(el); });
+      } else {
+        document.querySelectorAll(".reveal").forEach(function (el) { el.classList.add("in"); });
+      }
+    })();
+  </script>
+</body>
+
+</html>
